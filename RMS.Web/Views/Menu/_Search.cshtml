@@ -1,0 +1,10 @@
+@model MenuSearchViewModel
+
+<!-- search form -->
+<form asp-controller="Menu" asp-action="Menus" method="GET" class="d-flex flex-row align-items-center">
+    
+    <input class="form-control me-2" asp-for="Query" placeholder="Search..">
+   
+    <button class="btn btn-sm btn-outline-success" type="submit">Search</button>
+    <a asp-controller="Menu" asp-action="Menus" class="btn btn-sm btn-light ms-3">Clear</a>
+</form>

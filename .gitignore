@@ -1,0 +1,26 @@
+# Build output
+bin/
+obj/
+
+# User-specific files
+*.user
+*.suo
+.vs/
+
+# dotnet publish
+publish/
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+
+# Rider
+.idea/
+
+# macOS
+.DS_Store
+
+# Environment / secrets
+appsettings.Development.json
+*.env

@@ -1,0 +1,33 @@
+@model MenuViewModel
+
+<partial name="_BreadCrumbs" model=@(new [] {
+    ("/","Home"),
+    ("/Menu/Menus","Menus"),
+    ($"/Menu/Details/{Model.Id}", Model.Name),
+    ("","Delete")
+}) />
+
+<div class="card rounded shadow p-4">
+    <div class="border-bottom mb-3">
+        <h3 class="text-danger">Delete Menu</h3>
+    </div>
+
+    <p class="text-muted">Are you sure you want to delete this menu? This cannot be undone.</p>
+
+    <dl class="row">
+        <dt class="col-4">Name</dt>
+        <dd class="col-8">@Model.Name</dd>
+
+        <dt class="col-4">Type</dt>
+        <dd class="col-8">@Model.Type</dd>
+
+        <dt class="col-4">Status</dt>
+        <dd class="col-8">@Model.StatusDisplay</dd>
+    </dl>
+
+    <form asp-action="DeleteConfirm">
+        <input type="hidden" asp-for="Id" />
+        <button type="submit" class="btn btn-danger">Confirm Delete</button>
+        <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>

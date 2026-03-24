@@ -1,0 +1,36 @@
+
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+
+using RMS.Data.Entities;
+
+namespace RMS.Data.Repository;
+
+public class DataContext : DbContext
+{
+    public DbSet<Menu> Menus { get; set; }
+ 
+    public DbSet<User> Users { get; set; }
+
+    public DbSet<MenuItem> MenuItems { get; set; }
+    public DbSet<Ingredient> Ingredients { get; set; }
+    public DbSet<Order> Orders { get; set; }
+    public DbSet<Table> Tables { get; set; }
+    public DbSet<Booking> Bookings { get; set; }
+    public DbSet<AllergenConsent> AllergenConsents { get; set; }
+
+      
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        optionsBuilder                              
+            .UseSqlite("Filename=RMS.db")
+            .LogTo(Console.WriteLine, LogLevel.Information)
+            ;
+    }
+
+    public void Initialise() 
+    {
+        Database.EnsureDeleted();
+        Database.EnsureCreated();
+    }
+}

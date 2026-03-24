@@ -1,0 +1,48 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": ".NET: Debug RMS.Test (all tests)",
+			"type": "coreclr",
+			"request": "launch",
+			"program": "dotnet",
+			"args": [
+				"test",
+				"${workspaceFolder}/RMS.Test/RMS.Test.csproj",
+				"--no-build",
+				"-c",
+				"Debug"
+			],
+			"cwd": "${workspaceFolder}",
+			"preLaunchTask": "Build RMS.Test Debug",
+			"console": "integratedTerminal",
+			"justMyCode": true
+		},
+		{
+			"name": ".NET: Debug RMS.Test (filter)",
+			"type": "coreclr",
+			"request": "launch",
+			"program": "dotnet",
+			"args": [
+				"test",
+				"${workspaceFolder}/RMS.Test/RMS.Test.csproj",
+				"--no-build",
+				"-c",
+				"Debug",
+				"--filter",
+				"FullyQualifiedName~${input:testFilter}"
+			],
+			"cwd": "${workspaceFolder}",
+			"preLaunchTask": "Build RMS.Test Debug",
+			"console": "integratedTerminal",
+			"justMyCode": true
+		}
+	],
+	"inputs": [
+		{
+			"id": "testFilter",
+			"type": "promptString",
+			"description": "Enter part of test class or method name"
+		}
+	]
+}

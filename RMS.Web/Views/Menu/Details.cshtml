@@ -1,0 +1,70 @@
+@model MenuViewModel
+
+<partial name="_BreadCrumbs" model=@(new [] {
+    ("/","Home"),
+    ("/Menu/Menus","Menus"),
+    ("","Details")
+}) />
+
+<div class="card rounded shadow p-4">
+    <div class="border-bottom d-flex align-items-center justify-content-between mb-3">
+        <h3 class="text-primary">@Model.Name</h3>
+        <a asp-action="Menus" class="btn btn-sm btn-outline-secondary">Back</a>
+    </div>
+
+    <dl class="row">
+        <dt class="col-4">Name</dt>
+        <dd class="col-8">@Model.Name</dd>
+
+        <dt class="col-4">Type</dt>
+        <dd class="col-8">@Model.Type</dd>
+
+        <dt class="col-4">Description</dt>
+        <dd class="col-8">@Model.Description</dd>
+
+        <dt class="col-4">Status</dt>
+        <dd class="col-8">
+            <span class="badge @(Model.IsActive ? "bg-success" : "bg-secondary")">
+                @Model.StatusDisplay
+            </span>
+        </dd>
+
+        <dt class="col-4">Created On</dt>
+        <dd class="col-8">@Model.CreatedOnDisplay</dd>
+
+        <dt class="col-4">Menu Items</dt>
+        <dd class="col-8">@Model.MenuItemCount</dd>
+    </dl>
+
+    <div class="d-flex gap-2 mt-3">
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
+        <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger">Delete</a>
+    </div>
+</div>
+
+@if (Model.MenuItems.Any())
+{
+    <div class="card rounded shadow p-4 mt-4">
+        <h5 class="border-bottom pb-2">Menu Items</h5>
+        <table class="table table-sm table-hover">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.MenuItems)
+                {
+                    <tr>
+                        <td>@item.Name</td>
+                        <td>@item.Description</td>
+                        <td>€@item.Price.ToString("F2")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+

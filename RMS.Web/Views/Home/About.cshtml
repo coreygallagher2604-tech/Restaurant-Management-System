@@ -1,0 +1,32 @@
+@model AboutViewModel
+
+<partial name="_BreadCrumbs" model=@(new [] {
+    ("/","Home"),
+    ("","Menus"),
+}) />
+        
+ <div class="card text-center shadow">
+    <div class="card-header bg-warning">
+        <h2>@Model.Title</h2>
+    </div>
+    <div class="card-body">
+        <div class="card-body">
+            <h5 class="card-title">Mission Statement</h5>
+            <p><em>@Model.Message</em></p>
+        </div>
+        <div class="card-footer text-muted">
+            <div>Formed on @Model.FormedString <cite title="Source Title">(@Model.Days days ago)</cite></div>
+        </div>
+    </div>
+
+    <h3>What is Menu Management System?</h3>
+    <p>Menu Management System is a popular and authoritative source for Menu content designed to help fans explore the world of Menus and decide what to watch.
+
+Our searchable database includes your favourite Menus, casts and directors. 
+
+Menu Managemenet System can help you:
+
+Jog your memory about a Menu, show, or person on the tip of your tongue.
+Find the best Menu or show to watch next.
+Feel free to register and help us improve our resources and data to include all your favourite moveis!</p>
+</div>
