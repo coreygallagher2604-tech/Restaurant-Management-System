@@ -24,22 +24,26 @@ public class MenuItemViewModel
 
     public List<Ingredient> Ingredients { get; set; } = new();
 
-    public MenuItem ToMenuItem() => new MenuItem
+    public MenuItem ToMenuItem()
     {
-        Id = this.Id,
-        Name = this.Name,
-        Type = this.Type,
-        Description = this.Description,
-        Price = this.Price,
-    };
+        var item = new MenuItem();
+        item.Id = Id;
+        item.Name = Name;
+        item.Type = Type;
+        item.Description = Description;
+        item.Price = Price;
+        return item;
+    }
 
-    public static MenuItemViewModel FromMenuItem(MenuItem m) => new MenuItemViewModel
+    public static MenuItemViewModel FromMenuItem(MenuItem m)
     {
-        Id = m.Id,
-        Name = m.Name,
-        Type = m.Type,
-        Description = m.Description,
-        Price = m.Price,
-        Ingredients = m.Ingredients ?? new(),
-    };
+        var vm = new MenuItemViewModel();
+        vm.Id = m.Id;
+        vm.Name = m.Name;
+        vm.Type = m.Type;
+        vm.Description = m.Description;
+        vm.Price = m.Price;
+        vm.Ingredients = m.Ingredients ?? new();
+        return vm;
+    }
 }
