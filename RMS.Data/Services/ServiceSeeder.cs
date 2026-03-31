@@ -419,13 +419,61 @@ public static class ServiceSeeder
         };
 
 
+        // ===================== SIDES =====================
+        var side1 = new MenuItem
+        {
+            Name = "Chunky Chips",
+            Type = "Side",
+            Description = "Thick-cut fried potatoes seasoned with sea salt.",
+            Price = 3.50,
+            Ingredients = new List<Ingredient> { potato, gluten }
+        };
+
+        var side2 = new MenuItem
+        {
+            Name = "Seasonal Vegetables",
+            Type = "Side",
+            Description = "Steamed seasonal vegetables with herb butter.",
+            Price = 3.00,
+            Ingredients = new List<Ingredient> { broccoli, milk }
+        };
+
+        var side3 = new MenuItem
+        {
+            Name = "House Salad",
+            Type = "Side",
+            Description = "Mixed leaves, tomato and cucumber with a light vinaigrette.",
+            Price = 3.00,
+            Ingredients = new List<Ingredient> { lettuce, tomato, mustard, sulfites }
+        };
+
+        var side4 = new MenuItem
+        {
+            Name = "Garlic Mashed Potato",
+            Type = "Side",
+            Description = "Creamy mashed potato with roasted garlic and butter.",
+            Price = 3.50,
+            Ingredients = new List<Ingredient> { potato, milk, garlic }
+        };
+
+        var side5 = new MenuItem
+        {
+            Name = "Onion Rings",
+            Type = "Side",
+            Description = "Crispy battered onion rings.",
+            Price = 3.50,
+            Ingredients = new List<Ingredient> { onion, gluten, eggs, milk }
+        };
+
+        var sideItems = new List<MenuItem> { side1, side2, side3, side4, side5 };
+
         // Adding menus to service
 
-        svc.AddMenu("Lunch Menu", "Lunch", "Lunch selection with starters, mains and desserts.", true, lunchMenuItems);
-        svc.AddMenu("Dinner Menu", "Dinner", "Dinner selection with starters, mains and desserts.", true, dinnerMenuItems);
-        svc.AddMenu("Christmas Menu", "Seasonal", "Festive Christmas selection with seasonal favourites.", true, christmasMenuItems);
-        svc.AddMenu("Valentines Menu", "Seasonal", "A romantic Valentines Day dining experience for two.", true, valentinesMenuItems);
-        svc.AddMenu("Summer BBQ Menu", "Seasonal", "A sun-soaked outdoor barbecue experience with grilled favourites and refreshing desserts.", true, bbqMenuItems);
+        svc.AddMenu("Lunch Menu", "Lunch", "Lunch selection with starters, mains and desserts.", true, lunchMenuItems.Concat(sideItems).ToList());
+        svc.AddMenu("Dinner Menu", "Dinner", "Dinner selection with starters, mains and desserts.", true, dinnerMenuItems.Concat(sideItems).ToList());
+        svc.AddMenu("Christmas Menu", "Seasonal", "Festive Christmas selection with seasonal favourites.", true, christmasMenuItems.Concat(sideItems).ToList());
+        svc.AddMenu("Valentines Menu", "Seasonal", "A romantic Valentines Day dining experience for two.", true, valentinesMenuItems.Concat(sideItems).ToList());
+        svc.AddMenu("Summer BBQ Menu", "Seasonal", "A sun-soaked outdoor barbecue experience with grilled favourites and refreshing desserts.", true, bbqMenuItems.Concat(sideItems).ToList());
     }
 
 

@@ -251,7 +251,9 @@ public class MenuController : BaseController
     {
         if (ModelState.IsValid)
         {
-            var updated = svc.UpdateMenuItem(vm.ToMenuItem());
+            var existing = svc.GetMenuItemById(id);
+            var menuItem = vm.ToMenuItem();
+            menuItem.Ingredients = existing.Ingredients;
             if (updated is not null)
             {
                 Alert("Menu Item Has Been Updated.", AlertType.success);

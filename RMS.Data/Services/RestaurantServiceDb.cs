@@ -379,6 +379,7 @@ public class RestaurantServiceDb : IRestaurantService
         originalMenuItem.Description = mi.Description;
         originalMenuItem.Price = mi.Price;
         originalMenuItem.Ingredients = mi.Ingredients;
+        originalMenuItem.Type = mi.Type;
 
         db.MenuItems.Update(originalMenuItem);
         db.SaveChanges();
