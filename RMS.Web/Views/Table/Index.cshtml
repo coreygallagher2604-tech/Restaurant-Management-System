@@ -1,0 +1,47 @@
+@model IList<RMS.Web.Models.TableViewModel>
+
+<partial name="_BreadCrumbs" model=@(new [] {
+    ("/","Home"),
+    ("","Tables")
+}) />
+
+<div class="card rounded shadow p-4">
+    <div class="border-bottom d-flex align-items-center justify-content-between mb-3">
+        <h3 class="text-primary">Tables</h3>
+        <a asp-action="Create" class="btn btn-sm btn-primary">
+            <i class="bi bi-plus"></i> Add Table
+        </a>
+    </div>
+
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Table</th>
+                <th>Capacity</th>
+                <th>Seated</th>
+                <th>Status</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var t in Model)
+            {
+                <tr>
+                    <td>T@(t.TableNumber)</td>
+                    <td>@t.SeatingCapacity</td>
+                    <td>@t.CustomersSeated</td>
+                    <td>
+                        <span class="badge @(t.IsOccupied ? "bg-danger" : "bg-success")">
+                            @t.StatusDisplay
+                        </span>
+                    </td>
+                    <td class="text-end">
+                        <a asp-action="SetOccupancy" asp-route-id="@t.Id" class="btn btn-sm btn-outline-primary">Occupancy</a>
+                        <a asp-action="Edit" asp-route-id="@t.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
+                        <a asp-action="Delete" asp-route-id="@t.Id" class="btn btn-sm btn-outline-danger">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

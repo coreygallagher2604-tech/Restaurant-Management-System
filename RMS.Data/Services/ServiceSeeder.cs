@@ -18,7 +18,7 @@ public static class ServiceSeeder
 
         SeedUsers(usvc);
         SeedRestaurant(rsvc);
-        // SeedTables(rsvc);
+        SeedTables(rsvc);
        // SeedBookings(rsvc);
         // SeedOrders(rsvc);
     }
@@ -476,7 +476,52 @@ public static class ServiceSeeder
         svc.AddMenu("Summer BBQ Menu", "Seasonal", "A sun-soaked outdoor barbecue experience with grilled favourites and refreshing desserts.", true, bbqMenuItems.Concat(sideItems).ToList());
     }
 
-
+    private static void SeedTables(IRestaurantService svc)
+    {
+        // T1-3: 6 seats
+        svc.AddTable(1, 6);
+        svc.AddTable(2, 6);
+        svc.AddTable(3, 6);
+        // T4: 2 seats
+        svc.AddTable(4, 2);
+        // T5: 8 seats
+        svc.AddTable(5, 8);
+        // T6-7: 4 seats
+        svc.AddTable(6, 4);
+        svc.AddTable(7, 4);
+        // T8: 2 seats
+        svc.AddTable(8, 2);
+        // T9-10: 4 seats
+        svc.AddTable(9, 4);
+        svc.AddTable(10, 4);
+        // T11: 2 seats
+        svc.AddTable(11, 2);
+        // T12-15: 4 seats
+        svc.AddTable(12, 4);
+        svc.AddTable(13, 4);
+        svc.AddTable(14, 4);
+        svc.AddTable(15, 4);
+        // T16: 2 seats
+        svc.AddTable(16, 2);
+        // T17: 4 seats
+        svc.AddTable(17, 4);
+        // T18: 2 seats
+        svc.AddTable(18, 2);
+        // T19-24: 4 seats
+        svc.AddTable(19, 4);
+        svc.AddTable(20, 4);
+        svc.AddTable(21, 4);
+        svc.AddTable(22, 4);
+        svc.AddTable(23, 4);
+        svc.AddTable(24, 4);
+        // T25: 8 seats
+        svc.AddTable(25, 8);
+        // T26: 4 seats
+        svc.AddTable(26, 4);
+        // T27-28: 2 seats
+        svc.AddTable(27, 2);
+        svc.AddTable(28, 2);
+    }
 
 }
 

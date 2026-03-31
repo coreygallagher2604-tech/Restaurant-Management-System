@@ -1,0 +1,147 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using RMS.Data.Entities;
+using RMS.Data.Services;
+using RMS.Web.Models;
+
+namespace RMS.Web.Controllers;
+
+public class TableController : BaseController
+{
+    private IRestaurantService svc;
+
+    public TableController()
+    {
+        svc = new RestaurantServiceDb();
+    }
+
+    // GET /Table/Index
+    [HttpGet]
+    public IActionResult Index()
+    {
+        var tables = svc.GetAllTables();
+        return View(tables.Select(TableViewModel.FromTable).ToList());
+    }
+
+    // GET /Table/Create
+    [HttpGet]
+    [Authorize(Roles = "admin,authenticated")]
+    public IActionResult Create()
+    {
+        return View(new TableViewModel());
+    }
+
+    // POST /Table/Create
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [Authorize(Roles = "admin,authenticated")]
+    public IActionResult Create(TableViewModel vm)
+    {
+        if (ModelState.IsValid)
+        {
+            var created = svc.AddTable(vm.TableNumber, vm.SeatingCapacity);
+            if (created is not null)
+            {
+                Alert("Table has been added.", AlertType.success);
+                return RedirectToAction(nameof(Index));
+            }
+            Alert("Table could not be added.", AlertType.warning);
+        }
+        return View(vm);
+    }
+
+    // GET /Table/Edit/{id}
+    [HttpGet]
+    [Authorize(Roles = "admin,authenticated")]
+    public IActionResult Edit(int id)
+    {
+        var table = svc.GetTableById(id);
+
+        if (table is null)
+        {
+            Alert($"Table {id} could not be found.", AlertType.warning);
+            return NotFound();
+        }
+        return View(TableViewModel.FromTable(table));
+    }
+
+    // POST /Table/Edit/{id}
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [Authorize(Roles = "admin,authenticated")]
+    public IActionResult Edit(int id, TableViewModel vm)
+    {
+        if (ModelState.IsValid)
+        {
+            var updated = svc.UpdateTable(vm.ToTable());
+            if (updated is not null)
+            {
+                Alert("Table has been updated.", AlertType.success);
+                return RedirectToAction(nameof(Index));
+            }
+            Alert("Table could not be updated.", AlertType.warning);
+        }
+        return View(vm);
+    }
+
+    // GET /Table/Delete/{id}
+    [HttpGet]
+    [Authorize(Roles = "admin,authenticated")]
+    public IActionResult Delete(int id)
+    {
+        var table = svc.GetTableById(id);
+
+        if (table is null)
+        {
+            Alert($"Table {id} could not be found.", AlertType.warning);
+            return NotFound();
+        }
+        return View(TableViewModel.FromTable(table));
+    }
+
+    // POST /Table/DeleteConfirm
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [Authorize(Roles = "admin,authenticated")]
+    public IActionResult DeleteConfirm(int id)
+    {
+        var deleted = svc.DeleteTable(id);
+        Alert(deleted ? "Table has been deleted." : "Table could not be deleted.",
+              deleted ? AlertType.success : AlertType.danger);
+
+        return RedirectToAction(nameof(Index));
+    }
+
+    // GET /Table/SetOccupancy/{id}
+    [HttpGet]
+    [Authorize(Roles = "admin,authenticated")]
+    public IActionResult SetOccupancy(int id)
+    {
+        var table = svc.GetTableById(id);
+
+        if (table is null)
+        {
+            Alert($"Table {id} could not be found.", AlertType.warning);
+            return NotFound();
+        }
+        return View(TableViewModel.FromTable(table));
+    }
+
+    // POST /Table/SetOccupancy
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [Authorize(Roles = "admin,authenticated")]
+    public IActionResult SetOccupancy(int id, TableViewModel vm)
+    {
+        var updated = svc.SetTableOccupancy(id, vm.IsOccupied, vm.CustomersSeated);
+        if (updated is not null)
+        {
+            Alert($"Table {updated.TableNumber} occupancy updated.", AlertType.success);
+        }
+        else
+        {
+            Alert("Could not update table occupancy.", AlertType.warning);
+        }
+        return RedirectToAction(nameof(Index));
+    }
+}
