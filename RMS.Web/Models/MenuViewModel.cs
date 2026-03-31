@@ -26,6 +26,8 @@ public class MenuViewModel
 
     public List<MenuItem> MenuItems { get; set; } = new List<MenuItem>();
 
+    public List<MenuItem> AvailableMenuItems { get; set; } = new List<MenuItem>();
+
     public int MenuItemCount => MenuItems?.Count ?? 0;
     public string StatusDisplay => IsActive ? "Active" : "Inactive";
     public string CreatedOnDisplay => CreatedOn.ToLongDateString();

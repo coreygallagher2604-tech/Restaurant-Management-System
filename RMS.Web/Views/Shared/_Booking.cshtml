@@ -1,0 +1,64 @@
+<section class="py-5">
+    <div class="container">
+        <div class="row align-items-center g-5">
+
+            <div class="col-12 col-md-6">
+                <h1>The Banks</h1>
+                <p class="mt-3">Nestled in the heart of Strabane, The Banks is a warm and welcoming family restaurant serving honest, healthy Irish food. From fresh local produce to classic comfort dishes, we bring the best of Ireland to your table.</p>
+                <h3 class="mt-4">Book your table with us today!</h3>
+            </div>
+
+            <div class="col-12 col-md-6">
+                <div class="card shadow-sm border-0 p-4">
+                    <h5 class="card-title mb-4 fw-semibold">Reserve a Table</h5>
+                    <form method="post" asp-controller="Booking" asp-action="Create">
+
+                        <div class="mb-3">
+                            <label for="PartySize" class="form-label">Party Size</label>
+                            <select id="PartySize" name="PartySize" class="form-select" required>
+                                <option value="" disabled selected>Select guests</option>
+                                @for (int i = 1; i <= 8; i++)
+                                {
+                                    <option value="@i">@i @(i == 1 ? "Guest" : "Guests")</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="BookingDate" class="form-label">Date</label>
+                            <input type="date" id="BookingDate" name="BookingDate" class="form-control"
+                                   min="@DateTime.Today.ToString("yyyy-MM-dd")" required />
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="BookingTime" class="form-label">Time</label>
+                            <select id="BookingTime" name="BookingTime" class="form-select" required>
+                                <option value="" disabled selected>Select a time</option>
+                                @{
+                                    var start = new TimeSpan(12, 0, 0);
+                                    var end   = new TimeSpan(20, 00, 0);
+                                    for (var t = start; t <= end; t = t.Add(TimeSpan.FromMinutes(30)))
+                                    {
+                                        var display = DateTime.Today.Add(t).ToString("h:mm tt");
+                                        var value   = t.ToString(@"hh\:mm");
+                                        <option value="@value">@display</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">Next &rarr;</button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <p class="mt-3">For parties larger than 8 guests, please contact us directly to make a reservation. We will do our best to accommodate your group and ensure a memorable dining experience.</p>
+            </div>
+
+        </div>
+    </div>
+</section>

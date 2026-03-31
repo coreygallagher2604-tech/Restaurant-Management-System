@@ -72,6 +72,10 @@ public interface IRestaurantService
     
     Menu UpdateMenu (Menu m);
 
+    Menu AddMenuItemToMenu(int menuId, int menuItemId);
+
+    Menu RemoveMenuItemFromMenu(int menuId, int menuItemId);
+
     IList<Menu> SearchMenus();
 
 
@@ -134,7 +138,7 @@ public interface IRestaurantService
 
     // ---------------- MenuItem Management ---------------
 
-    MenuItem AddMenuItem(string name, string description, double price, List<Ingredient> ingredients);
+    MenuItem AddMenuItem(string name, string type, string description, double price, List<Ingredient> ingredients);
 
     MenuItem GetMenuItemById(int id);
 

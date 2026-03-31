@@ -24,3 +24,9 @@ publish/
 # Environment / secrets
 appsettings.Development.json
 *.env
+
+# Local workspace agents (ignored so agents can be used locally without committing)
+.github
+
+# Ignore local README if present
+README.md

@@ -301,12 +301,11 @@ public class RestaurantServiceDb : IRestaurantService
         var originalMenu = GetMenuById(m.Id);   
         if(originalMenu == null){return null;}
        
-        // update the Menu
+        // update the Menu (MenuItems managed separately via AddMenuItemToMenu/RemoveMenuItemFromMenu)
         originalMenu.Name = m.Name;
         originalMenu.Type = m.Type;
         originalMenu.Description = m.Description;
         originalMenu.IsActive = m.IsActive;
-        originalMenu.MenuItems = m.MenuItems;
 
         db.Menus.Update(originalMenu);
         db.SaveChanges();
@@ -317,11 +316,12 @@ public class RestaurantServiceDb : IRestaurantService
  // -------- MenuItem Related Operations ------------
 
    // Add MenuItem
-    public MenuItem AddMenuItem(string name, string description, double price, List<Ingredient> ingredients)
+    public MenuItem AddMenuItem(string name, string type, string description, double price, List<Ingredient> ingredients)
     {
         var menuItem = new MenuItem
         {
             Name = name,
+            Type = type,
             Description = description,
             Price = price,
             Ingredients = ingredients
@@ -400,6 +400,30 @@ public class RestaurantServiceDb : IRestaurantService
         menu.MenuItems.AddRange(menuItems);
         db.Menus.Update(menu);
         db.SaveChanges();
+        return GetMenuById(menuId);
+    }
+
+    public Menu AddMenuItemToMenu(int menuId, int menuItemId)
+    {
+        var menu = GetMenuById(menuId);
+        var item = GetMenuItemById(menuItemId);
+        if (menu == null || item == null) return null;
+        if (menu.MenuItems.Any(i => i.Id == menuItemId)) return menu;
+        menu.MenuItems.Add(item);
+        db.SaveChanges();
+        return GetMenuById(menuId);
+    }
+
+    public Menu RemoveMenuItemFromMenu(int menuId, int menuItemId)
+    {
+        var menu = GetMenuById(menuId);
+        if (menu == null) return null;
+        var item = menu.MenuItems.FirstOrDefault(i => i.Id == menuItemId);
+        if (item != null)
+        {
+            menu.MenuItems.Remove(item);
+            db.SaveChanges();
+        }
         return GetMenuById(menuId);
     }
     

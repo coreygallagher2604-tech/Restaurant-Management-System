@@ -1,0 +1,34 @@
+@model List<RMS.Data.Entities.Ingredient>
+
+<h5 class="border-bottom pb-2 mt-3">Ingredients</h5>
+
+@if (Model == null || !Model.Any())
+{
+    <p class="text-muted">No ingredients listed.</p>
+}
+else
+{
+    <table class="table table-sm table-hover">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Allergen Info</th>
+                <th>Allergen</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var ingredient in Model)
+            {
+                <tr>
+                    <td>@ingredient.Name</td>
+                    <td>@ingredient.AllergenInfo</td>
+                    <td>
+                        <span class="badge @(ingredient.Allergen ? "bg-danger" : "bg-success")">
+                            @(ingredient.Allergen ? "Yes" : "No")
+                        </span>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

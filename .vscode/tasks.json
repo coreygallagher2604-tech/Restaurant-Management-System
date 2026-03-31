@@ -1,59 +1,17 @@
 {
-	"version": "2.0.0",
-	"tasks": [
-		{
-			"label": "Build RMS.Test Debug",
-			"type": "shell",
-			"command": "dotnet",
-			"args": [
-				"build",
-				"RMS.Test/RMS.Test.csproj",
-				"-c",
-				"Debug"
-			],
-			"isBackground": false,
-			"group": "build",
-			"problemMatcher": "$msCompile"
-		},
-		{
-			"label": "Test RMS.Test Debug",
-			"type": "shell",
-			"command": "dotnet",
-			"args": [
-				"test",
-				"RMS.Test/RMS.Test.csproj",
-				"--no-build",
-				"-c",
-				"Debug"
-			],
-			"isBackground": false,
-			"dependsOn": "Build RMS.Test Debug",
-			"problemMatcher": "$msCompile"
-		},
-		{
-			"label": "Build MMS Debug",
-			"type": "shell",
-			"command": "dotnet",
-			"args": [
-				"build",
-				"MMS.sln",
-				"-c",
-				"Debug"
-			],
-			"isBackground": false
-		},
-		{
-			"label": "Run MMS.Web Debug",
-			"type": "shell",
-			"command": "dotnet",
-			"args": [
-				"run",
-				"--project",
-				"MMS.Web/MMS.Web.csproj",
-				"-c",
-				"Debug"
-			],
-			"isBackground": true
-		}
-	]
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build-test",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/RMS.Test/RMS.Test.csproj",
+                "--configuration",
+                "Debug"
+            ],
+            "problemMatcher": "$msCompile"
+        }
+    ]
 }

@@ -7,11 +7,12 @@ public class MenuItemViewModel
 {
     public int Id { get; set; }
 
-    public int? MenuID { get; set; }
-
     [Required]
     [StringLength(100, MinimumLength = 1)]
     public string Name { get; set; }
+
+    [Required]
+    public string Type { get; set; }
 
     [StringLength(500)]
     public string Description { get; set; }
@@ -21,11 +22,13 @@ public class MenuItemViewModel
     [DisplayFormat(DataFormatString = "{0:F2}")]
     public double Price { get; set; }
 
+    public List<Ingredient> Ingredients { get; set; } = new();
+
     public MenuItem ToMenuItem() => new MenuItem
     {
         Id = this.Id,
-        MenuID = this.MenuID,
         Name = this.Name,
+        Type = this.Type,
         Description = this.Description,
         Price = this.Price,
     };
@@ -33,9 +36,10 @@ public class MenuItemViewModel
     public static MenuItemViewModel FromMenuItem(MenuItem m) => new MenuItemViewModel
     {
         Id = m.Id,
-        MenuID = m.MenuID,
         Name = m.Name,
+        Type = m.Type,
         Description = m.Description,
         Price = m.Price,
+        Ingredients = m.Ingredients ?? new(),
     };
 }
