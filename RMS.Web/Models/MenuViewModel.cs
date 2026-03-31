@@ -32,24 +32,28 @@ public class MenuViewModel
     public string StatusDisplay => IsActive ? "Active" : "Inactive";
     public string CreatedOnDisplay => CreatedOn.ToLongDateString();
 
-    public Menu ToMenu() => new Menu
+    public Menu ToMenu()
     {
-        Id = Id,
-        Name = Name,
-        Type = Type,
-        Description = Description,
-        IsActive = IsActive,
-        MenuItems = MenuItems ?? new List<MenuItem>()
-    };
+        var menu = new Menu();
+        menu.Id = Id;
+        menu.Name = Name;
+        menu.Type = Type;
+        menu.Description = Description;
+        menu.IsActive = IsActive;
+        menu.MenuItems = MenuItems ?? new List<MenuItem>();
+        return menu;
+    }
 
-    public static MenuViewModel FromMenu(Menu m) => new MenuViewModel
+    public static MenuViewModel FromMenu(Menu m)
     {
-        Id = m.Id,
-        Name = m.Name,
-        Type = m.Type,
-        Description = m.Description,
-        IsActive = m.IsActive,
-        CreatedOn = m.CreatedOn,
-        MenuItems = m.MenuItems ?? new List<MenuItem>()
-    };
+        var vm = new MenuViewModel();
+        vm.Id = m.Id;
+        vm.Name = m.Name;
+        vm.Type = m.Type;
+        vm.Description = m.Description;
+        vm.IsActive = m.IsActive;
+        vm.CreatedOn = m.CreatedOn;
+        vm.MenuItems = m.MenuItems ?? new List<MenuItem>();
+        return vm;
+    }
 }

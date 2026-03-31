@@ -28,23 +28,27 @@ public class TableViewModel
 
     public string StatusDisplay => IsOccupied ? "Occupied" : "Available";
 
-    public Table ToTable() => new Table
+    public Table ToTable()
     {
-        Id = Id,
-        TableNumber = TableNumber,
-        SeatingCapacity = SeatingCapacity,
-        CustomersSeated = CustomersSeated,
-        IsOccupied = IsOccupied,
-        Active = Active
-    };
+        var table = new Table();
+        table.Id = Id;
+        table.TableNumber = TableNumber;
+        table.SeatingCapacity = SeatingCapacity;
+        table.CustomersSeated = CustomersSeated;
+        table.IsOccupied = IsOccupied;
+        table.Active = Active;
+        return table;
+    }
 
-    public static TableViewModel FromTable(Table t) => new TableViewModel
+    public static TableViewModel FromTable(Table t)
     {
-        Id = t.Id,
-        TableNumber = t.TableNumber,
-        SeatingCapacity = t.SeatingCapacity,
-        CustomersSeated = t.CustomersSeated,
-        IsOccupied = t.IsOccupied,
-        Active = t.Active
-    };
+        var vm = new TableViewModel();
+        vm.Id = t.Id;
+        vm.TableNumber = t.TableNumber;
+        vm.SeatingCapacity = t.SeatingCapacity;
+        vm.CustomersSeated = t.CustomersSeated;
+        vm.IsOccupied = t.IsOccupied;
+        vm.Active = t.Active;
+        return vm;
+    }
 }
