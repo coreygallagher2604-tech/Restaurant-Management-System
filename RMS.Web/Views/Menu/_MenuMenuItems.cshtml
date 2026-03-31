@@ -1,0 +1,30 @@
+@model List<RMS.Data.Entities.MenuItem>
+
+@if (Model == null || !Model.Any())
+{
+    <p class="text-muted">No menu items found.</p>
+}
+else
+{
+    var sections = new[] { ("Starter", "Starters"), ("Main", "Mains"), ("Dessert", "Desserts"), ("Side", "Sides") };
+
+    @foreach (var (type, label) in sections)
+    {
+        var items = Model.Where(i => i.Type == type).ToList();
+        if (!items.Any()) { continue; }
+
+        <h5 class="fw-bold mt-4">@label</h5>
+        <hr class="mt-0" />
+
+        @foreach (var item in items)
+        {
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <div>
+                    <span class="fw-semibold">@item.Name</span>
+                    <p class="text-muted small mb-0">@item.Description</p>
+                </div>
+                <span class="ms-3 fw-semibold text-nowrap">£@item.Price.ToString("F2")</span>
+            </div>
+        }
+    }
+}

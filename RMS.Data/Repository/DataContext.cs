@@ -28,6 +28,13 @@ public class DataContext : DbContext
             ;
     }
 
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<MenuItem>()
+            .HasMany(mi => mi.Ingredients)
+            .WithMany();
+    }
+
     public void Initialise() 
     {
         Database.EnsureDeleted();

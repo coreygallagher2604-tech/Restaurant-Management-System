@@ -1,0 +1,64 @@
+@model MenuViewModel
+
+<div class="card rounded shadow p-4 mt-4">
+    <div class="border-bottom d-flex align-items-center justify-content-between mb-3">
+        <h5 class="text-primary mb-0">Menu Items</h5>
+        <span class="badge bg-secondary">@Model.MenuItemCount item(s)</span>
+    </div>
+
+    @if (!Model.MenuItems.Any())
+    {
+        <p class="text-muted">No items on this menu yet.</p>
+    }
+    else
+    {
+        @foreach (var (type, label) in new[] { ("Starter", "Starters"), ("Main", "Mains"), ("Dessert", "Desserts"), ("Side", "Sides") })
+        {
+            var items = Model.MenuItems.Where(i => i.Type == type).ToList();
+            if (items.Any())
+            {
+                <p class="fw-bold mb-1 mt-3">@label</p>
+                <hr class="mt-0 mb-2" />
+                <table class="table table-sm table-hover mb-0">
+                    <tbody>
+                        @foreach (var item in items)
+                        {
+                            <tr>
+                                <td>@item.Name</td>
+                                <td class="text-end">€@item.Price.ToString("0.00")</td>
+                                <td class="text-end" style="width:1%">
+                                    <form asp-action="RemoveItemFromMenu" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="menuId" value="@Model.Id" />
+                                        <input type="hidden" name="menuItemId" value="@item.Id" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        }
+    }
+
+    @if (Model.AvailableMenuItems.Any())
+    {
+        <div class="mt-4 border-top pt-3">
+            <h6 class="text-secondary">Add Item</h6>
+            <form asp-action="AddItemToMenu" method="post" class="d-flex gap-2 align-items-end">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="menuId" value="@Model.Id" />
+                <div class="flex-grow-1">
+                    <select name="menuItemId" class="form-select">
+                        @foreach (var item in Model.AvailableMenuItems.OrderBy(i => i.Type).ThenBy(i => i.Name))
+                        {
+                            <option value="@item.Id">[@item.Type] @item.Name — €@item.Price.ToString("0.00")</option>
+                        }
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Add</button>
+            </form>
+        </div>
+    }
+</div>

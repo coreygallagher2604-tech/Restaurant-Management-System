@@ -1,0 +1,46 @@
+@model MenuItemSearchViewModel
+
+<partial name="_BreadCrumbs" model=@(new [] {
+    ("/","Home"),
+    ("","Menu Items")
+}) />
+
+<div class="card rounded shadow p-4">
+    <div class="border-bottom d-flex align-items-center justify-content-between mb-3">
+        <h3 class="text-primary">Menu Items</h3>
+        <a asp-action="AddMenuItem" class="btn btn-sm btn-primary">
+            <i class="bi bi-plus"></i> Add Item
+        </a>
+    </div>
+
+    <partial name="_MenuItemSearch" model="@Model" />
+
+    <table class="table table-hover mt-3">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Description</th>
+                <th>Price</th>
+                <th>Ingredients</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.MenuItems)
+            {
+                <tr style="cursor:pointer" onclick="window.location='@Url.Action("MenuItemDetails", new { id = item.Id })'">
+                    <td>@item.Name</td>
+                    <td>@item.Type</td>
+                    <td>@item.Description</td>
+                    <td>£@item.Price.ToString("F2")</td>
+                    <td>@item.Ingredients?.Count</td>
+                    <td class="text-end" onclick="event.stopPropagation()">
+                        <a asp-action="EditMenuItem" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
+                        <a asp-action="DeleteMenuItem" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

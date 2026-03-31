@@ -91,7 +91,12 @@ public class MenuController : BaseController
             Alert($"Menu {id} Has Not Been Found.", AlertType.warning);
             return NotFound();
         }
-        return View(MenuViewModel.FromMenu(m));
+        var vm = MenuViewModel.FromMenu(m);
+        var currentIds = vm.MenuItems.Select(i => i.Id).ToHashSet();
+        vm.AvailableMenuItems = svc.GetAllMenuItems()
+            .Where(i => !currentIds.Contains(i.Id))
+            .ToList();
+        return View(vm);
     }
 
     // POST /Menu/Edit/{id}
@@ -111,6 +116,26 @@ public class MenuController : BaseController
             Alert("Menu could not be updated.", AlertType.warning);
         }
         return View(vm);
+    }
+
+    // POST /Menu/AddItemToMenu
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [Authorize(Roles = "admin,authenticated")]
+    public IActionResult AddItemToMenu(int menuId, int menuItemId)
+    {
+        svc.AddMenuItemToMenu(menuId, menuItemId);
+        return RedirectToAction(nameof(Edit), new { id = menuId });
+    }
+
+    // POST /Menu/RemoveItemFromMenu
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [Authorize(Roles = "admin,authenticated")]
+    public IActionResult RemoveItemFromMenu(int menuId, int menuItemId)
+    {
+        svc.RemoveMenuItemFromMenu(menuId, menuItemId);
+        return RedirectToAction(nameof(Edit), new { id = menuId });
     }
 
     // GET /Menu/Delete/{id}
@@ -151,19 +176,23 @@ public class MenuController : BaseController
 
     // ===================== MENU ITEM ACTIONS =====================
 
-    // GET /Menu/AddMenuItem/{menuId}
     [HttpGet]
     [Authorize(Roles = "admin,authenticated")]
-    public IActionResult AddMenuItem(int menuId)
+    public IActionResult MenuItems(MenuItemSearchViewModel search)
     {
-        var m = svc.GetMenuById(menuId);
+        var items = svc.GetAllMenuItems();
+        search.MenuItems = string.IsNullOrWhiteSpace(search.Query)
+            ? items
+            : items.Where(i => i.Name.Contains(search.Query, StringComparison.OrdinalIgnoreCase)).ToList();
+        return View(search);
+    }
 
-        if (m is null)
-        {
-            Alert($"Menu {menuId} Could Not Be Found.", AlertType.warning);
-            return NotFound();
-        }
-        return View(new MenuItemViewModel { MenuID = menuId });
+    // GET /Menu/AddMenuItem
+    [HttpGet]
+    [Authorize(Roles = "admin,authenticated")]
+    public IActionResult AddMenuItem()
+    {
+        return View(new MenuItemViewModel());
     }
 
     // POST /Menu/AddMenuItem
@@ -174,15 +203,29 @@ public class MenuController : BaseController
     {
         if (ModelState.IsValid)
         {
-            var item = svc.AddMenuItem(vm.Name, vm.Description, vm.Price, new List<Ingredient>());
+            var item = svc.AddMenuItem(vm.Name, vm.Type, vm.Description, vm.Price, new List<Ingredient>());
             if (item is not null)
             {
                 Alert("Menu Item Has Been Added.", AlertType.success);
-                return RedirectToAction(nameof(Details), new { Id = vm.MenuID });
+                return RedirectToAction(nameof(MenuItems));
             }
             Alert("Menu Item could not be added.", AlertType.warning);
         }
         return View(vm);
+    }
+
+    // GET /Menu/MenuItemDetails/{id}
+    [HttpGet]
+    public IActionResult MenuItemDetails(int id)
+    {
+        var item = svc.GetMenuItemById(id);
+
+        if (item is null)
+        {
+            Alert($"Menu Item {id} Has Not Been Found.", AlertType.warning);
+            return NotFound();
+        }
+        return View(MenuItemViewModel.FromMenuItem(item));
     }
 
     // GET /Menu/EditMenuItem/{id}
@@ -212,7 +255,7 @@ public class MenuController : BaseController
             if (updated is not null)
             {
                 Alert("Menu Item Has Been Updated.", AlertType.success);
-                return RedirectToAction(nameof(Details), new { Id = vm.MenuID });
+                return RedirectToAction(nameof(MenuItems));
             }
             Alert("Menu Item could not be updated.", AlertType.warning);
         }
@@ -238,13 +281,13 @@ public class MenuController : BaseController
     [HttpPost]
     [ValidateAntiForgeryToken]
     [Authorize(Roles = "admin,authenticated")]
-    public IActionResult DeleteMenuItemConfirm(int id, int menuId)
+    public IActionResult DeleteMenuItemConfirm(int id)
     {
         var deleted = svc.DeleteMenuItem(id);
         Alert(deleted ? "Menu Item has been deleted." : "Menu Item could not be deleted.",
               deleted ? AlertType.success : AlertType.danger);
 
-        return RedirectToAction(nameof(Details), new { Id = menuId });
+        return RedirectToAction(nameof(MenuItems));
     }
 }
 

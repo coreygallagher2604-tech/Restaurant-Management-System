@@ -45,26 +45,7 @@
 @if (Model.MenuItems.Any())
 {
     <div class="card rounded shadow p-4 mt-4">
-        <h5 class="border-bottom pb-2">Menu Items</h5>
-        <table class="table table-sm table-hover">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Price</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Model.MenuItems)
-                {
-                    <tr>
-                        <td>@item.Name</td>
-                        <td>@item.Description</td>
-                        <td>€@item.Price.ToString("F2")</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+        <partial name="_MenuMenuItems" model="Model.MenuItems" />
     </div>
 }
 
