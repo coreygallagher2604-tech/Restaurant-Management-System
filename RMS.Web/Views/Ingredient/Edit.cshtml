@@ -1,0 +1,44 @@
+@model RMS.Web.Models.IngredientViewModel
+
+<partial name="_BreadCrumbs" model=@(new [] {
+    ("/","Home"),
+    ("/Ingredient/Index","Ingredients"),
+    ("","Edit Ingredient")
+}) />
+
+<div class="card rounded shadow p-4">
+    <div class="border-bottom d-flex align-items-center justify-content-between mb-3">
+        <h3 class="text-primary">Edit Ingredient</h3>
+    </div>
+
+    <form asp-action="Edit" method="post">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <input asp-for="Id" type="hidden" />
+
+        <div class="mb-3">
+            <label asp-for="Name" class="form-label"></label>
+            <input asp-for="Name" class="form-control" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3 form-check">
+            <input asp-for="Allergen" class="form-check-input" />
+            <label asp-for="Allergen" class="form-check-label"></label>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="AllergenInfo" class="form-label"></label>
+            <input asp-for="AllergenInfo" class="form-control" />
+            <span asp-validation-for="AllergenInfo" class="text-danger"></span>
+        </div>
+
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary">Save</button>
+            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

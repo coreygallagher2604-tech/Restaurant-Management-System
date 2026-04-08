@@ -1,0 +1,54 @@
+@model IList<RMS.Web.Models.BookingViewModel>
+
+<partial name="_BreadCrumbs" model=@(new [] {
+    ("/","Home"),
+    ("","Bookings")
+}) />
+
+<div class="card rounded shadow p-4">
+    <div class="border-bottom d-flex align-items-center justify-content-between mb-3">
+        <h3 class="text-primary">Bookings</h3>
+        <a asp-action="Create" class="btn btn-sm btn-primary">
+            <i class="bi bi-plus"></i> New Booking
+        </a>
+    </div>
+
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Customer</th>
+                <th>Date &amp; Time</th>
+                <th>Guests</th>
+                <th>Table</th>
+                <th>Status</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var b in Model)
+            {
+                <tr>
+                    <td>@b.CustomerName</td>
+                    <td>@b.BookingDateTime.ToString("dd MMM yyyy HH:mm")</td>
+                    <td>@b.NumberOfGuests</td>
+                    <td>@(b.TableNumber > 0 ? $"T{b.TableNumber}" : "—")</td>
+                    <td>
+                        @if (b.IsActive)
+                        {
+                            <span class="badge bg-success">Active</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Cancelled</span>
+                        }
+                    </td>
+                    <td class="text-end">
+                        <a asp-action="Details" asp-route-id="@b.Id" class="btn btn-sm btn-outline-secondary">View</a>
+                        <a asp-action="Edit" asp-route-id="@b.Id" class="btn btn-sm btn-outline-primary">Edit</a>
+                        <a asp-action="Delete" asp-route-id="@b.Id" class="btn btn-sm btn-outline-danger">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

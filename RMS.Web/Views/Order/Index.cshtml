@@ -1,0 +1,50 @@
+@model IList<RMS.Web.Models.OrderViewModel>
+
+<partial name="_BreadCrumbs" model=@(new [] {
+    ("/","Home"),
+    ("","Orders")
+}) />
+
+<div class="card rounded shadow p-4">
+    <div class="border-bottom d-flex align-items-center justify-content-between mb-3">
+        <h3 class="text-primary">Orders</h3>
+        <a asp-action="Create" class="btn btn-sm btn-primary">
+            <i class="bi bi-plus"></i> New Order
+        </a>
+    </div>
+
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Order #</th>
+                <th>Table</th>
+                <th>Items</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var o in Model)
+            {
+                <tr>
+                    <td>@o.Id</td>
+                    <td>@(o.TableId.HasValue ? $"T{o.TableId}" : "—")</td>
+                    <td>@o.MenuItems.Count</td>
+                    <td>£@o.TotalCost.ToString("F2")</td>
+                    <td>
+                        <span class="badge @o.StatusBadgeClass">@o.StatusDisplay</span>
+                    </td>
+                    <td class="text-end">
+                        <a asp-action="Details" asp-route-id="@o.Id" class="btn btn-sm btn-outline-primary">View</a>
+                        @if (!o.IsCompleted && !o.IsVoid)
+                        {
+                            <a asp-action="MarkCompleted" asp-route-id="@o.Id" class="btn btn-sm btn-outline-success">Complete</a>
+                            <a asp-action="Void" asp-route-id="@o.Id" class="btn btn-sm btn-outline-secondary">Void</a>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

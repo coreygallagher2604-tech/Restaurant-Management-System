@@ -1,0 +1,36 @@
+@model RMS.Web.Models.AllergenConsentViewModel
+
+<partial name="_BreadCrumbs" model=@(new [] {
+    ("/","Home"),
+    ("/AllergenConsent/Index","Allergen Consents"),
+    ("","Delete Consent")
+}) />
+
+<div class="card rounded shadow p-4">
+    <div class="border-bottom d-flex align-items-center justify-content-between mb-3">
+        <h3 class="text-danger">Delete Allergen Consent?</h3>
+    </div>
+
+    <p class="text-muted">Are you sure you want to delete this consent record? This cannot be undone.</p>
+
+    <dl class="row">
+        <dt class="col-4">Customer</dt>
+        <dd class="col-8">@Model.CustomerName</dd>
+
+        <dt class="col-4">Email</dt>
+        <dd class="col-8">@Model.CustomerEmail</dd>
+
+        <dt class="col-4">Order #</dt>
+        <dd class="col-8">@(Model.OrderId > 0 ? $"#{Model.OrderId}" : "—")</dd>
+
+        <dt class="col-4">Consent Given</dt>
+        <dd class="col-8">@(Model.ConsentGiven ? "Yes" : "No")</dd>
+    </dl>
+
+    <form asp-action="DeleteConfirm" asp-route-id="@Model.Id" method="post">
+        <div class="mt-4 d-flex gap-2">
+            <button type="submit" class="btn btn-danger">Yes, Delete</button>
+            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
