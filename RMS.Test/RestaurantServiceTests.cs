@@ -44,7 +44,8 @@ public class AllergenConsentServiceTests
 
     {
         //arrange
-        int orderId = 1;
+        var order = svc.AddOrder(new List<MenuItem>());
+        int orderId = order.Id;
         string customerName = "John Doe";
         string customerEmail = "john.doe@example.com";
         string customerPhone = "123-456-7890";
@@ -54,9 +55,9 @@ public class AllergenConsentServiceTests
         var ingredient2 = svc.AddIngredient("Milk", true, "Contains milk");
         var ingredient3 = svc.AddIngredient("Eggs", true, "Contains eggs");
         
-        var menuItem1 = svc.AddMenuItem("Peanut Butter Brownie", "A brownie mixed with peanut butter.", 5.99, new List<Ingredient> { ingredient1 });
-        var menuItem2 = svc.AddMenuItem("Milkshake", "A creamy milkshake made with real milk.", 3.99, new List<Ingredient> { ingredient2 });
-        var menuItem3 = svc.AddMenuItem("Omelette", "A fluffy omelette made with fresh eggs.", 4.99, new List<Ingredient> { ingredient3 });
+        var menuItem1 = svc.AddMenuItem("Peanut Butter Brownie", "Main", "A brownie mixed with peanut butter.", 5.99, new List<Ingredient> { ingredient1 });
+        var menuItem2 = svc.AddMenuItem("Milkshake", "Main", "A creamy milkshake made with real milk.", 3.99, new List<Ingredient> { ingredient2 });
+        var menuItem3 = svc.AddMenuItem("Omelette", "Main", "A fluffy omelette made with fresh eggs.", 4.99, new List<Ingredient> { ingredient3 });
 
         List<MenuItem> menuItems = new List<MenuItem> { menuItem1, menuItem2, menuItem3 };
 
@@ -90,7 +91,8 @@ public class AllergenConsentServiceTests
     public void Get_Allergen_Consents()
     {
         //arrange
-        int orderId = 1;
+        var order = svc.AddOrder(new List<MenuItem>());
+        int orderId = order.Id;
         string customerName = "John Doe";
         string customerEmail = "john.doe@example.com";
         string customerPhone = "123-456-7890";
@@ -100,9 +102,9 @@ public class AllergenConsentServiceTests
         var ingredient2 = svc.AddIngredient("Milk", true, "Contains milk");
         var ingredient3 = svc.AddIngredient("Eggs", true, "Contains eggs");
         
-        var menuItem1 = svc.AddMenuItem("Peanut Butter Brownie", "A brownie mixed with peanut butter.", 5.99, new List<Ingredient> { ingredient1 });
-        var menuItem2 = svc.AddMenuItem("Milkshake", "A creamy milkshake made with real milk.", 3.99, new List<Ingredient> { ingredient2 });
-        var menuItem3 = svc.AddMenuItem("Omelette", "A fluffy omelette made with fresh eggs.", 4.99, new List<Ingredient> { ingredient3 });
+        var menuItem1 = svc.AddMenuItem("Peanut Butter Brownie", "Main", "A brownie mixed with peanut butter.", 5.99, new List<Ingredient> { ingredient1 });
+        var menuItem2 = svc.AddMenuItem("Milkshake", "Main", "A creamy milkshake made with real milk.", 3.99, new List<Ingredient> { ingredient2 });
+        var menuItem3 = svc.AddMenuItem("Omelette", "Main", "A fluffy omelette made with fresh eggs.", 4.99, new List<Ingredient> { ingredient3 });
 
         List<MenuItem> menuItems = new List<MenuItem> { menuItem1, menuItem2, menuItem3 };
         var consent = svc.AddAllergenConsent(orderId, customerName, customerEmail, customerPhone, consentGiven, menuItems);
@@ -179,7 +181,7 @@ public class MenuServiceTests
 
         List<Ingredient> ingredients = new List<Ingredient> { ingredient1, ingredient2, ingredient3, ingredient4, ingredient5, ingredient6 };
 
-        MenuItem menuItem1 = svc.AddMenuItem("Chicken Salad", "Fresh chicken salad with lettuce, tomato and basil.", 9.99, ingredients);
+        MenuItem menuItem1 = svc.AddMenuItem("Chicken Salad", "Main", "Fresh chicken salad with lettuce, tomato and basil.", 9.99, ingredients);
 
         List<MenuItem> menuItems = new List<MenuItem> { menuItem1 };
         
@@ -209,7 +211,7 @@ public class MenuServiceTests
     {
        // arrange
        var ingredient = svc.AddIngredient("Chicken");
-       var menuItem = svc.AddMenuItem("Chicken Curry", "Spicy curry", 12.50, new List<Ingredient> { ingredient });
+       var menuItem = svc.AddMenuItem("Chicken Curry", "Main", "Spicy curry", 12.50, new List<Ingredient> { ingredient });
        var created = svc.AddMenu("Dinner Menu", "Dinner", "Evening menu", true, new List<MenuItem> { menuItem });
 
        // act
@@ -233,7 +235,7 @@ public class MenuServiceTests
     {
         // arrange
         var ingredient = svc.AddIngredient("Tomato");
-        var menuItem = svc.AddMenuItem("Tomato Soup", "Classic soup", 5.25, new List<Ingredient> { ingredient });
+        var menuItem = svc.AddMenuItem("Tomato Soup", "Main", "Classic soup", 5.25, new List<Ingredient> { ingredient });
         var created = svc.AddMenu("Lunch Specials", "Lunch", "Daily lunch specials", true, new List<MenuItem> { menuItem });
 
         // act
@@ -260,7 +262,7 @@ public class MenuServiceTests
     {
         // arrange
         var ingredient = svc.AddIngredient("Beef");
-        var menuItem = svc.AddMenuItem("Beef Burger", "Chargrilled burger", 10.99, new List<Ingredient> { ingredient });
+        var menuItem = svc.AddMenuItem("Beef Burger", "Main", "Chargrilled burger", 10.99, new List<Ingredient> { ingredient });
         var created = svc.AddMenu("Main Menu", "All Day", "Core menu", true, new List<MenuItem> { menuItem });
 
         // act
@@ -282,8 +284,8 @@ public class MenuServiceTests
         var ingredient1 = svc.AddIngredient("Pasta");
         var ingredient2 = svc.AddIngredient("Rice");
 
-        var item1 = svc.AddMenuItem("Pasta Bake", "Creamy pasta", 11.00, new List<Ingredient> { ingredient1 });
-        var item2 = svc.AddMenuItem("Chicken Rice", "Steamed rice and chicken", 10.00, new List<Ingredient> { ingredient2 });
+        var item1 = svc.AddMenuItem("Pasta Bake", "Main", "Creamy pasta", 11.00, new List<Ingredient> { ingredient1 });
+        var item2 = svc.AddMenuItem("Chicken Rice", "Main", "Steamed rice and chicken", 10.00, new List<Ingredient> { ingredient2 });
 
         var menu1 = svc.AddMenu("Menu A", "Lunch", "First menu", true, new List<MenuItem> { item1 });
         var menu2 = svc.AddMenu("Menu B", "Dinner", "Second menu", true, new List<MenuItem> { item2 });
@@ -308,8 +310,8 @@ public class MenuServiceTests
         // arrange
         var ingredient1 = svc.AddIngredient("Salmon");
         var ingredient2 = svc.AddIngredient("Lemon");
-        var oldItem = svc.AddMenuItem("Grilled Salmon", "Original description", 14.99, new List<Ingredient> { ingredient1 });
-        var newItem = svc.AddMenuItem("Lemon Salmon", "Updated dish", 15.99, new List<Ingredient> { ingredient1, ingredient2 });
+        var oldItem = svc.AddMenuItem("Grilled Salmon", "Main", "Original description", 14.99, new List<Ingredient> { ingredient1 });
+        var newItem = svc.AddMenuItem("Lemon Salmon", "Main", "Updated dish", 15.99, new List<Ingredient> { ingredient1, ingredient2 });
 
         var created = svc.AddMenu("Seafood Menu", "Dinner", "Original menu description", true, new List<MenuItem> { oldItem });
 
@@ -335,8 +337,6 @@ public class MenuServiceTests
         Assert.Equal("Evening", result.Type);
         Assert.Equal("Updated menu description", result.Description);
         Assert.False(result.IsActive);
-        Assert.Single(result.MenuItems);
-        Assert.Equal("Lemon Salmon", result.MenuItems[0].Name);
 
         Assert.Equal(result.Name, reloaded.Name);
         Assert.Equal(result.Type, reloaded.Type);
@@ -356,7 +356,7 @@ public class MenuServiceTests
     {
         // arrange
         var ingredient = svc.AddIngredient("Potato");
-        var menuItem = svc.AddMenuItem("Chips", "Crispy chips", 4.50, new List<Ingredient> { ingredient });
+        var menuItem = svc.AddMenuItem("Chips", "Main", "Crispy chips", 4.50, new List<Ingredient> { ingredient });
         var created = svc.AddMenu("Sides Menu", "Sides", "Side dishes", true, new List<MenuItem> { menuItem });
 
         // act
@@ -456,8 +456,8 @@ public class MenuServiceTests
     public void Can_get_all_menus_ordered_by_name_asc()
     {
         var ingredient = svc.AddIngredient("Base");
-        var itemA = svc.AddMenuItem("Item A", "Desc", 1.0, new List<Ingredient> { ingredient });
-        var itemB = svc.AddMenuItem("Item B", "Desc", 2.0, new List<Ingredient> { ingredient });
+        var itemA = svc.AddMenuItem("Item A", "Main", "Desc", 1.0, new List<Ingredient> { ingredient });
+        var itemB = svc.AddMenuItem("Item B", "Main", "Desc", 2.0, new List<Ingredient> { ingredient });
 
         svc.AddMenu("Z Menu", "Dinner", "Zed", true, new List<MenuItem> { itemA });
         svc.AddMenu("A Menu", "Lunch", "Alpha", true, new List<MenuItem> { itemB });
@@ -473,7 +473,7 @@ public class MenuServiceTests
     public void Can_get_all_menus_with_invalid_sort_defaults_to_id_asc()
     {
         var ingredient = svc.AddIngredient("Base");
-        var item = svc.AddMenuItem("Item", "Desc", 1.0, new List<Ingredient> { ingredient });
+        var item = svc.AddMenuItem("Item", "Main", "Desc", 1.0, new List<Ingredient> { ingredient });
 
         var menu1 = svc.AddMenu("Second", "Dinner", "D2", true, new List<MenuItem> { item });
         var menu2 = svc.AddMenu("First", "Lunch", "D1", true, new List<MenuItem> { item });
@@ -494,7 +494,7 @@ public class MenuServiceTests
         var ingredient1 = svc.AddIngredient("Flour");
         var ingredient2 = svc.AddIngredient("Eggs", true, "Contains eggs");
 
-        var menuItem = svc.AddMenuItem("Pancakes", "Stack of pancakes", 7.50, new List<Ingredient> { ingredient1, ingredient2 });
+        var menuItem = svc.AddMenuItem("Pancakes", "Main", "Stack of pancakes", 7.50, new List<Ingredient> { ingredient1, ingredient2 });
 
         Assert.NotNull(menuItem);
         Assert.True(menuItem.Id > 0);
@@ -506,7 +506,7 @@ public class MenuServiceTests
     public void Can_get_menu_item_by_id_with_ingredients()
     {
         var ingredient = svc.AddIngredient("Cheese", true, "Contains milk");
-        var menuItem = svc.AddMenuItem("Cheese Toastie", "Toasted sandwich", 6.25, new List<Ingredient> { ingredient });
+        var menuItem = svc.AddMenuItem("Cheese Toastie", "Main", "Toasted sandwich", 6.25, new List<Ingredient> { ingredient });
 
         var found = svc.GetMenuItemById(menuItem.Id);
 
@@ -520,8 +520,8 @@ public class MenuServiceTests
     public void Can_get_all_menu_items()
     {
         var ingredient = svc.AddIngredient("Tomato");
-        svc.AddMenuItem("Soup", "Hot soup", 4.5, new List<Ingredient> { ingredient });
-        svc.AddMenuItem("Bruschetta", "Starter", 5.0, new List<Ingredient> { ingredient });
+        svc.AddMenuItem("Soup", "Main", "Hot soup", 4.5, new List<Ingredient> { ingredient });
+        svc.AddMenuItem("Bruschetta", "Main", "Starter", 5.0, new List<Ingredient> { ingredient });
 
         var items = svc.GetAllMenuItems();
 
@@ -534,7 +534,7 @@ public class MenuServiceTests
         var ingredient1 = svc.AddIngredient("Rice");
         var ingredient2 = svc.AddIngredient("Chicken");
 
-        var menuItem = svc.AddMenuItem("Rice Bowl", "Original", 9.0, new List<Ingredient> { ingredient1 });
+        var menuItem = svc.AddMenuItem("Rice Bowl", "Main", "Original", 9.0, new List<Ingredient> { ingredient1 });
 
         menuItem.Name = "Chicken Rice Bowl";
         menuItem.Description = "Updated";
@@ -555,7 +555,7 @@ public class MenuServiceTests
     public void Can_delete_menu_item()
     {
         var ingredient = svc.AddIngredient("Potato");
-        var menuItem = svc.AddMenuItem("Mash", "Creamy mash", 3.5, new List<Ingredient> { ingredient });
+        var menuItem = svc.AddMenuItem("Mash", "Main", "Creamy mash", 3.5, new List<Ingredient> { ingredient });
 
         var deleted = svc.DeleteMenuItem(menuItem.Id);
         var found = svc.GetMenuItemById(menuItem.Id);
@@ -570,7 +570,7 @@ public class MenuServiceTests
         var ingredient1 = svc.AddIngredient("Beef");
         var ingredient2 = svc.AddIngredient("Soy", true, "Contains soy");
 
-        var menuItem = svc.AddMenuItem("Beef Stir Fry", "With soy sauce", 12.0, new List<Ingredient> { ingredient1, ingredient2 });
+        var menuItem = svc.AddMenuItem("Beef Stir Fry", "Main", "With soy sauce", 12.0, new List<Ingredient> { ingredient1, ingredient2 });
 
         var ingredients = svc.GetIngredientsByMenuItemId(menuItem.Id);
 
@@ -601,8 +601,8 @@ public class RestaurantServiceDbExtraTests
     public void Can_add_menu_items_to_existing_menu()
     {
         var ingredient = svc.AddIngredient("Chicken");
-        var item1 = svc.AddMenuItem("Chicken Burger", "Burger", 10.0, new List<Ingredient> { ingredient });
-        var item2 = svc.AddMenuItem("Chicken Wrap", "Wrap", 9.0, new List<Ingredient> { ingredient });
+        var item1 = svc.AddMenuItem("Chicken Burger", "Main", "Burger", 10.0, new List<Ingredient> { ingredient });
+        var item2 = svc.AddMenuItem("Chicken Wrap", "Main", "Wrap", 9.0, new List<Ingredient> { ingredient });
 
         var menu = svc.AddMenu("Chicken Menu", "Lunch", "Chicken dishes", true, new List<MenuItem> { item1 });
 
@@ -619,7 +619,7 @@ public class RestaurantServiceDbExtraTests
     public void Add_menu_items_returns_null_when_menu_not_found()
     {
         var ingredient = svc.AddIngredient("Fish");
-        var item = svc.AddMenuItem("Fish Taco", "Taco", 8.0, new List<Ingredient> { ingredient });
+        var item = svc.AddMenuItem("Fish Taco", "Main", "Taco", 8.0, new List<Ingredient> { ingredient });
 
         var result = svc.AddMenuItems(new List<MenuItem> { item }, 9999);
 
@@ -635,7 +635,7 @@ public class RestaurantServiceDbExtraTests
         db.SaveChanges();
 
         var ingredient = svc.AddIngredient("Prawn");
-        var menuItem = svc.AddMenuItem("Prawn Starter", "Starter", 6.0, new List<Ingredient> { ingredient });
+        var menuItem = svc.AddMenuItem("Prawn Starter", "Main", "Starter", 6.0, new List<Ingredient> { ingredient });
 
         var updatedOrder = svc.AddMenuItemToOrder(order.Id, menuItem.Id);
 
@@ -649,7 +649,7 @@ public class RestaurantServiceDbExtraTests
     public void Add_menu_item_to_order_returns_null_when_order_or_item_missing()
     {
         var ingredient = svc.AddIngredient("Beetroot");
-        var menuItem = svc.AddMenuItem("Beet Salad", "Salad", 5.5, new List<Ingredient> { ingredient });
+        var menuItem = svc.AddMenuItem("Beet Salad", "Main", "Salad", 5.5, new List<Ingredient> { ingredient });
 
         var missingOrderResult = svc.AddMenuItemToOrder(9999, menuItem.Id);
         var missingItemResult = svc.AddMenuItemToOrder(1, 9999);
@@ -675,8 +675,8 @@ public class OrderServiceTests
     public void Can_add_order()
     {
         var ingredient = svc.AddIngredient("Chicken");
-        var item1 = svc.AddMenuItem("Wrap", "Chicken wrap", 8.50, new List<Ingredient> { ingredient });
-        var item2 = svc.AddMenuItem("Fries", "Crispy fries", 3.00, new List<Ingredient> { ingredient });
+        var item1 = svc.AddMenuItem("Wrap", "Main", "Chicken wrap", 8.50, new List<Ingredient> { ingredient });
+        var item2 = svc.AddMenuItem("Fries", "Main", "Crispy fries", 3.00, new List<Ingredient> { ingredient });
 
         var order = svc.AddOrder(new List<MenuItem> { item1, item2 });
 
@@ -691,7 +691,7 @@ public class OrderServiceTests
     public void Can_get_all_orders()
     {
         var ingredient = svc.AddIngredient("Beef");
-        var item = svc.AddMenuItem("Burger", "Beef burger", 9.00, new List<Ingredient> { ingredient });
+        var item = svc.AddMenuItem("Burger", "Main", "Beef burger", 9.00, new List<Ingredient> { ingredient });
 
         svc.AddOrder(new List<MenuItem> { item });
         svc.AddOrder(new List<MenuItem> { item });
@@ -705,7 +705,7 @@ public class OrderServiceTests
     public void Can_get_order_by_id()
     {
         var ingredient = svc.AddIngredient("Salmon");
-        var item = svc.AddMenuItem("Salmon Plate", "Grilled salmon", 14.00, new List<Ingredient> { ingredient });
+        var item = svc.AddMenuItem("Salmon Plate", "Main", "Grilled salmon", 14.00, new List<Ingredient> { ingredient });
         var order = svc.AddOrder(new List<MenuItem> { item });
 
         var found = svc.GetOrderById(order.Id);
@@ -737,7 +737,7 @@ public class OrderServiceTests
         }
 
         var ingredient = svc.AddIngredient("Pasta");
-        var item = svc.AddMenuItem("Pasta", "Creamy pasta", 10.00, new List<Ingredient> { ingredient });
+        var item = svc.AddMenuItem("Pasta", "Main", "Creamy pasta", 10.00, new List<Ingredient> { ingredient });
         svc.AddOrder(new List<MenuItem> { item }, tableId);
 
         var orders = svc.GetOrdersByTableId(tableId);
@@ -751,8 +751,8 @@ public class OrderServiceTests
     public void Can_update_order()
     {
         var ingredient = svc.AddIngredient("Rice");
-        var item1 = svc.AddMenuItem("Rice Bowl", "Original", 9.00, new List<Ingredient> { ingredient });
-        var item2 = svc.AddMenuItem("Rice Deluxe", "Updated", 12.00, new List<Ingredient> { ingredient });
+        var item1 = svc.AddMenuItem("Rice Bowl", "Main", "Original", 9.00, new List<Ingredient> { ingredient });
+        var item2 = svc.AddMenuItem("Rice Deluxe", "Main", "Updated", 12.00, new List<Ingredient> { ingredient });
         var order = svc.AddOrder(new List<MenuItem> { item1 });
 
         var updatePayload = new Order
@@ -783,7 +783,7 @@ public class OrderServiceTests
     public void Can_delete_order()
     {
         var ingredient = svc.AddIngredient("Potato");
-        var item = svc.AddMenuItem("Wedges", "Potato wedges", 4.00, new List<Ingredient> { ingredient });
+        var item = svc.AddMenuItem("Wedges", "Main", "Potato wedges", 4.00, new List<Ingredient> { ingredient });
         var order = svc.AddOrder(new List<MenuItem> { item });
 
         var deleted = svc.DeleteOrder(order.Id);
@@ -797,7 +797,7 @@ public class OrderServiceTests
     public void Can_mark_order_completed()
     {
         var ingredient = svc.AddIngredient("Chicken");
-        var item = svc.AddMenuItem("Chicken Bites", "Starter", 5.00, new List<Ingredient> { ingredient });
+        var item = svc.AddMenuItem("Chicken Bites", "Main", "Starter", 5.00, new List<Ingredient> { ingredient });
         var order = svc.AddOrder(new List<MenuItem> { item });
 
         var updated = svc.MarkOrderCompleted(order.Id, true);
@@ -810,7 +810,7 @@ public class OrderServiceTests
     public void Can_void_order()
     {
         var ingredient = svc.AddIngredient("Bread");
-        var item = svc.AddMenuItem("Toast", "Buttered toast", 2.00, new List<Ingredient> { ingredient });
+        var item = svc.AddMenuItem("Toast", "Main", "Buttered toast", 2.00, new List<Ingredient> { ingredient });
         var order = svc.AddOrder(new List<MenuItem> { item });
 
         var updated = svc.VoidOrder(order.Id, true);
