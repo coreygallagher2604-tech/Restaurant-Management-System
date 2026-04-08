@@ -1,0 +1,54 @@
+@model IList<RMS.Web.Models.AllergenConsentViewModel>
+
+<partial name="_BreadCrumbs" model=@(new [] {
+    ("/","Home"),
+    ("","Allergen Consents")
+}) />
+
+<div class="card rounded shadow p-4">
+    <div class="border-bottom d-flex align-items-center justify-content-between mb-3">
+        <h3 class="text-primary">Allergen Consents</h3>
+        <a asp-action="Create" class="btn btn-sm btn-primary">
+            <i class="bi bi-plus"></i> Add Consent
+        </a>
+    </div>
+
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Customer</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Order #</th>
+                <th>Consent Given</th>
+                <th>Date</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var c in Model)
+            {
+                <tr>
+                    <td>@c.CustomerName</td>
+                    <td>@c.CustomerEmail</td>
+                    <td>@c.CustomerPhone</td>
+                    <td>@(c.OrderId > 0 ? $"#{c.OrderId}" : "—")</td>
+                    <td>
+                        @if (c.ConsentGiven)
+                        {
+                            <span class="badge bg-success">Yes</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">No</span>
+                        }
+                    </td>
+                    <td>@c.CreatedOn.ToString("dd MMM yyyy")</td>
+                    <td class="text-end">
+                        <a asp-action="Delete" asp-route-id="@c.Id" class="btn btn-sm btn-outline-danger">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

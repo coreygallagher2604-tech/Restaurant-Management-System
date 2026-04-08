@@ -1,0 +1,57 @@
+@model RMS.Web.Models.BookingViewModel
+
+<partial name="_BreadCrumbs" model=@(new [] {
+    ("/","Home"),
+    ("/Booking/Index","Bookings"),
+    ("/Booking/Details/" + Model.Id, Model.CustomerName),
+    ("","Details")
+}) />
+
+<div class="card rounded shadow p-4">
+    <div class="border-bottom d-flex align-items-center justify-content-between mb-3">
+        <h3 class="text-primary">Booking — @Model.CustomerName</h3>
+        @if (Model.IsActive)
+        {
+            <span class="badge bg-success fs-6">Active</span>
+        }
+        else
+        {
+            <span class="badge bg-secondary fs-6">Cancelled</span>
+        }
+    </div>
+
+    <dl class="row">
+        <dt class="col-4">Customer</dt>
+        <dd class="col-8">@Model.CustomerName</dd>
+
+        <dt class="col-4">Phone</dt>
+        <dd class="col-8">@Model.PhoneNumber</dd>
+
+        <dt class="col-4">Email</dt>
+        <dd class="col-8">@Model.Email</dd>
+
+        <dt class="col-4">Date &amp; Time</dt>
+        <dd class="col-8">@Model.BookingDateTime.ToString("dd MMM yyyy HH:mm")</dd>
+
+        <dt class="col-4">Guests</dt>
+        <dd class="col-8">@Model.NumberOfGuests</dd>
+
+        <dt class="col-4">Table</dt>
+        <dd class="col-8">@(Model.TableNumber > 0 ? $"T{Model.TableNumber}" : "Not assigned")</dd>
+
+        <dt class="col-4">Allergen</dt>
+        <dd class="col-8">@(Model.HasAllergen ? "Yes" : "No")</dd>
+
+        <dt class="col-4">Consent Given</dt>
+        <dd class="col-8">@(Model.AllergenConsentGiven ? "Yes" : "No")</dd>
+
+        <dt class="col-4">Comments</dt>
+        <dd class="col-8">@(string.IsNullOrEmpty(Model.BookingComments) ? "—" : Model.BookingComments)</dd>
+    </dl>
+
+    <div class="mt-4 d-flex gap-2">
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
+        <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger">Delete</a>
+        <a asp-action="Index" class="btn btn-secondary">Back to Bookings</a>
+    </div>
+</div>
