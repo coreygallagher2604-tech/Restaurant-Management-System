@@ -47,8 +47,12 @@
     <div class="mt-4 d-flex gap-2">
         @if (!Model.IsCompleted && !Model.IsVoid)
         {
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit Order</a>
             <a asp-action="MarkCompleted" asp-route-id="@Model.Id" class="btn btn-success">Mark Completed</a>
-            <a asp-action="Void" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Void Order</a>
+            @if (User.IsInRole("admin") || User.IsInRole("owner"))
+            {
+                <a asp-action="Void" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Void Order</a>
+            }
         }
         <a asp-action="Index" class="btn btn-secondary">Back to Orders</a>
     </div>

@@ -36,6 +36,8 @@ namespace RMS.Data.Entities;
 
         public bool IsActive {get; set;} = false;
 
+        public string Status {get; set;} = "Booked";
+
         public DateTime CreatedOnUtc {get; set;} = DateTime.UtcNow;
 
     

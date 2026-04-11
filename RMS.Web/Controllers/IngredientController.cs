@@ -26,7 +26,7 @@ public class IngredientController : BaseController
 
     // GET /Ingredient/Create
     [HttpGet]
-    [Authorize(Roles = "admin,authenticated")]
+    [Authorize(Roles = "admin,owner,manager,staff")]
     public IActionResult Create()
     {
         return View(new IngredientViewModel());
@@ -35,7 +35,7 @@ public class IngredientController : BaseController
     // POST /Ingredient/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [Authorize(Roles = "admin,authenticated")]
+    [Authorize(Roles = "admin,owner,manager,staff")]
     public IActionResult Create(IngredientViewModel vm)
     {
         if (!ModelState.IsValid)
@@ -57,7 +57,7 @@ public class IngredientController : BaseController
 
     // GET /Ingredient/Edit/{id}
     [HttpGet]
-    [Authorize(Roles = "admin,authenticated")]
+    [Authorize(Roles = "admin,owner,manager,staff")]
     public IActionResult Edit(int id)
     {
         var ingredient = svc.GetIngredientById(id);
@@ -74,7 +74,7 @@ public class IngredientController : BaseController
     // POST /Ingredient/Edit/{id}
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [Authorize(Roles = "admin,authenticated")]
+    [Authorize(Roles = "admin,owner,manager,staff")]
     public IActionResult Edit(int id, IngredientViewModel vm)
     {
         if (!ModelState.IsValid)
@@ -98,7 +98,7 @@ public class IngredientController : BaseController
 
     // GET /Ingredient/Delete/{id}
     [HttpGet]
-    [Authorize(Roles = "admin,authenticated")]
+    [Authorize(Roles = "admin,owner,manager,staff")]
     public IActionResult Delete(int id)
     {
         var ingredient = svc.GetIngredientById(id);
@@ -115,7 +115,7 @@ public class IngredientController : BaseController
     // POST /Ingredient/DeleteConfirm/{id}
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [Authorize(Roles = "admin,authenticated")]
+    [Authorize(Roles = "admin,owner,manager,staff")]
     public IActionResult DeleteConfirm(int id)
     {
         var deleted = svc.DeleteIngredient(id);

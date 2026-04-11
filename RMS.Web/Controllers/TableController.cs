@@ -25,18 +25,27 @@ public class TableController : BaseController
 
     // GET /Table/Create
     [HttpGet]
-    [Authorize(Roles = "admin,authenticated")]
+    [Authorize(Roles = "admin,owner,manager,staff")]
     public IActionResult Create()
     {
-        return View(new TableViewModel());
+        var allTables = svc.GetAllTables();
+        int nextTableNumber = allTables.Count > 0 ? allTables.Max(t => t.TableNumber) + 1 : 1;
+        return View(new TableViewModel { TableNumber = nextTableNumber });
     }
 
     // POST /Table/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [Authorize(Roles = "admin,authenticated")]
+    [Authorize(Roles = "admin,owner,manager,staff")]
     public IActionResult Create(TableViewModel vm)
     {
+        // Check for duplicate table number
+        bool duplicate = svc.GetAllTables().Any(t => t.TableNumber == vm.TableNumber);
+        if (duplicate)
+        {
+            ModelState.AddModelError("TableNumber", $"Table {vm.TableNumber} already exists.");
+        }
+
         if (ModelState.IsValid)
         {
             var created = svc.AddTable(vm.TableNumber, vm.SeatingCapacity);
@@ -52,7 +61,7 @@ public class TableController : BaseController
 
     // GET /Table/Edit/{id}
     [HttpGet]
-    [Authorize(Roles = "admin,authenticated")]
+    [Authorize(Roles = "admin,owner,manager,staff")]
     public IActionResult Edit(int id)
     {
         var table = svc.GetTableById(id);
@@ -68,7 +77,7 @@ public class TableController : BaseController
     // POST /Table/Edit/{id}
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [Authorize(Roles = "admin,authenticated")]
+    [Authorize(Roles = "admin,owner,manager,staff")]
     public IActionResult Edit(int id, TableViewModel vm)
     {
         if (ModelState.IsValid)
@@ -86,7 +95,7 @@ public class TableController : BaseController
 
     // GET /Table/Delete/{id}
     [HttpGet]
-    [Authorize(Roles = "admin,authenticated")]
+    [Authorize(Roles = "admin,owner,manager,staff")]
     public IActionResult Delete(int id)
     {
         var table = svc.GetTableById(id);
@@ -102,7 +111,7 @@ public class TableController : BaseController
     // POST /Table/DeleteConfirm
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [Authorize(Roles = "admin,authenticated")]
+    [Authorize(Roles = "admin,owner,manager,staff")]
     public IActionResult DeleteConfirm(int id)
     {
         var deleted = svc.DeleteTable(id);
@@ -114,7 +123,7 @@ public class TableController : BaseController
 
     // GET /Table/SetOccupancy/{id}
     [HttpGet]
-    [Authorize(Roles = "admin,authenticated")]
+    [Authorize(Roles = "admin,owner,manager,staff")]
     public IActionResult SetOccupancy(int id)
     {
         var table = svc.GetTableById(id);
@@ -130,7 +139,7 @@ public class TableController : BaseController
     // POST /Table/SetOccupancy
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [Authorize(Roles = "admin,authenticated")]
+    [Authorize(Roles = "admin,owner,manager,staff")]
     public IActionResult SetOccupancy(int id, TableViewModel vm)
     {
         var updated = svc.SetTableOccupancy(id, vm.IsOccupied, vm.CustomersSeated);

@@ -245,6 +245,7 @@ public class RestaurantServiceDb : IRestaurantService
     public IList<Menu>SearchMenus() 
     {
         return db.Menus
+            .Include(m => m.MenuItems)
             .OrderBy(m => m.Id)
             .ToList();
     }
@@ -470,6 +471,14 @@ public class RestaurantServiceDb : IRestaurantService
         };
 
         db.Orders.Add(order);
+
+        // Mark the table as occupied when an order is placed on it
+        if (table != null)
+        {
+            table.IsOccupied = true;
+            db.Tables.Update(table);
+        }
+
         db.SaveChanges();
         return GetOrderById(order.Id);
     }
@@ -555,6 +564,14 @@ public class RestaurantServiceDb : IRestaurantService
 
         order.IsCompleted = isCompleted;
         db.Orders.Update(order);
+
+        // Free the table when the order is completed
+        if (order.Table != null)
+        {
+            order.Table.IsOccupied = false;
+            db.Tables.Update(order.Table);
+        }
+
         db.SaveChanges();
         return GetOrderById(order.Id);
     }
@@ -570,6 +587,14 @@ public class RestaurantServiceDb : IRestaurantService
 
         order.IsVoid = isVoid;
         db.Orders.Update(order);
+
+        // Free the table when the order is voided
+        if (order.Table != null)
+        {
+            order.Table.IsOccupied = false;
+            db.Tables.Update(order.Table);
+        }
+
         db.SaveChanges();
         return GetOrderById(order.Id);
     }
@@ -699,7 +724,8 @@ public class RestaurantServiceDb : IRestaurantService
             OrderId = orderId,
             BookingComments = bookingComments,
             TableNumber = tableNumber,
-            IsActive = isActive
+            IsActive = isActive,
+            Status = "Booked"
         };
 
         db.Bookings.Add(booking);
@@ -759,6 +785,7 @@ public class RestaurantServiceDb : IRestaurantService
         existingBooking.BookingComments = booking.BookingComments;
         existingBooking.TableNumber = booking.TableNumber;
         existingBooking.IsActive = booking.IsActive;
+        existingBooking.Status = booking.Status;
 
         db.Bookings.Update(existingBooking);
         db.SaveChanges();

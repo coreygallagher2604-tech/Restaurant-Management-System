@@ -9,12 +9,12 @@ public class TableViewModel
 
     [Required]
     [Display(Name = "Table Number")]
-    [Range(1, 999)]
+    [Range(1, 50)]
     public int TableNumber { get; set; }
 
     [Required]
     [Display(Name = "Seating Capacity")]
-    [Range(1, 20)]
+    [Range(2, 20)]
     public int SeatingCapacity { get; set; }
 
     [Display(Name = "Customers Seated")]
