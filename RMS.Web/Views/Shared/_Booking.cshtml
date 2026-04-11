@@ -11,11 +11,11 @@
             <div class="col-12 col-md-6">
                 <div class="card shadow-sm border-0 p-4">
                     <h5 class="card-title mb-4 fw-semibold">Reserve a Table</h5>
-                    <form method="post" asp-controller="Booking" asp-action="Create">
+                    <form method="get" asp-controller="Booking" asp-action="CreateBooking">
 
                         <div class="mb-3">
-                            <label for="PartySize" class="form-label">Party Size</label>
-                            <select id="PartySize" name="PartySize" class="form-select" required>
+                            <label for="NumberOfGuests" class="form-label">Party Size</label>
+                            <select id="NumberOfGuests" name="numberOfGuests" class="form-select" required>
                                 <option value="" disabled selected>Select guests</option>
                                 @for (int i = 1; i <= 8; i++)
                                 {
@@ -26,18 +26,18 @@
 
                         <div class="mb-3">
                             <label for="BookingDate" class="form-label">Date</label>
-                            <input type="date" id="BookingDate" name="BookingDate" class="form-control"
+                            <input type="date" id="BookingDate" name="bookingDate" class="form-control"
                                    min="@DateTime.Today.ToString("yyyy-MM-dd")" required />
                         </div>
 
                         <div class="mb-4">
                             <label for="BookingTime" class="form-label">Time</label>
-                            <select id="BookingTime" name="BookingTime" class="form-select" required>
+                            <select id="BookingTime" name="bookingTime" class="form-select" required>
                                 <option value="" disabled selected>Select a time</option>
                                 @{
                                     var start = new TimeSpan(12, 0, 0);
                                     var end   = new TimeSpan(20, 00, 0);
-                                    for (var t = start; t <= end; t = t.Add(TimeSpan.FromMinutes(30)))
+                                    for (var t = start; t <= end; t = t.Add(TimeSpan.FromMinutes(15)))
                                     {
                                         var display = DateTime.Today.Add(t).ToString("h:mm tt");
                                         var value   = t.ToString(@"hh\:mm");

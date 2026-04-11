@@ -10,13 +10,17 @@
 <div class="card rounded shadow p-4">
     <div class="border-bottom d-flex align-items-center justify-content-between mb-3">
         <h3 class="text-primary">Booking — @Model.CustomerName</h3>
-        @if (Model.IsActive)
+        @if (Model.Status == "Active")
         {
             <span class="badge bg-success fs-6">Active</span>
         }
-        else
+        else if (Model.Status == "Cancelled")
         {
             <span class="badge bg-secondary fs-6">Cancelled</span>
+        }
+        else
+        {
+            <span class="badge bg-primary fs-6">Booked</span>
         }
     </div>
 
@@ -36,8 +40,11 @@
         <dt class="col-4">Guests</dt>
         <dd class="col-8">@Model.NumberOfGuests</dd>
 
-        <dt class="col-4">Table</dt>
-        <dd class="col-8">@(Model.TableNumber > 0 ? $"T{Model.TableNumber}" : "Not assigned")</dd>
+        @if (User.IsInRole("admin") || User.IsInRole("owner") || User.IsInRole("manager") || User.IsInRole("staff"))
+        {
+            <dt class="col-4">Table</dt>
+            <dd class="col-8">@(Model.TableNumber > 0 ? $"T{Model.TableNumber}" : "Not assigned")</dd>
+        }
 
         <dt class="col-4">Allergen</dt>
         <dd class="col-8">@(Model.HasAllergen ? "Yes" : "No")</dd>
@@ -50,8 +57,11 @@
     </dl>
 
     <div class="mt-4 d-flex gap-2">
-        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
-        <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger">Delete</a>
+        @if (User.IsInRole("admin") || User.IsInRole("owner") || User.IsInRole("manager") || User.IsInRole("staff"))
+        {
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
+            <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger">Delete</a>
+        }
         <a asp-action="Index" class="btn btn-secondary">Back to Bookings</a>
     </div>
 </div>

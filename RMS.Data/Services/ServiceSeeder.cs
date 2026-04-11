@@ -19,20 +19,27 @@ public static class ServiceSeeder
         SeedUsers(usvc);
         SeedRestaurant(rsvc);
         SeedTables(rsvc);
-       // SeedBookings(rsvc);
-        // SeedOrders(rsvc);
+        SeedBookings(rsvc);
+       // SeedOrders(rsvc);
     }
 
     // use this method FIRST to seed the database with dummy test data using an IUserService
     private static void SeedUsers(IUserService svc)
     {
-        // Note: do not call initialise here
+        // System admin — full access to everything including system config
+        svc.Register("admin", "admin@rms.com", "password", Role.admin);
 
-        // seed default users
-        svc.Register("admin","admin@mail.com","password",Role.admin);
-        svc.Register("autenticated","autenticated@mail.com","password",Role.autenticated);
-        svc.Register("guest","guest@mail.com","password",Role.guest);
-       
+        // Owner/boss — full restaurant access, can void orders, manage staff
+        svc.Register("owner", "owner@rms.com", "password", Role.owner);
+
+        // Manager — can manage menus, ingredients, bookings, view orders
+        svc.Register("manager", "manager@rms.com", "password", Role.manager);
+
+        // Staff — can take orders, manage bookings, mark order stages
+        svc.Register("staff", "staff@rms.com", "password", Role.staff);
+
+        // Registered guest — can make bookings, view menus
+        svc.Register("guest", "guest@rms.com", "password", Role.guest);
     }
     
     // use this method SECOND to seed the database with dummy test data using an IRestaurantService
@@ -471,9 +478,74 @@ public static class ServiceSeeder
 
         svc.AddMenu("Lunch Menu", "Lunch", "Lunch selection with starters, mains and desserts.", true, lunchMenuItems.Concat(sideItems).ToList());
         svc.AddMenu("Dinner Menu", "Dinner", "Dinner selection with starters, mains and desserts.", true, dinnerMenuItems.Concat(sideItems).ToList());
-        svc.AddMenu("Christmas Menu", "Seasonal", "Festive Christmas selection with seasonal favourites.", true, christmasMenuItems.Concat(sideItems).ToList());
-        svc.AddMenu("Valentines Menu", "Seasonal", "A romantic Valentines Day dining experience for two.", true, valentinesMenuItems.Concat(sideItems).ToList());
-        svc.AddMenu("Summer BBQ Menu", "Seasonal", "A sun-soaked outdoor barbecue experience with grilled favourites and refreshing desserts.", true, bbqMenuItems.Concat(sideItems).ToList());
+        svc.AddMenu("Christmas Menu", "Seasonal", "Festive Christmas selection with seasonal favourites.", false, christmasMenuItems.Concat(sideItems).ToList());
+        svc.AddMenu("Valentines Menu", "Seasonal", "A romantic Valentines Day dining experience for two.", false, valentinesMenuItems.Concat(sideItems).ToList());
+        svc.AddMenu("Summer BBQ Menu", "Seasonal", "A sun-soaked outdoor barbecue experience with grilled favourites and refreshing desserts.", false, bbqMenuItems.Concat(sideItems).ToList());
+
+        // ===================== DRINKS MENU =====================
+        // Allergen ingredients already seeded above — reuse: milk, eggs, gluten, sulfites, lupin
+
+        // Soft Drinks
+        var cola = new MenuItem { Name = "Coca-Cola", Type = "Soft Drink", Description = "Classic chilled Coca-Cola.", Price = 2.95, Ingredients = new List<Ingredient>() };
+        var dietCola = new MenuItem { Name = "Diet Coke", Type = "Soft Drink", Description = "Diet Coke, ice cold.", Price = 2.95, Ingredients = new List<Ingredient>() };
+        var lemonade = new MenuItem { Name = "Lemonade", Type = "Soft Drink", Description = "Sparkling lemonade.", Price = 2.95, Ingredients = new List<Ingredient>() };
+        var orangeJuice = new MenuItem { Name = "Fresh Orange Juice", Type = "Soft Drink", Description = "Freshly squeezed orange juice.", Price = 3.50, Ingredients = new List<Ingredient>() };
+        var appleJuice = new MenuItem { Name = "Apple Juice", Type = "Soft Drink", Description = "Chilled cloudy apple juice.", Price = 3.00, Ingredients = new List<Ingredient>() };
+        var sparklingWater = new MenuItem { Name = "Sparkling Water", Type = "Soft Drink", Description = "Chilled sparkling mineral water.", Price = 2.50, Ingredients = new List<Ingredient>() };
+        var stillWater = new MenuItem { Name = "Still Water", Type = "Soft Drink", Description = "Chilled still mineral water.", Price = 2.50, Ingredients = new List<Ingredient>() };
+
+        // Mixers & Tonics
+        var tonicWater = new MenuItem { Name = "Tonic Water", Type = "Mixer", Description = "Classic tonic water.", Price = 2.00, Ingredients = new List<Ingredient>() };
+        var slimlineTonic = new MenuItem { Name = "Slimline Tonic", Type = "Mixer", Description = "Light tonic water.", Price = 2.00, Ingredients = new List<Ingredient>() };
+        var gingerBeer = new MenuItem { Name = "Ginger Beer", Type = "Mixer", Description = "Feisty ginger beer.", Price = 2.50, Ingredients = new List<Ingredient>() };
+        var sodaWater = new MenuItem { Name = "Soda Water", Type = "Mixer", Description = "Plain soda water.", Price = 1.50, Ingredients = new List<Ingredient>() };
+
+        // Hot Drinks
+        var espresso = new MenuItem { Name = "Espresso", Type = "Hot Drink", Description = "Single shot espresso.", Price = 2.50, Ingredients = new List<Ingredient>() };
+        var americano = new MenuItem { Name = "Americano", Type = "Hot Drink", Description = "Espresso with hot water.", Price = 3.00, Ingredients = new List<Ingredient>() };
+        var flatWhite = new MenuItem { Name = "Flat White", Type = "Hot Drink", Description = "Double espresso with steamed milk.", Price = 3.50, Ingredients = new List<Ingredient> { milk } };
+        var cappuccino = new MenuItem { Name = "Cappuccino", Type = "Hot Drink", Description = "Espresso with steamed milk and foam.", Price = 3.50, Ingredients = new List<Ingredient> { milk } };
+        var latte = new MenuItem { Name = "Latte", Type = "Hot Drink", Description = "Espresso with lots of steamed milk.", Price = 3.50, Ingredients = new List<Ingredient> { milk } };
+        var hotChocolate = new MenuItem { Name = "Hot Chocolate", Type = "Hot Drink", Description = "Rich hot chocolate with cream.", Price = 3.75, Ingredients = new List<Ingredient> { milk } };
+        var irishBreakfastTea = new MenuItem { Name = "Irish Breakfast Tea", Type = "Hot Drink", Description = "Barry's Irish Breakfast Tea served with milk.", Price = 2.75, Ingredients = new List<Ingredient> { milk } };
+        var herbalTea = new MenuItem { Name = "Herbal Tea", Type = "Hot Drink", Description = "Selection of herbal teas — peppermint, chamomile or green tea.", Price = 2.75, Ingredients = new List<Ingredient>() };
+
+        // Beer & Cider
+        var guinness = new MenuItem { Name = "Guinness (Pint)", Type = "Beer", Description = "Classic Guinness draught stout.", Price = 6.20, Ingredients = new List<Ingredient> { gluten } };
+        var heineken = new MenuItem { Name = "Heineken (Pint)", Type = "Beer", Description = "Chilled Heineken lager.", Price = 5.90, Ingredients = new List<Ingredient> { gluten } };
+        var coronaBottle = new MenuItem { Name = "Corona (Bottle)", Type = "Beer", Description = "Corona Extra 330ml bottle served with lime.", Price = 5.50, Ingredients = new List<Ingredient> { gluten } };
+        var bulmersCider = new MenuItem { Name = "Bulmers Cider (Pint)", Type = "Cider", Description = "Bulmers Original Irish cider.", Price = 6.00, Ingredients = new List<Ingredient>() };
+
+        // Wine
+        var houseRedWine = new MenuItem { Name = "House Red Wine (Glass)", Type = "Wine", Description = "Smooth house red wine, 175ml.", Price = 6.50, Ingredients = new List<Ingredient> { sulfites } };
+        var houseWhiteWine = new MenuItem { Name = "House White Wine (Glass)", Type = "Wine", Description = "Crisp house white wine, 175ml.", Price = 6.50, Ingredients = new List<Ingredient> { sulfites } };
+        var prosecco = new MenuItem { Name = "Prosecco (Glass)", Type = "Wine", Description = "Chilled Italian prosecco, 125ml.", Price = 7.50, Ingredients = new List<Ingredient> { sulfites } };
+
+        // Spirits
+        var vodkaTonic = new MenuItem { Name = "Vodka & Tonic", Type = "Spirit", Description = "Single vodka served with tonic water and ice.", Price = 7.00, Ingredients = new List<Ingredient>() };
+        var ginTonic = new MenuItem { Name = "Gin & Tonic", Type = "Spirit", Description = "Single gin served with premium tonic, ice and lemon.", Price = 7.50, Ingredients = new List<Ingredient>() };
+        var whiskeySoda = new MenuItem { Name = "Whiskey & Soda", Type = "Spirit", Description = "Irish whiskey served with soda water.", Price = 7.50, Ingredients = new List<Ingredient> { gluten } };
+
+        // Cocktails — using egg whites flags allergen
+        var mojito = new MenuItem { Name = "Mojito", Type = "Cocktail", Description = "White rum, fresh mint, lime juice, sugar and soda.", Price = 10.00, Ingredients = new List<Ingredient> { mint, lime, sugar } };
+        var cosmo = new MenuItem { Name = "Cosmopolitan", Type = "Cocktail", Description = "Vodka, triple sec, cranberry juice and lime.", Price = 10.00, Ingredients = new List<Ingredient> { cranberry, lime } };
+        var whiskeySour = new MenuItem { Name = "Whiskey Sour", Type = "Cocktail", Description = "Bourbon, lemon juice, sugar syrup and egg white foam.", Price = 11.00, Ingredients = new List<Ingredient> { lemon, sugar, eggs } };
+        var aperolSpritz = new MenuItem { Name = "Aperol Spritz", Type = "Cocktail", Description = "Aperol, prosecco and a splash of soda.", Price = 10.50, Ingredients = new List<Ingredient> { sulfites } };
+        var strawberryDaiquiri = new MenuItem { Name = "Strawberry Daiquiri", Type = "Cocktail", Description = "White rum, strawberry puree, lime juice and sugar.", Price = 10.00, Ingredients = new List<Ingredient> { strawberry, lime, sugar } };
+        var pinaColada = new MenuItem { Name = "Pina Colada", Type = "Cocktail", Description = "White rum, coconut cream and pineapple juice.", Price = 10.50, Ingredients = new List<Ingredient> { treeNuts } };
+
+        var drinksMenuItems = new List<MenuItem>
+        {
+            cola, dietCola, lemonade, orangeJuice, appleJuice, sparklingWater, stillWater,
+            tonicWater, slimlineTonic, gingerBeer, sodaWater,
+            espresso, americano, flatWhite, cappuccino, latte, hotChocolate, irishBreakfastTea, herbalTea,
+            guinness, heineken, coronaBottle, bulmersCider,
+            houseRedWine, houseWhiteWine, prosecco,
+            vodkaTonic, ginTonic, whiskeySoda,
+            mojito, cosmo, whiskeySour, aperolSpritz, strawberryDaiquiri, pinaColada
+        };
+
+        svc.AddMenu("Drinks Menu", "Drinks", "Full drinks menu including soft drinks, hot drinks, beer, wine, spirits and cocktails.", true, drinksMenuItems);
     }
 
     private static void SeedTables(IRestaurantService svc)
@@ -521,6 +593,91 @@ public static class ServiceSeeder
         // T27-28: 2 seats
         svc.AddTable(27, 2);
         svc.AddTable(28, 2);
+    }
+
+    private static void SeedBookings(IRestaurantService svc)
+    {
+        // Pull the Dinner Menu so we have real menu items to attach to orders
+        var dinnerMenu = svc.SearchMenus().FirstOrDefault(m => m.Name == "Dinner Menu");
+        if (dinnerMenu == null) return;
+
+        var items = dinnerMenu.MenuItems;
+
+        var prawnCocktail = items.FirstOrDefault(i => i.Name == "Prawn Cocktail");
+        var bruschetta    = items.FirstOrDefault(i => i.Name == "Bruschetta");
+        var steak         = items.FirstOrDefault(i => i.Name == "Sirloin Steak");
+        var salmon        = items.FirstOrDefault(i => i.Name == "Baked Salmon");
+        var cheesecake    = items.FirstOrDefault(i => i.Name == "Vanilla Cheesecake");
+        var appleCrumble  = items.FirstOrDefault(i => i.Name == "Apple Crumble");
+
+        // --- Active order on Table 1 (DB Id = 1) ---
+        var order1Items = new List<MenuItem>();
+        if (prawnCocktail != null) order1Items.Add(prawnCocktail);
+        if (steak != null)         order1Items.Add(steak);
+        if (cheesecake != null)    order1Items.Add(cheesecake);
+        var order1 = svc.AddOrder(order1Items, 1);
+
+        // --- Active order on Table 2 (DB Id = 2) ---
+        var order2Items = new List<MenuItem>();
+        if (bruschetta != null)   order2Items.Add(bruschetta);
+        if (salmon != null)       order2Items.Add(salmon);
+        if (appleCrumble != null) order2Items.Add(appleCrumble);
+        var order2 = svc.AddOrder(order2Items, 2);
+
+        // --- Active order on Table 3 (DB Id = 3) ---
+        var order3Items = new List<MenuItem>();
+        if (prawnCocktail != null) order3Items.Add(prawnCocktail);
+        if (salmon != null)        order3Items.Add(salmon);
+        if (cheesecake != null)    order3Items.Add(cheesecake);
+        var order3 = svc.AddOrder(order3Items, 3);
+
+        // --- Booking 1: Alice Murphy — seated at Table 1, linked to order1 ---
+        var booking1 = svc.AddBooking(
+            "Alice Murphy", "0871234567", "alice@example.com",
+            DateTime.Today.AddHours(19), 4,
+            false, false, order1?.Id ?? 0, "", 1, true
+        );
+        if (booking1 != null)
+        {
+            booking1.Status = "Active";
+            svc.UpdateBooking(booking1);
+        }
+
+        // --- Booking 2: James Brady — seated at Table 2, linked to order2 ---
+        var booking2 = svc.AddBooking(
+            "James Brady", "0852345678", "james@example.com",
+            DateTime.Today.AddHours(19).AddMinutes(30), 2,
+            false, false, order2?.Id ?? 0, "", 2, true
+        );
+        if (booking2 != null)
+        {
+            booking2.Status = "Active";
+            svc.UpdateBooking(booking2);
+        }
+
+        // --- Booking 3: Sarah O'Neill — seated at Table 3, linked to order3, has allergen ---
+        var booking3 = svc.AddBooking(
+            "Sarah O'Neill", "0863456789", "sarah@example.com",
+            DateTime.Today.AddHours(20), 3,
+            true, true, order3?.Id ?? 0, "Window seat preferred", 3, true
+        );
+        if (booking3 != null)
+        {
+            booking3.Status = "Active";
+            svc.UpdateBooking(booking3);
+        }
+
+        // --- Two future bookings — Status stays as "Booked" (default) ---
+        svc.AddBooking(
+            "Liam Walsh", "0874567890", "liam@example.com",
+            DateTime.Today.AddDays(1).AddHours(18), 2,
+            false, false, 0, "", 0, true
+        );
+        svc.AddBooking(
+            "Emma Byrne", "0865678901", "emma@example.com",
+            DateTime.Today.AddHours(21), 4,
+            false, false, 0, "Celebrating a birthday", 0, true
+        );
     }
 
 }

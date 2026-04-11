@@ -28,5 +28,8 @@ appsettings.Development.json
 # Local workspace agents (ignored so agents can be used locally without committing)
 .github
 
+# Personal study notes
+VIVA-PREP.md
+
 # Ignore local README if present
 *.md

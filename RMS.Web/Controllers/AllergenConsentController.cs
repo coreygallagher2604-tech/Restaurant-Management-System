@@ -41,7 +41,7 @@ public class AllergenConsentController : BaseController
 
     // GET /AllergenConsent/Create
     [HttpGet]
-    [Authorize(Roles = "admin,authenticated")]
+    [Authorize(Roles = "admin,owner,manager,staff")]
     public IActionResult Create()
     {
         var vm = new AllergenConsentViewModel();
@@ -53,7 +53,7 @@ public class AllergenConsentController : BaseController
     // POST /AllergenConsent/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [Authorize(Roles = "admin,authenticated")]
+    [Authorize(Roles = "admin,owner,manager,staff")]
     public IActionResult Create(AllergenConsentViewModel vm)
     {
         if (!ModelState.IsValid)
@@ -90,7 +90,7 @@ public class AllergenConsentController : BaseController
 
     // GET /AllergenConsent/Delete/{id}
     [HttpGet]
-    [Authorize(Roles = "admin,authenticated")]
+    [Authorize(Roles = "admin,owner,manager,staff")]
     public IActionResult Delete(int id)
     {
         var consents = svc.GetAllergenConsents();
@@ -108,7 +108,7 @@ public class AllergenConsentController : BaseController
     // POST /AllergenConsent/DeleteConfirm/{id}
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [Authorize(Roles = "admin,authenticated")]
+    [Authorize(Roles = "admin,owner,manager,staff")]
     public IActionResult DeleteConfirm(int id)
     {
         svc.DeleteAllergenConsent(id);

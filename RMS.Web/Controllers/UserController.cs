@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
 
+using RMS.Data.Entities;
 using RMS.Data.Services;
 using RMS.Web.Models;
 
@@ -51,7 +52,7 @@ public class UserController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult Register([Bind("Name,Email,Password,PasswordConfirm,Role")]UserRegisterViewModel m)
+    public IActionResult Register([Bind("Name,Email,Password,PasswordConfirm")]UserRegisterViewModel m)
     {
         // check if email address is already in use
         if (_svc.GetUserByEmail(m.Email) != null) {
@@ -64,8 +65,8 @@ public class UserController : Controller
             return View(m);
         }
 
-        // register user
-        var user = _svc.Register(m.Name, m.Email, m.Password, m.Role);               
+        // register user — role is always guest for self-registration
+        var user = _svc.Register(m.Name, m.Email, m.Password, Role.guest);               
         
         // registration successful now redirect to login page
         return RedirectToAction(nameof(Login));

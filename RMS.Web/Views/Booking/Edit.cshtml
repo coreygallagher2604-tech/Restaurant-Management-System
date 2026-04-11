@@ -34,9 +34,27 @@
         </div>
 
         <div class="mb-3">
-            <label asp-for="BookingDateTime" class="form-label"></label>
-            <input asp-for="BookingDateTime" class="form-control" type="datetime-local" />
-            <span asp-validation-for="BookingDateTime" class="text-danger"></span>
+            <label class="form-label">Booking Date</label>
+            <input type="date" name="bookingDatePart" class="form-control"
+                   value="@Model.BookingDateTime.ToString("yyyy-MM-dd")" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Booking Time</label>
+            <select name="bookingTimePart" class="form-select">
+                @for (var t = TimeSpan.FromHours(12); t <= TimeSpan.FromHours(21); t = t.Add(TimeSpan.FromMinutes(15)))
+                {
+                    string timeValue = $"{t.Hours:D2}:{t.Minutes:D2}";
+                    if (timeValue == Model.BookingDateTime.ToString("HH:mm"))
+                    {
+                        <option value="@timeValue" selected>@timeValue</option>
+                    }
+                    else
+                    {
+                        <option value="@timeValue">@timeValue</option>
+                    }
+                }
+            </select>
         </div>
 
         <div class="mb-3">
@@ -56,9 +74,13 @@
             <label asp-for="HasAllergen" class="form-check-label"></label>
         </div>
 
-        <div class="mb-3 form-check">
-            <input asp-for="IsActive" class="form-check-input" />
-            <label asp-for="IsActive" class="form-check-label"></label>
+        <div class="mb-3">
+            <label asp-for="Status" class="form-label">Status</label>
+            <select asp-for="Status" class="form-select">
+                <option value="Booked">Booked</option>
+                <option value="Active">Active</option>
+                <option value="Cancelled">Cancelled</option>
+            </select>
         </div>
 
         <div class="mb-3">

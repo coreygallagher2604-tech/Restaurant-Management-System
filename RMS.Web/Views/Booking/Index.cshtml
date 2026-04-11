@@ -19,7 +19,10 @@
                 <th>Customer</th>
                 <th>Date &amp; Time</th>
                 <th>Guests</th>
-                <th>Table</th>
+                @if (User.IsInRole("admin") || User.IsInRole("owner") || User.IsInRole("manager") || User.IsInRole("staff"))
+                {
+                    <th>Table</th>
+                }
                 <th>Status</th>
                 <th></th>
             </tr>
@@ -31,21 +34,31 @@
                     <td>@b.CustomerName</td>
                     <td>@b.BookingDateTime.ToString("dd MMM yyyy HH:mm")</td>
                     <td>@b.NumberOfGuests</td>
-                    <td>@(b.TableNumber > 0 ? $"T{b.TableNumber}" : "—")</td>
+                    @if (User.IsInRole("admin") || User.IsInRole("owner") || User.IsInRole("manager") || User.IsInRole("staff"))
+                    {
+                        <td>@(b.TableNumber > 0 ? $"T{b.TableNumber}" : "—")</td>
+                    }
                     <td>
-                        @if (b.IsActive)
+                        @if (b.Status == "Active")
                         {
                             <span class="badge bg-success">Active</span>
                         }
-                        else
+                        else if (b.Status == "Cancelled")
                         {
                             <span class="badge bg-secondary">Cancelled</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-primary">Booked</span>
                         }
                     </td>
                     <td class="text-end">
                         <a asp-action="Details" asp-route-id="@b.Id" class="btn btn-sm btn-outline-secondary">View</a>
-                        <a asp-action="Edit" asp-route-id="@b.Id" class="btn btn-sm btn-outline-primary">Edit</a>
-                        <a asp-action="Delete" asp-route-id="@b.Id" class="btn btn-sm btn-outline-danger">Delete</a>
+                        @if (User.IsInRole("admin") || User.IsInRole("owner") || User.IsInRole("manager") || User.IsInRole("staff"))
+                        {
+                            <a asp-action="Edit" asp-route-id="@b.Id" class="btn btn-sm btn-outline-primary">Edit</a>
+                            <a asp-action="Delete" asp-route-id="@b.Id" class="btn btn-sm btn-outline-danger">Delete</a>
+                        }
                     </td>
                 </tr>
             }

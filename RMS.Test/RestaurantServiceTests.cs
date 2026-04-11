@@ -1086,6 +1086,190 @@ public class BookingServiceTests
         Assert.NotNull(updated);
         Assert.False(updated.IsActive);
     }
+
+    [Fact]
+    public void New_booking_has_status_booked()
+    {
+        // When a booking is created the Status should default to "Booked"
+        var booking = svc.AddBooking("Alice", "0871234567", "alice@test.com", DateTime.Today.AddHours(19), 2);
+
+        Assert.NotNull(booking);
+        Assert.Equal("Booked", booking.Status);
+    }
+
+    [Fact]
+    public void Can_update_booking_status_to_active()
+    {
+        // Staff seat the guests — status changes from Booked to Active
+        var booking = svc.AddBooking("Bob", "0851234567", "bob@test.com", DateTime.Today.AddHours(19), 2);
+        booking.Status = "Active";
+
+        var updated = svc.UpdateBooking(booking);
+
+        Assert.NotNull(updated);
+        Assert.Equal("Active", updated.Status);
+    }
+
+    [Fact]
+    public void Can_update_booking_status_to_cancelled()
+    {
+        // Customer cancels — status changes to Cancelled
+        var booking = svc.AddBooking("Carol", "0861234567", "carol@test.com", DateTime.Today.AddHours(19), 2);
+        booking.Status = "Cancelled";
+
+        var updated = svc.UpdateBooking(booking);
+
+        Assert.NotNull(updated);
+        Assert.Equal("Cancelled", updated.Status);
+    }
+}
+
+
+// ==================== OrderService Tests =============================
+
+[Collection("Sequential")]
+public class OrderTests
+{
+    private readonly IRestaurantService svc;
+
+    public OrderTests()
+    {
+        svc = new RestaurantServiceDb();
+        svc.Initialise();
+    }
+
+    [Fact]
+    public void Can_create_order_with_no_items()
+    {
+        // An order can be created with an empty item list
+        var order = svc.AddOrder(new List<MenuItem>());
+
+        Assert.NotNull(order);
+        Assert.True(order.Id > 0);
+        Assert.Equal(0, order.totalCost);
+        Assert.False(order.IsCompleted);
+        Assert.False(order.IsVoid);
+    }
+
+    [Fact]
+    public void Can_create_order_with_items_and_cost_is_calculated()
+    {
+        // Total cost should be the sum of the item prices
+        var ingredient = svc.AddIngredient("Bread");
+        var item1 = svc.AddMenuItem("Toast", "Starter", "Buttered toast", 3.00, new List<Ingredient> { ingredient });
+        var item2 = svc.AddMenuItem("Coffee", "Hot Drink", "Americano", 3.50, new List<Ingredient>());
+
+        var order = svc.AddOrder(new List<MenuItem> { item1, item2 });
+
+        Assert.NotNull(order);
+        Assert.Equal(6.50, order.totalCost);
+        Assert.Equal(2, order.MenuItems.Count);
+    }
+
+    [Fact]
+    public void Can_get_order_by_id()
+    {
+        var order = svc.AddOrder(new List<MenuItem>());
+
+        var found = svc.GetOrderById(order.Id);
+
+        Assert.NotNull(found);
+        Assert.Equal(order.Id, found.Id);
+    }
+
+    [Fact]
+    public void Get_order_by_invalid_id_returns_null()
+    {
+        var found = svc.GetOrderById(99999);
+
+        Assert.Null(found);
+    }
+
+    [Fact]
+    public void Can_get_all_orders()
+    {
+        svc.AddOrder(new List<MenuItem>());
+        svc.AddOrder(new List<MenuItem>());
+
+        var orders = svc.GetAllOrders();
+
+        Assert.Equal(2, orders.Count);
+    }
+
+    [Fact]
+    public void Can_mark_order_completed()
+    {
+        var order = svc.AddOrder(new List<MenuItem>());
+
+        var completed = svc.MarkOrderCompleted(order.Id);
+
+        Assert.NotNull(completed);
+        Assert.True(completed.IsCompleted);
+        Assert.False(completed.IsVoid);
+    }
+
+    [Fact]
+    public void Can_void_order()
+    {
+        var order = svc.AddOrder(new List<MenuItem>());
+
+        var voided = svc.VoidOrder(order.Id);
+
+        Assert.NotNull(voided);
+        Assert.True(voided.IsVoid);
+        Assert.False(voided.IsCompleted);
+    }
+
+    [Fact]
+    public void Can_delete_order()
+    {
+        var order = svc.AddOrder(new List<MenuItem>());
+
+        var deleted = svc.DeleteOrder(order.Id);
+        var found = svc.GetOrderById(order.Id);
+
+        Assert.True(deleted);
+        Assert.Null(found);
+    }
+
+    [Fact]
+    public void Creating_order_on_table_marks_table_occupied()
+    {
+        // When an order is placed on a table, that table should become occupied
+        var table = svc.AddTable(1, 4);
+
+        var order = svc.AddOrder(new List<MenuItem>(), table.Id);
+        var updatedTable = svc.GetTableById(table.Id);
+
+        Assert.NotNull(order);
+        Assert.True(updatedTable.IsOccupied);
+    }
+
+    [Fact]
+    public void Completing_order_frees_the_table()
+    {
+        // When an order is marked complete, the table should become available again
+        var table = svc.AddTable(1, 4);
+        var order = svc.AddOrder(new List<MenuItem>(), table.Id);
+
+        svc.MarkOrderCompleted(order.Id);
+        var updatedTable = svc.GetTableById(table.Id);
+
+        Assert.False(updatedTable.IsOccupied);
+    }
+
+    [Fact]
+    public void Voiding_order_frees_the_table()
+    {
+        // When an order is voided, the table should become available again
+        var table = svc.AddTable(1, 4);
+        var order = svc.AddOrder(new List<MenuItem>(), table.Id);
+
+        svc.VoidOrder(order.Id);
+        var updatedTable = svc.GetTableById(table.Id);
+
+        Assert.False(updatedTable.IsOccupied);
+    }
 }
 
 }

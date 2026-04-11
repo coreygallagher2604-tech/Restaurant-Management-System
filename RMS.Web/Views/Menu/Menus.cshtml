@@ -8,13 +8,19 @@
 <div class="card rounded shadow p-4">
     <div class="border-bottom d-flex align-items-center justify-content-between mb-3">
         <h3 class="text-primary">Menus</h3>
-        <a asp-action="Create" class="btn btn-sm btn-primary">
-            <i class="bi bi-plus"></i> Add Menu
-        </a>
+        @if (User.IsInRole("admin") || User.IsInRole("owner") || User.IsInRole("manager") || User.IsInRole("staff"))
+        {
+            <a asp-action="Create" class="btn btn-sm btn-primary">
+                <i class="bi bi-plus"></i> Add Menu
+            </a>
+        }
     </div>
 
-    <!-- Search Form -->
-    <partial name="_Search" model="@Model" />
+    @if (User.IsInRole("admin") || User.IsInRole("owner") || User.IsInRole("manager") || User.IsInRole("staff"))
+    {
+        <!-- Search Form -->
+        <partial name="_Search" model="@Model" />
+    }
 
     <!-- Results -->
     <table class="table table-hover mt-3">
@@ -22,8 +28,11 @@
             <tr>
                 <th>Name</th>
                 <th>Type</th>
-                <th>Status</th>
-                <th>Items</th>
+                @if (User.IsInRole("admin") || User.IsInRole("owner") || User.IsInRole("manager") || User.IsInRole("staff"))
+                {
+                    <th>Status</th>
+                    <th>Items</th>
+                }
                 <th></th>
             </tr>
         </thead>
@@ -33,16 +42,22 @@
                 <tr>
                     <td>@m.Name</td>
                     <td>@m.Type</td>
-                    <td>
-                        <span class="badge @(m.IsActive ? "bg-success" : "bg-secondary")">
-                            @(m.IsActive ? "Active" : "Inactive")
-                        </span>
-                    </td>
-                    <td>@m.MenuItems?.Count</td>
+                    @if (User.IsInRole("admin") || User.IsInRole("owner") || User.IsInRole("manager") || User.IsInRole("staff"))
+                    {
+                        <td>
+                            <span class="badge @(m.IsActive ? "bg-success" : "bg-secondary")">
+                                @(m.IsActive ? "Active" : "Inactive")
+                            </span>
+                        </td>
+                        <td>@m.MenuItems?.Count</td>
+                    }
                     <td class="text-end">
                         <a asp-action="Details" asp-route-id="@m.Id" class="btn btn-sm btn-outline-primary">View</a>
-                        <a asp-action="Edit" asp-route-id="@m.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
-                        <a asp-action="Delete" asp-route-id="@m.Id" class="btn btn-sm btn-outline-danger">Delete</a>
+                        @if (User.IsInRole("admin") || User.IsInRole("owner") || User.IsInRole("manager") || User.IsInRole("staff"))
+                        {
+                            <a asp-action="Edit" asp-route-id="@m.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
+                            <a asp-action="Delete" asp-route-id="@m.Id" class="btn btn-sm btn-outline-danger">Delete</a>
+                        }
                     </td>
                 </tr>
             }
