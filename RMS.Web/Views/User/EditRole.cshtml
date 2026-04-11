@@ -1,0 +1,40 @@
+@model RMS.Web.Models.UserViewModel
+@using RMS.Data.Entities
+
+<partial name="_BreadCrumbs" model=@(new [] {
+    ("/","Home"),
+    ("/User/Index","Users"),
+    ("","Change Role")
+}) />
+
+<div class="card rounded shadow p-4">
+    <div class="border-bottom d-flex align-items-center justify-content-between mb-3">
+        <h3 class="text-primary">Change Role</h3>
+    </div>
+
+    <dl class="row mb-3">
+        <dt class="col-4">Name</dt>
+        <dd class="col-8">@Model.Name</dd>
+        <dt class="col-4">Email</dt>
+        <dd class="col-8">@Model.Email</dd>
+    </dl>
+
+    <form asp-action="EditRole" asp-route-id="@Model.Id" method="post">
+        <input asp-for="Id" type="hidden" />
+
+        <div class="mb-3">
+            <label asp-for="Role" class="form-label">Role</label>
+            <select asp-for="Role" class="form-select">
+                @foreach (Role r in Enum.GetValues(typeof(Role)))
+                {
+                    <option value="@r">@r</option>
+                }
+            </select>
+        </div>
+
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary">Save</button>
+            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>

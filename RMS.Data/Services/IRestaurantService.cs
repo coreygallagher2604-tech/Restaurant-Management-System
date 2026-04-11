@@ -97,6 +97,8 @@ public interface IRestaurantService
 
     Order VoidOrder(int id, bool isVoid = true);
 
+    Order UpdateCourseStatus(int id, string courseStatus);
+
 
     // ---------------- Table Management ---------------
 
@@ -149,7 +151,17 @@ public interface IRestaurantService
     MenuItem UpdateMenuItem(MenuItem mi);
 
 
-   
+    // ---------------- Review Management ---------------
+
+    Review AddReview(int orderId, string customerName, int stars, string comment);
+
+    List<Review> GetAllReviews();
+
+    Review GetReviewById(int id);
+
+    Review GetReviewByOrderId(int orderId);
+
+    bool DeleteReview(int id);
 
 
 }

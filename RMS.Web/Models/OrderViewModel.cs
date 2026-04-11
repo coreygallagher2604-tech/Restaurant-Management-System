@@ -26,6 +26,8 @@ public class OrderViewModel
 
     public bool IsVoid { get; set; } = false;
 
+    public string CourseStatus { get; set; } = "NotStarted";
+
     public string StatusDisplay
     {
         get
@@ -56,6 +58,7 @@ public class OrderViewModel
         vm.TotalCost = o.totalCost;
         vm.IsCompleted = o.IsCompleted;
         vm.IsVoid = o.IsVoid;
+        vm.CourseStatus = o.CourseStatus;
         return vm;
     }
 }

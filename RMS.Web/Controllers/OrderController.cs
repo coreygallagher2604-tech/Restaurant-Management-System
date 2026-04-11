@@ -212,4 +212,31 @@ public class OrderController : BaseController
 
         return RedirectToAction(nameof(Index));
     }
+
+    // POST /Order/AdvanceCourse/{id}
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [Authorize(Roles = "admin,owner,manager,staff")]
+    public IActionResult AdvanceCourse(int id)
+    {
+        var order = svc.GetOrderById(id);
+
+        if (order is null || order.IsCompleted || order.IsVoid)
+        {
+            Alert("Order not found or already closed.", AlertType.warning);
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        string nextStatus = order.CourseStatus switch
+        {
+            "NotStarted"    => "StartersServed",
+            "StartersServed" => "MainsServed",
+            "MainsServed"   => "DessertsServed",
+            _               => order.CourseStatus
+        };
+
+        svc.UpdateCourseStatus(id, nextStatus);
+        Alert($"Course updated to: {nextStatus.Replace("Served", " Served")}.", AlertType.success);
+        return RedirectToAction(nameof(Details), new { id });
+    }
 }

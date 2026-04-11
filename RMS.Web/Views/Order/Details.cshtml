@@ -44,6 +44,42 @@
         </tbody>
     </table>
 
+    @if (!Model.IsCompleted && !Model.IsVoid)
+    {
+        <h5 class="mt-4">Course Tracking</h5>
+        <div class="d-flex gap-2 mb-3">
+            @{
+                var courses = new[] { "NotStarted", "StartersServed", "MainsServed", "DessertsServed" };
+                var labels = new[] { "Not Started", "Starters", "Mains", "Desserts" };
+                int currentIndex = Array.IndexOf(courses, Model.CourseStatus);
+            }
+            @for (int i = 0; i < courses.Length; i++)
+            {
+                string badgeClass;
+                if (i < currentIndex)
+                {
+                    badgeClass = "bg-success";
+                }
+                else if (i == currentIndex)
+                {
+                    badgeClass = "bg-primary";
+                }
+                else
+                {
+                    badgeClass = "bg-secondary";
+                }
+                <span class="badge @badgeClass fs-6">@labels[i]</span>
+            }
+        </div>
+
+        @if (Model.CourseStatus != "DessertsServed")
+        {
+            <form asp-action="AdvanceCourse" asp-route-id="@Model.Id" method="post">
+                <button type="submit" class="btn btn-sm btn-outline-primary">Advance to Next Course</button>
+            </form>
+        }
+    }
+
     <div class="mt-4 d-flex gap-2">
         @if (!Model.IsCompleted && !Model.IsVoid)
         {
@@ -53,6 +89,10 @@
             {
                 <a asp-action="Void" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Void Order</a>
             }
+        }
+        @if (Model.IsCompleted)
+        {
+            <a asp-controller="Review" asp-action="Create" asp-route-orderId="@Model.Id" class="btn btn-outline-warning">Leave a Review</a>
         }
         <a asp-action="Index" class="btn btn-secondary">Back to Orders</a>
     </div>

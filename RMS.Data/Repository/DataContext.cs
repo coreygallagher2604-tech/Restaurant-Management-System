@@ -18,6 +18,7 @@ public class DataContext : DbContext
     public DbSet<Table> Tables { get; set; }
     public DbSet<Booking> Bookings { get; set; }
     public DbSet<AllergenConsent> AllergenConsents { get; set; }
+    public DbSet<Review> Reviews { get; set; }
 
       
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

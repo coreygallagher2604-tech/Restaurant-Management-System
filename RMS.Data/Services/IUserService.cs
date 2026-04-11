@@ -11,6 +11,9 @@ public interface IUserService
     User Authenticate(string email, string password);
     User Register(string name, string email, string password, Role role);
     User GetUserByEmail(string email);
+    User GetUserById(int id);
+    List<User> GetAllUsers();
+    User UpdateUserRole(int id, Role role);
 
 }
     

@@ -29,7 +29,8 @@ namespace RMS.Data.Entities;
     public double FinalPrice {get; set;} = 0;
 
     public int AllergyCountRequired {get; set;} = 0;
-    
 
+    // Course tracking: NotStarted -> StartersServed -> MainsServed -> DessertsServed
+    public string CourseStatus {get; set;} = "NotStarted";
     
 }
