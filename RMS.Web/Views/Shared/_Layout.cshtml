@@ -57,6 +57,17 @@
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="AllergenConsent" asp-action="Index">Allergen Consents</a>
                             </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Review" asp-action="Index">Reviews</a>
+                            </li>
+                        }
+
+                        @if (User.IsInRole("admin") || User.IsInRole("owner"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="Index">Users</a>
+                            </li>
                         }
 
                     </ul>

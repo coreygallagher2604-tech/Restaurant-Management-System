@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
@@ -77,6 +78,44 @@ public class UserController : Controller
     {
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         return RedirectToAction(nameof(Login));
+    }
+
+    // GET /User/Index — admin and owner: list all users
+    [HttpGet]
+    [Authorize(Roles = "admin,owner")]
+    public IActionResult Index()
+    {
+        var users = _svc.GetAllUsers();
+        var vms = users.Select(UserViewModel.FromUser).ToList();
+        return View(vms);
+    }
+
+    // GET /User/EditRole/{id} — admin and owner: change a user's role
+    [HttpGet]
+    [Authorize(Roles = "admin,owner")]
+    public IActionResult EditRole(int id)
+    {
+        var user = _svc.GetUserById(id);
+        if (user is null)
+        {
+            return RedirectToAction(nameof(Index));
+        }
+        return View(UserViewModel.FromUser(user));
+    }
+
+    // POST /User/EditRole/{id}
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [Authorize(Roles = "admin,owner")]
+    public IActionResult EditRole(int id, UserViewModel vm)
+    {
+        var updated = _svc.UpdateUserRole(id, vm.Role);
+        if (updated is not null)
+        {
+            TempData["Alert.Message"] = $"Role updated for {updated.Name}.";
+            TempData["Alert.Type"] = "success";
+        }
+        return RedirectToAction(nameof(Index));
     }
 
     public IActionResult ErrorNotAuthorised()

@@ -599,6 +599,16 @@ public class RestaurantServiceDb : IRestaurantService
         return GetOrderById(order.Id);
     }
 
+    public Order UpdateCourseStatus(int id, string courseStatus)
+    {
+        var order = GetOrderById(id);
+        if (order == null) { return null; }
+        order.CourseStatus = courseStatus;
+        db.Orders.Update(order);
+        db.SaveChanges();
+        return GetOrderById(id);
+    }
+
 
  // -------- Table Related Operations ------------
 
@@ -821,8 +831,60 @@ public class RestaurantServiceDb : IRestaurantService
         return GetBookingById(booking.Id);
     }
 
-  
-    
 
-    
+    // -------- Review Related Operations ------------
+
+    public Review AddReview(int orderId, string customerName, int stars, string comment)
+    {
+        var order = db.Orders.FirstOrDefault(o => o.Id == orderId);
+        if (order == null || !order.IsCompleted)
+        {
+            return null; // Can only review a completed order
+        }
+
+        // One review per order
+        bool alreadyReviewed = db.Reviews.Any(r => r.OrderId == orderId);
+        if (alreadyReviewed)
+        {
+            return null;
+        }
+
+        var review = new Review
+        {
+            OrderId = orderId,
+            CustomerName = customerName,
+            Stars = stars,
+            Comment = comment
+        };
+
+        db.Reviews.Add(review);
+        db.SaveChanges();
+        return review;
+    }
+
+    public List<Review> GetAllReviews()
+    {
+        return db.Reviews.ToList();
+    }
+
+    public Review GetReviewById(int id)
+    {
+        return db.Reviews.FirstOrDefault(r => r.Id == id);
+    }
+
+    public Review GetReviewByOrderId(int orderId)
+    {
+        return db.Reviews.FirstOrDefault(r => r.OrderId == orderId);
+    }
+
+    public bool DeleteReview(int id)
+    {
+        var review = db.Reviews.FirstOrDefault(r => r.Id == id);
+        if (review == null) { return false; }
+        db.Reviews.Remove(review);
+        db.SaveChanges();
+        return true;
+    }
+
+
 }

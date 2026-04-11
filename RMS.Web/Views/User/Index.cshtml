@@ -1,0 +1,40 @@
+@model IList<RMS.Web.Models.UserViewModel>
+
+<partial name="_BreadCrumbs" model=@(new [] {
+    ("/","Home"),
+    ("","Users")
+}) />
+
+<div class="card rounded shadow p-4">
+    <div class="border-bottom d-flex align-items-center justify-content-between mb-3">
+        <h3 class="text-primary">User Management</h3>
+    </div>
+
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var u in Model)
+            {
+                <tr>
+                    <td>@u.Name</td>
+                    <td>@u.Email</td>
+                    <td>
+                        <span class="badge @(u.Role.ToString() == "admin" ? "bg-danger" : u.Role.ToString() == "owner" ? "bg-warning text-dark" : u.Role.ToString() == "manager" ? "bg-primary" : u.Role.ToString() == "staff" ? "bg-info text-dark" : "bg-secondary")">
+                            @u.Role
+                        </span>
+                    </td>
+                    <td class="text-end">
+                        <a asp-action="EditRole" asp-route-id="@u.Id" class="btn btn-sm btn-outline-primary">Change Role</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

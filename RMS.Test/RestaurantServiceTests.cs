@@ -1272,6 +1272,191 @@ public class OrderTests
     }
 }
 
+// ==================== Review Tests =============================
+[Collection("Sequential")]
+public class ReviewServiceTests
+{
+    private readonly IRestaurantService svc;
+
+    public ReviewServiceTests()
+    {
+        svc = new RestaurantServiceDb();
+        svc.Initialise();
+    }
+
+    [Fact]
+    public void AddReview_OnCompletedOrder_ShouldReturnReview()
+    {
+        var table = svc.AddTable(1, 4);
+        var order = svc.AddOrder(new List<MenuItem>(), table.Id);
+        svc.MarkOrderCompleted(order.Id);
+
+        var review = svc.AddReview(order.Id, "Alice", 5, "Excellent meal.");
+
+        Assert.NotNull(review);
+        Assert.Equal("Alice", review.CustomerName);
+        Assert.Equal(5, review.Stars);
+    }
+
+    [Fact]
+    public void AddReview_OnOpenOrder_ShouldReturnNull()
+    {
+        var table = svc.AddTable(1, 4);
+        var order = svc.AddOrder(new List<MenuItem>(), table.Id);
+
+        // Order is NOT completed
+        var review = svc.AddReview(order.Id, "Alice", 5, "");
+
+        Assert.Null(review);
+    }
+
+    [Fact]
+    public void AddReview_Twice_OnSameOrder_ShouldReturnNull()
+    {
+        var table = svc.AddTable(1, 4);
+        var order = svc.AddOrder(new List<MenuItem>(), table.Id);
+        svc.MarkOrderCompleted(order.Id);
+
+        svc.AddReview(order.Id, "Alice", 4, "Good.");
+        var second = svc.AddReview(order.Id, "Bob", 3, "OK.");
+
+        Assert.Null(second);
+    }
+
+    [Fact]
+    public void GetAllReviews_WhenOneExists_ShouldReturnOne()
+    {
+        var table = svc.AddTable(1, 4);
+        var order = svc.AddOrder(new List<MenuItem>(), table.Id);
+        svc.MarkOrderCompleted(order.Id);
+        svc.AddReview(order.Id, "Alice", 5, "Great.");
+
+        var reviews = svc.GetAllReviews();
+
+        Assert.NotEmpty(reviews);
+    }
+
+    [Fact]
+    public void GetReviewByOrderId_ShouldReturnCorrectReview()
+    {
+        var table = svc.AddTable(1, 4);
+        var order = svc.AddOrder(new List<MenuItem>(), table.Id);
+        svc.MarkOrderCompleted(order.Id);
+        svc.AddReview(order.Id, "Alice", 5, "Lovely.");
+
+        var review = svc.GetReviewByOrderId(order.Id);
+
+        Assert.NotNull(review);
+        Assert.Equal(order.Id, review.OrderId);
+    }
+
+    [Fact]
+    public void DeleteReview_ShouldReturnTrueAndRemoveIt()
+    {
+        var table = svc.AddTable(1, 4);
+        var order = svc.AddOrder(new List<MenuItem>(), table.Id);
+        svc.MarkOrderCompleted(order.Id);
+        var review = svc.AddReview(order.Id, "Alice", 5, "");
+
+        var deleted = svc.DeleteReview(review.Id);
+        var fetched = svc.GetReviewById(review.Id);
+
+        Assert.True(deleted);
+        Assert.Null(fetched);
+    }
+}
+
+// ==================== Course Tracking Tests =============================
+[Collection("Sequential")]
+public class CourseTrackingTests
+{
+    private readonly IRestaurantService svc;
+
+    public CourseTrackingTests()
+    {
+        svc = new RestaurantServiceDb();
+        svc.Initialise();
+    }
+
+    [Fact]
+    public void NewOrder_ShouldHaveCourseStatus_NotStarted()
+    {
+        var table = svc.AddTable(1, 4);
+        var order = svc.AddOrder(new List<MenuItem>(), table.Id);
+
+        Assert.Equal("NotStarted", order.CourseStatus);
+    }
+
+    [Fact]
+    public void UpdateCourseStatus_ToStartersServed_ShouldPersist()
+    {
+        var table = svc.AddTable(1, 4);
+        var order = svc.AddOrder(new List<MenuItem>(), table.Id);
+
+        var updated = svc.UpdateCourseStatus(order.Id, "StartersServed");
+
+        Assert.Equal("StartersServed", updated.CourseStatus);
+    }
+
+    [Fact]
+    public void UpdateCourseStatus_FullProgression_ShouldWork()
+    {
+        var table = svc.AddTable(1, 4);
+        var order = svc.AddOrder(new List<MenuItem>(), table.Id);
+
+        svc.UpdateCourseStatus(order.Id, "StartersServed");
+        svc.UpdateCourseStatus(order.Id, "MainsServed");
+        var final = svc.UpdateCourseStatus(order.Id, "DessertsServed");
+
+        Assert.Equal("DessertsServed", final.CourseStatus);
+    }
+}
+
+// ==================== User Management Tests =============================
+[Collection("Sequential")]
+public class UserManagementTests
+{
+    private readonly IUserService svc;
+
+    public UserManagementTests()
+    {
+        svc = new UserServiceDb();
+        svc.Initialise();
+    }
+
+    [Fact]
+    public void GetAllUsers_AfterRegister_ShouldReturnUser()
+    {
+        svc.Register("Test User", "test@rms.com", "password", Role.staff);
+
+        var users = svc.GetAllUsers();
+
+        Assert.NotEmpty(users);
+        Assert.Contains(users, u => u.Email == "test@rms.com");
+    }
+
+    [Fact]
+    public void UpdateUserRole_ShouldChangeRole()
+    {
+        var user = svc.Register("Test User", "test2@rms.com", "password", Role.staff);
+
+        var updated = svc.UpdateUserRole(user.Id, Role.manager);
+
+        Assert.Equal(Role.manager, updated.Role);
+    }
+
+    [Fact]
+    public void GetUserById_ShouldReturnCorrectUser()
+    {
+        var user = svc.Register("Test User", "test3@rms.com", "password", Role.guest);
+
+        var fetched = svc.GetUserById(user.Id);
+
+        Assert.NotNull(fetched);
+        Assert.Equal("test3@rms.com", fetched.Email);
+    }
+}
+
 }
 
 

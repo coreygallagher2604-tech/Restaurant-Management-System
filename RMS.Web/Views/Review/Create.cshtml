@@ -1,0 +1,52 @@
+@model RMS.Web.Models.ReviewViewModel
+
+<partial name="_BreadCrumbs" model=@(new [] {
+    ("/","Home"),
+    ("","Leave a Review")
+}) />
+
+<div class="card rounded shadow p-4">
+    <div class="border-bottom d-flex align-items-center justify-content-between mb-3">
+        <h3 class="text-primary">Leave a Review</h3>
+        <span class="text-muted">Order #@Model.OrderId</span>
+    </div>
+
+    <form asp-action="Create" method="post">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <input asp-for="OrderId" type="hidden" />
+
+        <div class="mb-3">
+            <label asp-for="CustomerName" class="form-label"></label>
+            <input asp-for="CustomerName" class="form-control" />
+            <span asp-validation-for="CustomerName" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Stars" class="form-label"></label>
+            <select asp-for="Stars" class="form-select">
+                <option value="">-- Select a rating --</option>
+                <option value="1">1 star</option>
+                <option value="2">2 stars</option>
+                <option value="3">3 stars</option>
+                <option value="4">4 stars</option>
+                <option value="5">5 stars</option>
+            </select>
+            <span asp-validation-for="Stars" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Comment" class="form-label"></label>
+            <textarea asp-for="Comment" class="form-control" rows="4"></textarea>
+            <span asp-validation-for="Comment" class="text-danger"></span>
+        </div>
+
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary">Submit Review</button>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

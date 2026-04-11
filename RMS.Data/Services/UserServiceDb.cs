@@ -57,5 +57,24 @@ public class UserServiceDb : IUserService
         return db.Users.FirstOrDefault(u => u.Email == email);
     }
 
+    public User GetUserById(int id)
+    {
+        return db.Users.FirstOrDefault(u => u.Id == id);
+    }
+
+    public List<User> GetAllUsers()
+    {
+        return db.Users.ToList();
+    }
+
+    public User UpdateUserRole(int id, Role role)
+    {
+        var user = GetUserById(id);
+        if (user is null) { return null; }
+        user.Role = role;
+        db.SaveChanges();
+        return user;
+    }
+
 }
 
