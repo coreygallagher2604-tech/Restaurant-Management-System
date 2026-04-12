@@ -64,8 +64,13 @@
         </div>
 
         <div class="mb-3">
-            <label asp-for="TableNumber" class="form-label"></label>
-            <input asp-for="TableNumber" class="form-control" type="number" min="0" />
+            <label asp-for="TableNumber" class="form-label">Table</label>
+            <select asp-for="TableNumber" class="form-select">
+                @foreach (var t in (IEnumerable<RMS.Data.Entities.Table>)ViewBag.Tables)
+                {
+                    <option value="@t.TableNumber">T@(t.TableNumber) — seats @t.SeatingCapacity</option>
+                }
+            </select>
             <span asp-validation-for="TableNumber" class="text-danger"></span>
         </div>
 

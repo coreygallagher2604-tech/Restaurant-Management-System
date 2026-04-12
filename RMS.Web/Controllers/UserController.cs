@@ -126,6 +126,106 @@ public class UserController : Controller
     public IActionResult ErrorNotAuthenticated()
     {
         return RedirectToAction("Login", "User"); 
+    }
+
+    // GET /User/Edit/{id} — admin and owner: edit user name and email
+    [HttpGet]
+    [Authorize(Roles = "admin,owner")]
+    public IActionResult Edit(int id)
+    {
+        var user = _svc.GetUserById(id);
+        if (user is null)
+        {
+            return RedirectToAction(nameof(Index));
+        }
+        return View(UserViewModel.FromUser(user));
+    }
+
+    // POST /User/Edit/{id}
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [Authorize(Roles = "admin,owner")]
+    public IActionResult Edit(int id, UserViewModel vm)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(vm);
+        }
+        var updated = _svc.UpdateUser(id, vm.Name, vm.Email);
+        if (updated is not null)
+        {
+            TempData["Alert.Message"] = $"User '{updated.Name}' updated.";
+            TempData["Alert.Type"] = "success";
+        }
+        else
+        {
+            TempData["Alert.Message"] = "Could not update user — email may already be in use.";
+            TempData["Alert.Type"] = "warning";
+        }
+        return RedirectToAction(nameof(Index));
+    }
+
+    // GET /User/Create — admin and owner: add a new user account
+    [HttpGet]
+    [Authorize(Roles = "admin,owner")]
+    public IActionResult Create()
+    {
+        return View(new UserViewModel());
+    }
+
+    // POST /User/Create
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [Authorize(Roles = "admin,owner")]
+    public IActionResult Create(UserViewModel vm, string password)
+    {
+        if (string.IsNullOrWhiteSpace(password) || password.Length < 6)
+        {
+            ModelState.AddModelError("", "Password must be at least 6 characters.");
+        }
+        if (_svc.GetUserByEmail(vm.Email) != null)
+        {
+            ModelState.AddModelError("Email", "That email address is already in use.");
+        }
+        if (!ModelState.IsValid)
+        {
+            return View(vm);
+        }
+        var created = _svc.Register(vm.Name, vm.Email, password, vm.Role);
+        if (created is not null)
+        {
+            TempData["Alert.Message"] = $"User '{created.Name}' created.";
+            TempData["Alert.Type"] = "success";
+            return RedirectToAction(nameof(Index));
+        }
+        TempData["Alert.Message"] = "User could not be created.";
+        TempData["Alert.Type"] = "warning";
+        return View(vm);
+    }
+
+    // GET /User/Delete/{id}
+    [HttpGet]
+    [Authorize(Roles = "admin,owner")]
+    public IActionResult Delete(int id)
+    {
+        var user = _svc.GetUserById(id);
+        if (user is null)
+        {
+            return RedirectToAction(nameof(Index));
+        }
+        return View(UserViewModel.FromUser(user));
+    }
+
+    // POST /User/DeleteConfirm/{id}
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [Authorize(Roles = "admin,owner")]
+    public IActionResult DeleteConfirm(int id)
+    {
+        var deleted = _svc.DeleteUser(id);
+        TempData["Alert.Message"] = deleted ? "User deleted." : "User could not be deleted.";
+        TempData["Alert.Type"] = deleted ? "success" : "warning";
+        return RedirectToAction(nameof(Index));
     }        
 
 }

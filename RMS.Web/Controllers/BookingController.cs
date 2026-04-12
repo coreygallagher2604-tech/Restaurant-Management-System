@@ -271,6 +271,7 @@ public class BookingController : BaseController
             return RedirectToAction(nameof(Index));
         }
 
+        ViewBag.Tables = svc.GetAllTables().Where(t => t.Active).OrderBy(t => t.TableNumber).ToList();
         return View(BookingViewModel.FromBooking(booking));
     }
 
@@ -293,8 +294,28 @@ public class BookingController : BaseController
             }
         }
 
+        // Validate: table must be assigned
+        if (vm.TableNumber <= 0)
+        {
+            ModelState.AddModelError("TableNumber", "A table must be selected.");
+        }
+        else
+        {
+            // Validate: table must exist and have enough capacity
+            var table = svc.GetAllTables().FirstOrDefault(t => t.TableNumber == vm.TableNumber);
+            if (table == null)
+            {
+                ModelState.AddModelError("TableNumber", $"Table {vm.TableNumber} does not exist.");
+            }
+            else if (table.SeatingCapacity < vm.NumberOfGuests)
+            {
+                ModelState.AddModelError("TableNumber", $"Table {vm.TableNumber} has a capacity of {table.SeatingCapacity} but the booking is for {vm.NumberOfGuests} guest(s).");
+            }
+        }
+
         if (!ModelState.IsValid)
         {
+            ViewBag.Tables = svc.GetAllTables().Where(t => t.Active).OrderBy(t => t.TableNumber).ToList();
             return View(vm);
         }
 
@@ -309,6 +330,7 @@ public class BookingController : BaseController
         }
 
         Alert("Booking could not be updated.", AlertType.warning);
+        ViewBag.Tables = svc.GetAllTables().Where(t => t.Active).OrderBy(t => t.TableNumber).ToList();
         return View(vm);
     }
 

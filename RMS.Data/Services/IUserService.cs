@@ -14,6 +14,8 @@ public interface IUserService
     User GetUserById(int id);
     List<User> GetAllUsers();
     User UpdateUserRole(int id, Role role);
+    User UpdateUser(int id, string name, string email);
+    bool DeleteUser(int id);
 
 }
     

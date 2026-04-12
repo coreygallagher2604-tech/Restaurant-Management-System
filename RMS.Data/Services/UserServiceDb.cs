@@ -76,5 +76,27 @@ public class UserServiceDb : IUserService
         return user;
     }
 
+    public User UpdateUser(int id, string name, string email)
+    {
+        var user = GetUserById(id);
+        if (user is null) { return null; }
+        // email uniqueness check — reject if another user already uses this email
+        var existing = GetUserByEmail(email);
+        if (existing != null && existing.Id != id) { return null; }
+        user.Name = name;
+        user.Email = email;
+        db.SaveChanges();
+        return user;
+    }
+
+    public bool DeleteUser(int id)
+    {
+        var user = GetUserById(id);
+        if (user is null) { return false; }
+        db.Users.Remove(user);
+        db.SaveChanges();
+        return true;
+    }
+
 }
 

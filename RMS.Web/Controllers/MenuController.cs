@@ -32,22 +32,19 @@ public class MenuController : BaseController
         // Guests and anonymous users only see active menus
         bool isStaff = User.IsInRole("admin") || User.IsInRole("owner") || User.IsInRole("manager") || User.IsInRole("staff");
 
-        if (isStaff)
+        var allMenus = svc.SearchMenus().ToList();
+
+        if (!isStaff)
         {
-            search.Menus = svc.SearchMenus();
+            allMenus = allMenus.Where(m => m.IsActive).ToList();
         }
-        else
+
+        if (!string.IsNullOrWhiteSpace(search.Query))
         {
-            List<Menu> allMenus = svc.SearchMenus().ToList();
-            search.Menus = new List<Menu>();
-            foreach (Menu m in allMenus)
-            {
-                if (m.IsActive)
-                {
-                    search.Menus.Add(m);
-                }
-            }
+            allMenus = allMenus.Where(m => m.Name.Contains(search.Query, StringComparison.OrdinalIgnoreCase)).ToList();
         }
+
+        search.Menus = allMenus;
 
         if (Request.Headers.ContainsKey("HX-Request"))
         {
@@ -199,9 +196,20 @@ public class MenuController : BaseController
     public IActionResult MenuItems(MenuItemSearchViewModel search)
     {
         var items = svc.GetAllMenuItems();
-        search.MenuItems = string.IsNullOrWhiteSpace(search.Query)
+        var filtered = string.IsNullOrWhiteSpace(search.Query)
             ? items
             : items.Where(i => i.Name.Contains(search.Query, StringComparison.OrdinalIgnoreCase)).ToList();
+
+        // Order by type: Starter → Main → Dessert → Side → Drink → Cocktail → everything else
+        var typeOrder = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
+        {
+            { "Starter", 1 }, { "Main", 2 }, { "Dessert", 3 }, { "Side", 4 }, { "Drink", 5 }, { "Cocktail", 6 }
+        };
+        search.MenuItems = filtered
+            .OrderBy(i => typeOrder.TryGetValue(i.Type ?? "", out var order) ? order : 99)
+            .ThenBy(i => i.Name)
+            .ToList();
+
         return View(search);
     }
 

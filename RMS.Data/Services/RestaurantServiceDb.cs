@@ -90,9 +90,12 @@ public class RestaurantServiceDb : IRestaurantService
     // Delete Allergen Consent
     public void DeleteAllergenConsent(int consentId)
     {
-        var consent = db.AllergenConsents.FirstOrDefault(ac => ac.Id == consentId);
+        var consent = db.AllergenConsents
+            .Include(ac => ac.MenuItems)
+            .FirstOrDefault(ac => ac.Id == consentId);
         if (consent != null)
         {
+            consent.MenuItems.Clear(); // remove join entries before deleting parent
             db.AllergenConsents.Remove(consent);
             db.SaveChanges();
         }

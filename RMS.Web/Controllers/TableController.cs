@@ -80,6 +80,13 @@ public class TableController : BaseController
     [Authorize(Roles = "admin,owner,manager,staff")]
     public IActionResult Edit(int id, TableViewModel vm)
     {
+        // Check for duplicate table number — exclude the record being edited
+        bool duplicate = svc.GetAllTables().Any(t => t.TableNumber == vm.TableNumber && t.Id != id);
+        if (duplicate)
+        {
+            ModelState.AddModelError("TableNumber", $"Table {vm.TableNumber} already exists.");
+        }
+
         if (ModelState.IsValid)
         {
             var updated = svc.UpdateTable(vm.ToTable());
@@ -114,6 +121,21 @@ public class TableController : BaseController
     [Authorize(Roles = "admin,owner,manager,staff")]
     public IActionResult DeleteConfirm(int id)
     {
+        var table = svc.GetTableById(id);
+        if (table is not null)
+        {
+            // Block delete if any open (non-void, non-completed) orders are still on this table
+            var activeOrders = svc.GetOrdersByTableId(id)
+                .Where(o => !o.IsCompleted && !o.IsVoid)
+                .ToList();
+
+            if (activeOrders.Count > 0)
+            {
+                Alert($"Table {table.TableNumber} has {activeOrders.Count} open order(s). Complete or void them first.", AlertType.warning);
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
         var deleted = svc.DeleteTable(id);
         Alert(deleted ? "Table has been deleted." : "Table could not be deleted.",
               deleted ? AlertType.success : AlertType.danger);
