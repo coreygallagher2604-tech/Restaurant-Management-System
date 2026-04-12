@@ -240,7 +240,7 @@ xUnit. The test project is `RMS.Test/RestaurantServiceTests.cs`. Tests use an in
 
 **Q: How many tests do you have and what do they cover?**
 
-65 tests covering:
+90 tests covering:
 - AllergenConsent: add, get, update, delete, get by order
 - Ingredients: add, get, update, delete, get by name
 - Menu: add, get, update, delete, add/remove menu items, search
@@ -473,3 +473,62 @@ The production-correct approach would be a `BookingTable` join table with a prop
 ---
 
 *Last updated: Owner role testing session, 12 April 2026.*
+
+---
+
+## 12. Unit Tests — What You Can Be Asked To Explain
+
+**Q: Walk me through one of your AllergenConsent tests — what does it actually verify?**
+
+Take `Delete_Allergen_Consent`:
+1. Arrange — create an order, an ingredient, a menu item, then add an allergen consent record linked to that order. At this point the database has one consent.
+2. Act — call `DeleteAllergenConsent` with the consent's ID.
+3. Assert — call `GetAllergenConsents()` and assert the result is empty.
+
+It verifies that after a delete the record is gone from the database. We test through the service — not by querying the database directly — because the service is the contract we are testing. If `GetAllergenConsents` still returns a record after a delete, something in the service is wrong regardless of why.
+
+---
+
+**Q: Why do you test `OrderHasAllergenConsent` for both true and false?**
+
+Because both paths are real behaviour your code has to handle. If you only test the true case you do not know whether the false path (no consent exists) works correctly — maybe it throws an exception or returns true by accident. Testing both cases means you are confident the method is correct in all realistic situations, not just the happy path.
+
+---
+
+**Q: What does `GetConsentGivenCountByOrderId` actually count and how did you test it?**
+
+It counts the number of `AllergenConsent` records for a given order where `ConsentGiven == true`. The test adds two consents to the same order — one with `consentGiven: true` and one with `consentGiven: false`. Then it calls the method and asserts the count is 1. This confirms the method is filtering on `ConsentGiven`, not just counting all records for the order.
+
+---
+
+**Q: Your test for `AddMenuItemToMenu` — what is it checking and why?**
+
+It verifies that calling `AddMenuItemToMenu` on a menu that currently has one item results in that menu having two items, and that the new item is the one that was added. The why: adding an item to a menu updates a many-to-many link in the database (Menu → MenuItem). Without the test you cannot be certain that `db.SaveChanges()` persisted the link or that `GetMenuById` is loading the related items correctly.
+
+---
+
+**Q: You have tests for `UpdateUser` and `DeleteUser`. What would happen if you called `DeleteUser` with an ID that does not exist?**
+
+It would return `false` — the service method tries to find the user, and if `FirstOrDefault` returns null it skips the delete and returns false. We do not test that specific path in this project (it is a reasonable extension), but it is a good question about defensive programming. A negative-path test would call `svc.DeleteUser(99999)` and assert the result is `false`.
+
+---
+
+**Q: What is the test data CSV file in your project?**
+
+`test-data.csv` is a manual testing record. It documents 50 manual test cases run across every major feature in the application — each row has: a test ID, the feature being tested, the role used, the action taken, the inputs provided, what was expected, what actually happened, whether it passed or failed, and which bug fix number it relates to (if any).
+
+This is separate from the unit tests. Unit tests verify the service layer in isolation. The manual test log verifies the end-to-end application — real browser, real login, real form submission. Together they give evidence that both the code logic and the user-facing behaviour are correct.
+
+---
+
+**Q: What is the difference between your unit tests and your manual tests?**
+
+Unit tests (`RestaurantServiceTests.cs`) test the service layer directly in C#. They do not involve a browser, HTTP requests, controllers, or views. They are fast (90 tests run in about 3 seconds) and automated — anyone can run `dotnet test` and immediately know whether the core business logic works.
+
+Manual tests (`test-data.csv`) test the full application stack — browser, routing, controllers, views, and the service layer together. They catch things unit tests cannot, like a form with a missing field, a broken redirect, a view that crashes on null data, or a role restriction that is wrong on a specific button. Manual tests are slower and require a human to run them, but they are the only way to fully verify the user experience.
+
+A production project would also have integration tests or end-to-end tests (using tools like Playwright or Selenium) to automate the browser testing. This project used manual testing instead.
+
+---
+
+*Last updated: 13 April 2026 — 90 unit tests passing, 50 manual test cases documented.*

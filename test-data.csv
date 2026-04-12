@@ -1,0 +1,51 @@
+Test ID,Feature,Role,Action,Test Input / Steps,Expected Result,Actual Result,Pass/Fail,Bug Fixed (if any)
+TC-001,Login,Anonymous,Valid login,Email: admin@rms.com / Password: password,Redirect to home page logged in as Admin,Redirected to home page logged in as Admin,Pass,
+TC-002,Login,Anonymous,Wrong password,Email: admin@rms.com / Password: wrongpass,Stay on login page with error message,Stayed on login page with validation error,Pass,
+TC-003,Login,Anonymous,Unknown email,Email: nobody@rms.com / Password: password,Stay on login page with error message,Stayed on login page with validation error,Pass,
+TC-004,Menu - View,Anonymous,Browse menus,Navigate to /Menu/Index,Menu list displayed publicly without login,Menu list displayed correctly,Pass,
+TC-005,Menu - Create,Admin,Create food menu,Name: Lunch Menu / Type: Lunch / Description: test / Active: true,Menu created and redirected to Edit view to add items,Redirected to Edit view immediately,Pass,Batch 3 fix 12
+TC-006,Menu - Create,Admin,Create drinks menu,Name: Drinks Menu / Type: Drinks / Description: test / Active: true,Menu created and redirected to Edit view,Redirected to Edit view correctly,Pass,
+TC-007,Menu - Edit,Admin,Edit food menu - cannot add drink items,Open food menu edit; check available items,Only food item types shown in Available Items list,Only food items shown,Pass,Batch 4 fix 26
+TC-008,Menu - Edit,Admin,Edit drinks menu - cannot add food items,Open drinks menu edit; check available items,Only drink item types shown in Available Items list,Only drink items shown,Pass,Batch 3 fix 13
+TC-009,Menu - Delete,Admin,Delete menu,Click Delete on any menu,Menu removed from list,Menu removed correctly,Pass,
+TC-010,Menu - Search,Admin,Search menus,Navigate to /Menu/Index,All menus displayed,Menus displayed correctly,Pass,Batch 1 fix 3
+TC-011,MenuItem - Create,Admin,Add menu item with allergen ingredient,Name: Peanut Brownie / Type: Main / Ingredients: Peanuts (allergen),Item created with allergen ingredient linked,Item created with correct ingredient,Pass,
+TC-012,MenuItem - Create,Admin,Add drink menu item,Name: Guinness / Type: Beer / Price: 5.50,Drink item created successfully,Item created correctly,Pass,Batch 1 fix 4
+TC-013,MenuItem - Edit,Admin,Edit item and update ingredients,Open any item / change ingredients using checkbox list,Ingredients updated on item,Ingredients updated correctly,Pass,Batch 3 fix 17
+TC-014,MenuItem - Delete,Admin,Delete menu item,Click Delete on a menu item,Item removed from list,Item removed correctly,Pass,
+TC-015,Ingredient - Create,Admin,Add allergen ingredient,Name: Peanuts / Allergen: true / Info: Contains peanuts,Ingredient created with allergen flag,Ingredient created correctly,Pass,
+TC-016,Ingredient - Create,Admin,Add non-allergen ingredient,Name: Lettuce / Allergen: false,Ingredient created with no allergen flag,Ingredient created correctly,Pass,
+TC-017,Ingredient - Edit,Admin,Update ingredient name,Change name from Lettuce to Iceberg Lettuce,Name updated successfully,Name updated correctly,Pass,
+TC-018,Ingredient - Delete,Admin,Delete ingredient,Click Delete on an ingredient,Ingredient removed from list,Ingredient removed correctly,Pass,
+TC-019,Table - Create,Admin,Add new table,Table Number: 10 / Seats: 4,Table created successfully,Table created correctly,Pass,
+TC-020,Table - Create,Admin,Duplicate table number rejected,Table Number: 1 (already exists),Validation error shown,Validation error displayed,Pass,Batch 1 fix 7
+TC-021,Table - Edit,Admin,Edit table,Change seating capacity,Table updated successfully,Updated correctly,Pass,
+TC-022,Table - Delete,Admin,Delete empty table,Click Delete on table with no active orders,Table removed from list,Table removed correctly,Pass,
+TC-023,Table - Delete,Admin,Cannot delete table with active order,Click Delete on table that has an active order,Error message shown - cannot delete,Blocked with error message,Pass,Batch 1 fix 8
+TC-024,Table - Occupancy,Staff,Set table occupied,Click Set Occupied on empty table,Table shown as occupied with customer count,Table status updated correctly,Pass,
+TC-025,Booking - Create,Admin,Create valid booking,Name: John Smith / Guests: 2 / Table: 1 / Date: future,Booking created successfully,Booking created correctly,Pass,Batch 1 fix 1
+TC-026,Booking - Create,Admin,Guests exceed table capacity,Guests: 10 / Table capacity: 4,Validation error,Validation error shown,Pass,Batch 1 fix 5
+TC-027,Booking - Edit,Admin,Edit booking and change table,Move booking to different table,Booking updated and occupancy synced on both tables,Updated correctly with table sync,Pass,Batch 4 fix 30
+TC-028,Booking - Edit,Admin,Taken tables shown as disabled,Open edit form during busy time slot,Tables with clashing bookings shown as disabled,Disabled correctly in checkbox list,Pass,Batch 4 fix 29
+TC-029,Booking - Delete,Admin,Cannot delete booking with active order,Delete booking that has an active order linked,Error message - order must be voided first,Blocked with error message,Pass,Batch 4 fix 23
+TC-030,Booking - List,Admin,Allergy indicator visible,Booking list for a customer with HasAllergen=true,Orange Allergy badge visible next to name,Badge displayed correctly,Pass,Batch 4 fix 24
+TC-031,Order - Create,Staff,Create order for a table,Select table and menu items,Order created and table marked occupied,Order created and table occupied,Pass,
+TC-032,Order - View by Table,Staff,View active orders for a table,Click Orders button on occupied table,Active orders for that table listed,Orders listed correctly,Pass,Batch 4 fix 31
+TC-033,Order - Mark Complete,Staff,Mark order as completed,Click Complete on an active order,Order marked completed and table freed,Order completed and table freed,Pass,
+TC-034,Order - Void,Admin,Void an order,Click Void on an active order,Order marked void and table freed,Order voided and table freed,Pass,
+TC-035,AllergenConsent - Add,Staff,Add consent for order with allergens,Fill in consent form for a customer,Consent record created and linked to order,Consent created correctly,Pass,
+TC-036,AllergenConsent - View,Admin,View all consent records,Navigate to /AllergenConsent,All consent records listed,Records listed correctly,Pass,
+TC-037,AllergenConsent - Delete,Admin,Delete consent record,Click Delete on a consent record,Record removed,Record removed correctly,Pass,Batch 1 fix 2
+TC-038,Review - Add,Guest,Add review for completed order,Stars: 5 / Comment: Great food,Review saved and linked to order,Review created correctly,Pass,
+TC-039,Review - Add,Guest,Cannot review open order,Try to add review to an order not yet completed,Review rejected - order not complete,Review blocked correctly,Pass,
+TC-040,Review - List,Admin,View all reviews,Navigate to /Review,All reviews listed with star rating,Reviews listed correctly,Pass,
+TC-041,User - Create,Admin,Create new user,Name: Jane / Email: jane@rms.com / Role: staff,User created and listed,User created correctly,Pass,Batch 1 fix 6
+TC-042,User - Edit,Admin,Change user role,Change role from staff to manager,Role updated,Role updated correctly,Pass,
+TC-043,User - Delete,Admin,Delete user,Click Delete on a user,User removed from list,User removed correctly,Pass,Batch 1 fix 6
+TC-044,Auth - Role restriction,Guest,Access admin-only page,Navigate to /User while logged in as guest,Redirected to login or Access Denied,Redirected correctly,Pass,
+TC-045,Auth - Role restriction,Anonymous,Access staff-only page,Navigate to /Order while not logged in,Redirected to login page,Redirected to login,Pass,
+TC-046,Menu - Type dropdown,Admin,Type field is dropdown not free text,Open Menu Create form,Type shown as dropdown with Lunch/Dinner/Special/Seasonal/Drinks,Dropdown shown correctly,Pass,Batch 3 fix 11
+TC-047,MenuItem - Drink types,Admin,Drink subtypes available,Open MenuItem Create and check Type dropdown,Specific drink types shown: Beer/Wine/Cocktail/Spirit/Hot Drink/Soft Drink,All drink types listed,Pass,Batch 2
+TC-048,Booking - Additional tables,Admin,Join tables for large party,Edit booking and select additional tables,Additional table numbers saved and displayed,Additional tables saved correctly,Pass,Batch 4 fix 28
+TC-049,About page,Anonymous,View about page,Navigate to /Home/About,The Banks Strabane content shown,Correct content displayed,Pass,Batch 3 fix 18
+TC-050,Course Tracking,Staff,Update course status on order,Change course status to StartersServed then MainsServed,Status updated and persisted,Status updated correctly,Pass,

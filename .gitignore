@@ -30,6 +30,7 @@ appsettings.Development.json
 
 # Personal study notes
 VIVA-PREP.md
+SPRINT-NOTES.md
 
 # Ignore local README if present
 *.md

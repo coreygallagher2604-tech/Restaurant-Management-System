@@ -133,6 +133,125 @@ public class AllergenConsentServiceTests
 
     }
 
+
+    // ==================== Update Allergen Consent Tests =============================
+
+    [Fact]
+    public void Update_Allergen_Consent()
+    {
+        // arrange
+        var order = svc.AddOrder(new List<MenuItem>());
+        var ingredient = svc.AddIngredient("Peanuts", true, "Contains peanuts");
+        var menuItem = svc.AddMenuItem("PB Brownie", "Main", "A brownie.", 5.99, new List<Ingredient> { ingredient });
+        var consent = svc.AddAllergenConsent(order.Id, "John Doe", "john@test.com", "123456", true, new List<MenuItem> { menuItem });
+
+        // act
+        svc.UpdateAllergenConsent(consent.Id, "Jane Doe", "jane@test.com", "999999", false);
+        var updated = svc.GetAllergenConsents().FirstOrDefault(c => c.Id == consent.Id);
+
+        // assert
+        Assert.NotNull(updated);
+        Assert.Equal("Jane Doe", updated.CustomerName);
+        Assert.Equal("jane@test.com", updated.CustomerEmail);
+        Assert.Equal("999999", updated.CustomerPhone);
+        Assert.False(updated.ConsentGiven);
+    }
+
+
+    // ==================== Delete Allergen Consent Tests =============================
+
+    [Fact]
+    public void Delete_Allergen_Consent()
+    {
+        // arrange
+        var order = svc.AddOrder(new List<MenuItem>());
+        var ingredient = svc.AddIngredient("Milk", true, "Contains milk");
+        var menuItem = svc.AddMenuItem("Milkshake", "Main", "Creamy milkshake.", 3.99, new List<Ingredient> { ingredient });
+        svc.AddAllergenConsent(order.Id, "John Doe", "john@test.com", "123456", true, new List<MenuItem> { menuItem });
+
+        // act
+        var allBefore = svc.GetAllergenConsents();
+        svc.DeleteAllergenConsent(allBefore[0].Id);
+        var allAfter = svc.GetAllergenConsents();
+
+        // assert
+        Assert.Empty(allAfter);
+    }
+
+
+    // ==================== Get Allergen Consents By Order ID Tests =============================
+
+    [Fact]
+    public void Get_Allergen_Consents_By_Order_Id()
+    {
+        // arrange
+        var order = svc.AddOrder(new List<MenuItem>());
+        var ingredient = svc.AddIngredient("Eggs", true, "Contains eggs");
+        var menuItem = svc.AddMenuItem("Omelette", "Main", "A fluffy omelette.", 4.99, new List<Ingredient> { ingredient });
+        svc.AddAllergenConsent(order.Id, "John Doe", "john@test.com", "123456", true, new List<MenuItem> { menuItem });
+
+        // act
+        var consents = svc.GetAllergenConsentsByOrderId(order.Id);
+
+        // assert
+        Assert.NotNull(consents);
+        Assert.Single(consents);
+        Assert.Equal(order.Id, consents[0].OrderId);
+    }
+
+
+    // ==================== Get Consent Given Count By Order ID Tests =============================
+
+    [Fact]
+    public void Get_Consent_Given_Count_By_Order_Id()
+    {
+        // arrange
+        var order = svc.AddOrder(new List<MenuItem>());
+        var ingredient = svc.AddIngredient("Wheat", true, "Contains gluten");
+        var menuItem = svc.AddMenuItem("Bread Roll", "Main", "Freshly baked.", 2.50, new List<Ingredient> { ingredient });
+        svc.AddAllergenConsent(order.Id, "John Doe", "john@test.com", "111111", true, new List<MenuItem> { menuItem });
+        svc.AddAllergenConsent(order.Id, "Jane Doe", "jane@test.com", "222222", false, new List<MenuItem> { menuItem });
+
+        // act
+        int count = svc.GetConsentGivenCountByOrderId(order.Id);
+
+        // assert
+        // only 1 of the 2 consents has ConsentGiven = true
+        Assert.Equal(1, count);
+    }
+
+
+    // ==================== Order Has Allergen Consent Tests =============================
+
+    [Fact]
+    public void Order_Has_Allergen_Consent_Returns_True_When_Consent_Exists()
+    {
+        // arrange
+        var order = svc.AddOrder(new List<MenuItem>());
+        var ingredient = svc.AddIngredient("Soy", true, "Contains soy");
+        var menuItem = svc.AddMenuItem("Stir Fry", "Main", "Soy based dish.", 8.99, new List<Ingredient> { ingredient });
+        svc.AddAllergenConsent(order.Id, "John Doe", "john@test.com", "123456", true, new List<MenuItem> { menuItem });
+
+        // act
+        bool result = svc.OrderHasAllergenConsent(order.Id);
+
+        // assert
+        Assert.True(result);
+    }
+
+    [Fact]
+    public void Order_Has_Allergen_Consent_Returns_False_When_No_Consent()
+    {
+        // arrange
+        var order = svc.AddOrder(new List<MenuItem>());
+
+        // act
+        bool result = svc.OrderHasAllergenConsent(order.Id);
+
+        // assert
+        Assert.False(result);
+    }
+
 }
 
 
@@ -579,6 +698,47 @@ public class MenuServiceTests
         Assert.Contains(ingredients, i => i.Name == "Soy");
     }
 
+
+    // ==================== Add MenuItem To Menu Tests =============================
+
+    [Fact]
+    public void Can_add_menu_item_to_menu()
+    {
+        // arrange
+        var ingredient = svc.AddIngredient("Chicken");
+        var item1 = svc.AddMenuItem("Chicken Burger", "Main", "A burger", 9.00, new List<Ingredient> { ingredient });
+        var item2 = svc.AddMenuItem("Chicken Wings", "Main", "Crispy wings", 7.50, new List<Ingredient> { ingredient });
+        var menu = svc.AddMenu("Chicken Menu", "Lunch", "All chicken", true, new List<MenuItem> { item1 });
+
+        // act
+        var updated = svc.AddMenuItemToMenu(menu.Id, item2.Id);
+
+        // assert
+        Assert.NotNull(updated);
+        Assert.Equal(2, updated.MenuItems.Count);
+        Assert.Contains(updated.MenuItems, mi => mi.Name == "Chicken Wings");
+    }
+
+
+    // ==================== Remove MenuItem From Menu Tests =============================
+
+    [Fact]
+    public void Can_remove_menu_item_from_menu()
+    {
+        // arrange
+        var ingredient = svc.AddIngredient("Beef");
+        var item1 = svc.AddMenuItem("Beef Burger", "Main", "Classic burger", 10.00, new List<Ingredient> { ingredient });
+        var item2 = svc.AddMenuItem("Beef Steak", "Main", "8oz steak", 18.00, new List<Ingredient> { ingredient });
+        var menu = svc.AddMenu("Beef Menu", "Dinner", "Beef dishes", true, new List<MenuItem> { item1, item2 });
+
+        // act
+        var updated = svc.RemoveMenuItemFromMenu(menu.Id, item2.Id);
+
+        // assert
+        Assert.NotNull(updated);
+        Assert.Single(updated.MenuItems);
+        Assert.DoesNotContain(updated.MenuItems, mi => mi.Name == "Beef Steak");
+    }
 
 
 
@@ -1454,6 +1614,89 @@ public class UserManagementTests
 
         Assert.NotNull(fetched);
         Assert.Equal("test3@rms.com", fetched.Email);
+    }
+
+
+    // ==================== Authenticate Tests =============================
+
+    [Fact]
+    public void Authenticate_With_Valid_Credentials_Returns_User()
+    {
+        // arrange
+        svc.Register("Test User", "auth@test.com", "password", Role.staff);
+
+        // act
+        var user = svc.Authenticate("auth@test.com", "password");
+
+        // assert
+        Assert.NotNull(user);
+        Assert.Equal("auth@test.com", user.Email);
+    }
+
+    [Fact]
+    public void Authenticate_With_Wrong_Password_Returns_Null()
+    {
+        // arrange
+        svc.Register("Test User", "auth2@test.com", "password", Role.staff);
+
+        // act
+        var user = svc.Authenticate("auth2@test.com", "wrongpassword");
+
+        // assert
+        Assert.Null(user);
+    }
+
+
+    // ==================== Get User By Email Tests =============================
+
+    [Fact]
+    public void GetUserByEmail_Returns_Correct_User()
+    {
+        // arrange
+        svc.Register("Test User", "email@test.com", "password", Role.guest);
+
+        // act
+        var user = svc.GetUserByEmail("email@test.com");
+
+        // assert
+        Assert.NotNull(user);
+        Assert.Equal("email@test.com", user.Email);
+    }
+
+
+    // ==================== Update User Tests =============================
+
+    [Fact]
+    public void UpdateUser_Changes_Name_And_Email()
+    {
+        // arrange
+        var user = svc.Register("Old Name", "old@test.com", "password", Role.staff);
+
+        // act
+        var updated = svc.UpdateUser(user.Id, "New Name", "new@test.com");
+
+        // assert
+        Assert.NotNull(updated);
+        Assert.Equal("New Name", updated.Name);
+        Assert.Equal("new@test.com", updated.Email);
+    }
+
+
+    // ==================== Delete User Tests =============================
+
+    [Fact]
+    public void DeleteUser_Returns_True_And_Removes_User()
+    {
+        // arrange
+        var user = svc.Register("Delete Me", "delete@test.com", "password", Role.guest);
+
+        // act
+        var deleted = svc.DeleteUser(user.Id);
+        var found = svc.GetUserById(user.Id);
+
+        // assert
+        Assert.True(deleted);
+        Assert.Null(found);
     }
 }
 
