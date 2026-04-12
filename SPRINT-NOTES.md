@@ -220,3 +220,74 @@ First full browser test of the completed application. Nine bugs found and fixed 
 **Observed:** The `/Menu/MenuItems` page showed items in database insertion order — drinks mixed in with starters and mains.  
 **Root cause:** `GetAllMenuItems()` returns items in insertion order. No sort was applied in the controller.  
 **Fix:** After filtering, sort by a type priority dictionary: Starter(1) → Main(2) → Dessert(3) → Side(4) → Cocktail(5) → Hot Drink(6) → Soft Drink(7) → Beer(8) → Wine(9), then alphabetically by name within each group.
+
+---
+
+# Manual Testing Session — 12 April 2026 (Pass 2)
+**Tested as:** admin (continued)
+**Commit:** `fix: menu type dropdown, drinks filtering, ingredient selection, about page, seeder table fixes`
+
+---
+
+### Bug 10 — Seeded bookings for Liam Walsh and Emma Byrne had TableNumber = 0
+**Observed:** Two bookings in the seeder had no assigned table (0 = Unassigned), making the booking list look broken on first run.
+**Root cause:** `ServiceSeeder.cs` created those bookings without setting `TableNumber`.
+**Fix:** Assigned Liam Walsh to table 4 and Emma Byrne to table 6.
+
+---
+
+### Bug 11 — Menu Type was a free text input
+**Observed:** On Menu Create and Edit, the Type field was an `<input type="text">`. A user could type anything — "lunch", "LUNCH", "Food", breaking all the filtering logic that depends on exact values.
+**Root cause:** The field was never converted to a dropdown.
+**Fix:** Replaced with a `<select>` in both `Create.cshtml` and `Edit.cshtml` with fixed options: Lunch, Dinner, Special, Drinks.
+
+---
+
+### Bug 12 — Creating a menu gave no way to add items
+**Observed:** After Menu Create POST, the app redirected to the Details page — which just showed an empty menu with no controls to add items. You had to manually navigate to Edit.
+**Root cause:** The Create POST redirected to `Details` action.
+**Fix:** Changed redirect to `Edit` so the admin lands on the edit page immediately after creating a menu, and can add items right away.
+
+---
+
+### Bug 13 — Menu Edit showed all item types regardless of menu type
+**Observed:** On a Drinks menu, the "Add Item to Menu" dropdown showed all food types (Starters, Mains, Desserts, Sides) as well as drinks. You could add a Starter to a Drinks menu.
+**Root cause:** The Edit GET action loaded all available items without filtering by type compatibility.
+**Fix:** In the Edit GET action, filter `AvailableMenuItems`: drinks menus only show Cocktail/Spirit/Hot Drink/Soft Drink/Beer/Wine; all other menus show Starter/Main/Dessert/Side.
+
+---
+
+### Bug 14 — Drinks menu Details page showed no items
+**Observed:** A Drinks menu with items navigated to showed an empty "No items on this menu yet" message despite having items.
+**Root cause:** `_MenuMenuItems.cshtml` was hardcoded to only iterate Starter/Main/Dessert/Side sections. Drink-type items were never displayed.
+**Fix:** Rewrote the partial to detect if the menu is a Drinks menu (`Model.Type == "Drinks"`). If so, iterate Cocktail/Spirit/Hot Drink/Soft Drink/Beer/Wine sections instead.
+
+---
+
+### Bug 15 — _EditMenuMenuItems partial had the same food-only section problem
+**Observed:** The edit page for a Drinks menu showed no existing items in the "current items" panel.
+**Root cause:** `_EditMenuMenuItems.cshtml` had the same hardcoded food sections.
+**Fix:** Same rewrite as `_MenuMenuItems.cshtml` — detect `Model.Type == "Drinks"` and switch section list accordingly.
+
+---
+
+### Bug 16 — Spirits were named "Vodka & Tonic", "Gin & Tonic", "Whiskey & Soda" with type "Soft Drink"
+**Observed:** The seeded spirit items had mixer names and the wrong type, so they appeared in the Soft Drinks section.
+**Root cause:** `ServiceSeeder.cs` had incorrect seed data.
+**Fix:** Renamed to "Vodka", "Gin", "Whiskey" and set type to "Spirit".
+
+---
+
+### Bug 17 — AddMenuItem and EditMenuItem had no ingredient selection
+**Observed:** When adding or editing a menu item, there was no way to choose which ingredients it contained. The edit page just showed a read-only list of existing ingredients outside the form.
+**Root cause:** `MenuItemViewModel` had no `AvailableIngredients` or `SelectedIngredientIds` properties. The controller didn't load the ingredient list, and the view had no form inputs for it.
+**Fix:** Added `AvailableIngredients` and `SelectedIngredientIds` to `MenuItemViewModel`. Updated `AddMenuItem` and `EditMenuItem` GET actions to populate the ingredient list and pre-select existing choices. Updated POST actions to resolve selected IDs to `Ingredient` objects and save them. Replaced read-only partial in `EditMenuItem.cshtml` with a checkbox list inside the form. Both views have a live JS search filter on the ingredient list.
+
+---
+
+### Bug 18 — About page contained leftover template content about a movie database
+**Observed:** `/Home/About` showed "About the Menu Management System" with generic boilerplate text.
+**Root cause:** The About view was never updated from the project template.
+**Fix:** Rewrote `About.cshtml` with real content about The Banks restaurant in Strabane. Updated `HomeController.cs` with the correct title and founding date (2010).
+
+---
