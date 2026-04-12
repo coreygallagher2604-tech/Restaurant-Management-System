@@ -1,6 +1,6 @@
 namespace RMS.Data.Entities;
 
-public enum Role { admin, owner, manager, staff, autenticated, guest }
+public enum Role { admin, owner, manager, staff, authenticated, guest }
 
 public class User {
     public int Id { get; set; }
