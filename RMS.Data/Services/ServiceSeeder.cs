@@ -522,9 +522,9 @@ public static class ServiceSeeder
         var prosecco = new MenuItem { Name = "Prosecco (Glass)", Type = "Wine", Description = "Chilled Italian prosecco, 125ml.", Price = 7.50, Ingredients = new List<Ingredient> { sulfites } };
 
         // Spirits
-        var vodkaTonic = new MenuItem { Name = "Vodka & Tonic", Type = "Spirit", Description = "Single vodka served with tonic water and ice.", Price = 7.00, Ingredients = new List<Ingredient>() };
-        var ginTonic = new MenuItem { Name = "Gin & Tonic", Type = "Spirit", Description = "Single gin served with premium tonic, ice and lemon.", Price = 7.50, Ingredients = new List<Ingredient>() };
-        var whiskeySoda = new MenuItem { Name = "Whiskey & Soda", Type = "Spirit", Description = "Irish whiskey served with soda water.", Price = 7.50, Ingredients = new List<Ingredient> { gluten } };
+        var vodka = new MenuItem { Name = "Vodka", Type = "Spirit", Description = "Single measure of vodka served with your choice of mixer.", Price = 7.00, Ingredients = new List<Ingredient>() };
+        var gin = new MenuItem { Name = "Gin", Type = "Spirit", Description = "Single measure of gin served with your choice of mixer.", Price = 7.50, Ingredients = new List<Ingredient>() };
+        var whiskey = new MenuItem { Name = "Whiskey", Type = "Spirit", Description = "Single measure of Irish whiskey served with your choice of mixer.", Price = 7.50, Ingredients = new List<Ingredient> { gluten } };
 
         // Cocktails — using egg whites flags allergen
         var mojito = new MenuItem { Name = "Mojito", Type = "Cocktail", Description = "White rum, fresh mint, lime juice, sugar and soda.", Price = 10.00, Ingredients = new List<Ingredient> { mint, lime, sugar } };
@@ -541,7 +541,7 @@ public static class ServiceSeeder
             espresso, americano, flatWhite, cappuccino, latte, hotChocolate, irishBreakfastTea, herbalTea,
             guinness, heineken, coronaBottle, bulmersCider,
             houseRedWine, houseWhiteWine, prosecco,
-            vodkaTonic, ginTonic, whiskeySoda,
+            vodka, gin, whiskey,
             mojito, cosmo, whiskeySour, aperolSpritz, strawberryDaiquiri, pinaColada
         };
 
@@ -671,12 +671,12 @@ public static class ServiceSeeder
         svc.AddBooking(
             "Liam Walsh", "0874567890", "liam@example.com",
             DateTime.Today.AddDays(1).AddHours(18), 2,
-            false, false, 0, "", 0, true
+            false, false, 0, "", 4, true
         );
         svc.AddBooking(
             "Emma Byrne", "0865678901", "emma@example.com",
             DateTime.Today.AddHours(21), 4,
-            false, false, 0, "Celebrating a birthday", 0, true
+            false, false, 0, "Celebrating a birthday", 6, true
         );
     }
 

@@ -20,9 +20,9 @@ public class HomeController : Controller
      public IActionResult About()
     { 
         var about = new AboutViewModel {
-            Title = "About",
-            Message = "Our mission is to develop a Menu management system allowing users to look up/create and rate their favourite Menus.",
-            Formed = new DateTime(2024,05,03)
+            Title = "About The Banks",
+            Message = "Proud to serve Strabane since 2010.",
+            Formed = new DateTime(2010, 03, 15)
         };
         return View(about);
     }

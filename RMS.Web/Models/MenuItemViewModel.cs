@@ -24,6 +24,10 @@ public class MenuItemViewModel
 
     public List<Ingredient> Ingredients { get; set; } = new();
 
+    public List<Ingredient> AvailableIngredients { get; set; } = new();
+
+    public List<int> SelectedIngredientIds { get; set; } = new();
+
     public MenuItem ToMenuItem()
     {
         var item = new MenuItem();
@@ -44,6 +48,7 @@ public class MenuItemViewModel
         vm.Description = m.Description;
         vm.Price = m.Price;
         vm.Ingredients = m.Ingredients ?? new();
+        vm.SelectedIngredientIds = m.Ingredients?.Select(i => i.Id).ToList() ?? new();
         return vm;
     }
 }

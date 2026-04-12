@@ -12,7 +12,25 @@
     }
     else
     {
-        @foreach (var (type, label) in new[] { ("Starter", "Starters"), ("Main", "Mains"), ("Dessert", "Desserts"), ("Side", "Sides") })
+        var foodSections = new[] {
+                ("Starter",  "Starters"),
+                ("Main",     "Mains"),
+                ("Dessert",  "Desserts"),
+                ("Side",     "Sides")
+            };
+            var drinkSections = new[] {
+                ("Cocktail",   "Cocktails"),
+                ("Spirit",     "Spirits"),
+                ("Hot Drink",  "Hot Drinks"),
+                ("Soft Drink", "Soft Drinks"),
+                ("Beer",       "Beers"),
+                ("Wine",       "Wines")
+            };
+            var drinkTypes = new HashSet<string> { "Cocktail", "Spirit", "Hot Drink", "Soft Drink", "Beer", "Wine" };
+            bool isDrinksMenu = string.Equals(Model.Type, "Drinks", StringComparison.OrdinalIgnoreCase);
+            var sections = isDrinksMenu ? drinkSections : foodSections;
+
+        foreach (var (type, label) in sections)
         {
             var items = Model.MenuItems.Where(i => i.Type == type).ToList();
             if (items.Any())

@@ -6,7 +6,24 @@
 }
 else
 {
-    var sections = new[] { ("Starter", "Starters"), ("Main", "Mains"), ("Dessert", "Desserts"), ("Side", "Sides") };
+    var foodSections = new[] {
+        ("Starter",  "Starters"),
+        ("Main",     "Mains"),
+        ("Dessert",  "Desserts"),
+        ("Side",     "Sides")
+    };
+    var drinkSections = new[] {
+        ("Cocktail",   "Cocktails"),
+        ("Spirit",     "Spirits"),
+        ("Hot Drink",  "Hot Drinks"),
+        ("Soft Drink", "Soft Drinks"),
+        ("Beer",       "Beers"),
+        ("Wine",       "Wines")
+    };
+
+    var drinkTypes = new HashSet<string> { "Cocktail", "Spirit", "Hot Drink", "Soft Drink", "Beer", "Wine" };
+    bool isDrinksMenu = Model.All(i => drinkTypes.Contains(i.Type ?? ""));
+    var sections = isDrinksMenu ? drinkSections : foodSections;
 
     @foreach (var (type, label) in sections)
     {
@@ -23,7 +40,7 @@ else
                     <span class="fw-semibold">@item.Name</span>
                     <p class="text-muted small mb-0">@item.Description</p>
                 </div>
-                <span class="ms-3 fw-semibold text-nowrap">£@item.Price.ToString("F2")</span>
+                <span class="ms-3 fw-semibold text-nowrap">€@item.Price.ToString("F2")</span>
             </div>
         }
     }

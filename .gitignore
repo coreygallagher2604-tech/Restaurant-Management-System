@@ -33,3 +33,4 @@ VIVA-PREP.md
 
 # Ignore local README if present
 *.md
+*.db

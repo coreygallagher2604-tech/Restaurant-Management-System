@@ -4,29 +4,53 @@
     ("/","Home"),
     ("","About Us"),
 }) />
-        
- <div class="card text-center shadow">
-    <div class="card-header bg-warning">
-        <h2>@Model.Title</h2>
+
+<div class="card rounded shadow p-4 mb-4">
+    <div class="border-bottom mb-3">
+        <h2 class="text-primary">About The Banks</h2>
     </div>
-    <div class="card-body">
-        <div class="card-body">
-            <h5 class="card-title">Mission Statement</h5>
-            <p><em>@Model.Message</em></p>
-        </div>
-        <div class="card-footer text-muted">
-            <div>Formed on @Model.FormedString <cite title="Source Title">(@Model.Days days ago)</cite></div>
+    <p class="lead">The Banks is a family-run restaurant and bar situated on the banks of the River Mourne in the heart of Strabane, Co. Tyrone. We pride ourselves on delivering outstanding food, warm hospitality, and an experience that keeps our customers coming back.</p>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-6">
+        <div class="card rounded shadow p-4 h-100">
+            <h4 class="text-primary">Our Food</h4>
+            <p>We serve fresh, locally sourced food with menus that change to reflect the seasons. From casual lunches to dinner service and everything in between, our kitchen team puts quality first, every time.</p>
+            <p>Whether you're in for a quick bite or a celebratory dinner, you'll find something on our menu to suit the occasion.</p>
         </div>
     </div>
+    <div class="col-md-6">
+        <div class="card rounded shadow p-4 h-100">
+            <h4 class="text-primary">Our Bar</h4>
+            <p>The Banks bar offers a carefully curated selection of drinks — from local and craft beers on draught, a broad wine list, and a full range of spirits, to freshly made cocktails and premium soft drinks.</p>
+            <p>Our staff are knowledgeable and passionate about what they serve. Ask us for a recommendation and we'll point you in the right direction.</p>
+        </div>
+    </div>
+</div>
 
-    <h3>What is Menu Management System?</h3>
-    <p>Menu Management System is a popular and authoritative source for Menu content designed to help fans explore the world of Menus and decide what to watch.
+<div class="row g-4 mb-4">
+    <div class="col-md-6">
+        <div class="card rounded shadow p-4 h-100">
+            <h4 class="text-primary">Private Dining & Events</h4>
+            <p>Planning something special? We offer private dining and event hosting for birthdays, anniversaries, work events, and celebrations of all kinds. Talk to our team about what we can do for you.</p>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card rounded shadow p-4 h-100">
+            <h4 class="text-primary">Find Us</h4>
+            <address class="mb-0">
+                <strong>The Banks</strong><br />
+                Mourne Promenade,<br />
+                Strabane,<br />
+                Co. Tyrone,<br />
+                BT82<br />
+                <abbr title="Phone">P:</abbr> 028 7138 2222
+            </address>
+        </div>
+    </div>
+</div>
 
-Our searchable database includes your favourite Menus, casts and directors. 
-
-Menu Managemenet System can help you:
-
-Jog your memory about a Menu, show, or person on the tip of your tongue.
-Find the best Menu or show to watch next.
-Feel free to register and help us improve our resources and data to include all your favourite moveis!</p>
+<div class="card rounded shadow p-4 text-center text-muted">
+    <small>Established @Model.FormedString &mdash; serving Strabane for @Model.Days days and counting.</small>
 </div>

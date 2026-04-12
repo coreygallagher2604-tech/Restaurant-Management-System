@@ -86,8 +86,8 @@ public class MenuController : BaseController
             var created = svc.AddMenu(vm.Name, vm.Type, vm.Description, vm.IsActive, vm.MenuItems.ToList());
             if (created is not null)
             {
-                Alert("Menu Has Been Created.", AlertType.success);
-                return RedirectToAction(nameof(Details), new { Id = created.Id });
+                Alert("Menu created. Now add items to it.", AlertType.success);
+                return RedirectToAction(nameof(Edit), new { id = created.Id });
             }
             Alert("Menu could not be created as the name already exists.", AlertType.warning);
         }
@@ -108,9 +108,17 @@ public class MenuController : BaseController
         }
         var vm = MenuViewModel.FromMenu(m);
         var currentIds = vm.MenuItems.Select(i => i.Id).ToHashSet();
-        vm.AvailableMenuItems = svc.GetAllMenuItems()
-            .Where(i => !currentIds.Contains(i.Id))
-            .ToList();
+        var allItems = svc.GetAllMenuItems().Where(i => !currentIds.Contains(i.Id));
+
+        // Drinks menus only show drink types; food menus only show food types
+        bool isDrinksMenu = string.Equals(m.Type, "Drinks", StringComparison.OrdinalIgnoreCase);
+        var drinkTypes = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            { "Cocktail", "Spirit", "Hot Drink", "Soft Drink", "Beer", "Wine" };
+
+        vm.AvailableMenuItems = isDrinksMenu
+            ? allItems.Where(i => drinkTypes.Contains(i.Type ?? "")).ToList()
+            : allItems.Where(i => !drinkTypes.Contains(i.Type ?? "")).ToList();
+
         return View(vm);
     }
 
@@ -204,7 +212,7 @@ public class MenuController : BaseController
         var typeOrder = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
         {
             { "Starter", 1 }, { "Main", 2 }, { "Dessert", 3 }, { "Side", 4 },
-            { "Cocktail", 5 }, { "Hot Drink", 6 }, { "Soft Drink", 7 }, { "Beer", 8 }, { "Wine", 9 }
+            { "Cocktail", 5 }, { "Spirit", 6 }, { "Hot Drink", 7 }, { "Soft Drink", 8 }, { "Beer", 9 }, { "Wine", 10 }
         };
         search.MenuItems = filtered
             .OrderBy(i => typeOrder.TryGetValue(i.Type ?? "", out var order) ? order : 99)
@@ -219,7 +227,9 @@ public class MenuController : BaseController
     [Authorize(Roles = "admin,owner,manager,staff")]
     public IActionResult AddMenuItem()
     {
-        return View(new MenuItemViewModel());
+        var vm = new MenuItemViewModel();
+        vm.AvailableIngredients = svc.GetAllIngredients().OrderBy(i => i.Name).ToList();
+        return View(vm);
     }
 
     // POST /Menu/AddMenuItem
@@ -230,7 +240,10 @@ public class MenuController : BaseController
     {
         if (ModelState.IsValid)
         {
-            var item = svc.AddMenuItem(vm.Name, vm.Type, vm.Description, vm.Price, new List<Ingredient>());
+            var selectedIngredients = svc.GetAllIngredients()
+                .Where(i => vm.SelectedIngredientIds.Contains(i.Id))
+                .ToList();
+            var item = svc.AddMenuItem(vm.Name, vm.Type, vm.Description, vm.Price, selectedIngredients);
             if (item is not null)
             {
                 Alert("Menu Item Has Been Added.", AlertType.success);
@@ -238,6 +251,7 @@ public class MenuController : BaseController
             }
             Alert("Menu Item could not be added.", AlertType.warning);
         }
+        vm.AvailableIngredients = svc.GetAllIngredients().OrderBy(i => i.Name).ToList();
         return View(vm);
     }
 
@@ -267,7 +281,9 @@ public class MenuController : BaseController
             Alert($"Menu Item {id} Could Not Be Found.", AlertType.warning);
             return NotFound();
         }
-        return View(MenuItemViewModel.FromMenuItem(item));
+        var vm = MenuItemViewModel.FromMenuItem(item);
+        vm.AvailableIngredients = svc.GetAllIngredients().OrderBy(i => i.Name).ToList();
+        return View(vm);
     }
 
     // POST /Menu/EditMenuItem/{id}
@@ -278,9 +294,10 @@ public class MenuController : BaseController
     {
         if (ModelState.IsValid)
         {
-            var existing = svc.GetMenuItemById(id);
             var menuItem = vm.ToMenuItem();
-            menuItem.Ingredients = existing.Ingredients;        
+            menuItem.Ingredients = svc.GetAllIngredients()
+                .Where(i => vm.SelectedIngredientIds.Contains(i.Id))
+                .ToList();
             var updated = svc.UpdateMenuItem(menuItem);
             
             if (updated is not null)
@@ -290,6 +307,7 @@ public class MenuController : BaseController
             }
             Alert("Menu Item could not be updated.", AlertType.warning);
         }
+        vm.AvailableIngredients = svc.GetAllIngredients().OrderBy(i => i.Name).ToList();
         return View(vm);
     }
 
