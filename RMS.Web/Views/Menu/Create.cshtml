@@ -31,6 +31,7 @@
                 <option value="Lunch">Lunch</option>
                 <option value="Dinner">Dinner</option>
                 <option value="Special">Special</option>
+                <option value="Seasonal">Seasonal</option>
                 <option value="Drinks">Drinks</option>
             </select>
             <span asp-validation-for="Type" class="text-danger"></span>
@@ -50,7 +51,7 @@
         </div>
 
         <div class="mt-3">
-            <button asp-condition=@User.HasOneOfRoles("admin,authenticated") type="submit" class="btn btn-primary" aria-label="Create">Create</button>
+            <button asp-condition=@User.HasOneOfRoles("admin,owner,manager,staff") type="submit" class="btn btn-primary" aria-label="Create">Create</button>
             <a class="btn btn-secondary" asp-controller="Menu" asp-action="Menus" aria-label="Cancel">Cancel</a>
         </div>
 

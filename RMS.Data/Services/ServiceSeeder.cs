@@ -494,11 +494,11 @@ public static class ServiceSeeder
         var sparklingWater = new MenuItem { Name = "Sparkling Water", Type = "Soft Drink", Description = "Chilled sparkling mineral water.", Price = 2.50, Ingredients = new List<Ingredient>() };
         var stillWater = new MenuItem { Name = "Still Water", Type = "Soft Drink", Description = "Chilled still mineral water.", Price = 2.50, Ingredients = new List<Ingredient>() };
 
-        // Mixers & Tonics
-        var tonicWater = new MenuItem { Name = "Tonic Water", Type = "Mixer", Description = "Classic tonic water.", Price = 2.00, Ingredients = new List<Ingredient>() };
-        var slimlineTonic = new MenuItem { Name = "Slimline Tonic", Type = "Mixer", Description = "Light tonic water.", Price = 2.00, Ingredients = new List<Ingredient>() };
-        var gingerBeer = new MenuItem { Name = "Ginger Beer", Type = "Mixer", Description = "Feisty ginger beer.", Price = 2.50, Ingredients = new List<Ingredient>() };
-        var sodaWater = new MenuItem { Name = "Soda Water", Type = "Mixer", Description = "Plain soda water.", Price = 1.50, Ingredients = new List<Ingredient>() };
+        // Mixers — these are soft drinks used as mixers, listed under Soft Drinks
+        var tonicWater = new MenuItem { Name = "Tonic Water", Type = "Soft Drink", Description = "Classic tonic water.", Price = 2.00, Ingredients = new List<Ingredient>() };
+        var slimlineTonic = new MenuItem { Name = "Slimline Tonic", Type = "Soft Drink", Description = "Light tonic water.", Price = 2.00, Ingredients = new List<Ingredient>() };
+        var gingerBeer = new MenuItem { Name = "Ginger Beer", Type = "Soft Drink", Description = "Feisty ginger beer.", Price = 2.50, Ingredients = new List<Ingredient>() };
+        var sodaWater = new MenuItem { Name = "Soda Water", Type = "Soft Drink", Description = "Plain soda water.", Price = 1.50, Ingredients = new List<Ingredient>() };
 
         // Hot Drinks
         var espresso = new MenuItem { Name = "Espresso", Type = "Hot Drink", Description = "Single shot espresso.", Price = 2.50, Ingredients = new List<Ingredient>() };

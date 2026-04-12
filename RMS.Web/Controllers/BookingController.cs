@@ -356,6 +356,24 @@ public class BookingController : BaseController
     [Authorize(Roles = "admin,owner,manager,staff")]
     public IActionResult DeleteConfirm(int id)
     {
+        var booking = svc.GetBookingById(id);
+        if (booking is null)
+        {
+            Alert("Booking not found.", AlertType.warning);
+            return RedirectToAction(nameof(Index));
+        }
+
+        // Block delete if the booking has an active (non-completed, non-void) order
+        if (booking.OrderId > 0)
+        {
+            var order = svc.GetOrderById(booking.OrderId);
+            if (order != null && !order.IsCompleted && !order.IsVoid)
+            {
+                Alert("Cannot delete this booking \u2014 the customer has an active order. Complete or void the order first.", AlertType.warning);
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
         var deleted = svc.DeleteBooking(id);
 
         if (deleted)

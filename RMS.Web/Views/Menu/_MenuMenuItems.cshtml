@@ -1,6 +1,6 @@
-@model List<RMS.Data.Entities.MenuItem>
+@model RMS.Web.Models.MenuViewModel
 
-@if (Model == null || !Model.Any())
+@if (Model == null || !Model.MenuItems.Any())
 {
     <p class="text-muted">No menu items found.</p>
 }
@@ -21,19 +21,18 @@ else
         ("Wine",       "Wines")
     };
 
-    var drinkTypes = new HashSet<string> { "Cocktail", "Spirit", "Hot Drink", "Soft Drink", "Beer", "Wine" };
-    bool isDrinksMenu = Model.All(i => drinkTypes.Contains(i.Type ?? ""));
+    bool isDrinksMenu = string.Equals(Model.Type, "Drinks", StringComparison.OrdinalIgnoreCase);
     var sections = isDrinksMenu ? drinkSections : foodSections;
 
-    @foreach (var (type, label) in sections)
+    foreach (var (type, label) in sections)
     {
-        var items = Model.Where(i => i.Type == type).ToList();
+        var items = Model.MenuItems.Where(i => i.Type == type).ToList();
         if (!items.Any()) { continue; }
 
         <h5 class="fw-bold mt-4">@label</h5>
         <hr class="mt-0" />
 
-        @foreach (var item in items)
+        foreach (var item in items)
         {
             <div class="d-flex justify-content-between align-items-start mb-2">
                 <div>

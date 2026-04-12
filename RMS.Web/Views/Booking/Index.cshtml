@@ -31,7 +31,13 @@
             @foreach (var b in Model)
             {
                 <tr>
-                    <td>@b.CustomerName</td>
+                    <td>
+                        @b.CustomerName
+                        @if (b.HasAllergen)
+                        {
+                            <span class="badge bg-warning text-dark ms-1">Allergy</span>
+                        }
+                    </td>
                     <td>@b.BookingDateTime.ToString("dd MMM yyyy HH:mm")</td>
                     <td>@b.NumberOfGuests</td>
                     @if (User.IsInRole("admin") || User.IsInRole("owner") || User.IsInRole("manager") || User.IsInRole("staff"))
