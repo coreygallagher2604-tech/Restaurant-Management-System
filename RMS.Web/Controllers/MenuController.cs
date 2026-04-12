@@ -200,10 +200,11 @@ public class MenuController : BaseController
             ? items
             : items.Where(i => i.Name.Contains(search.Query, StringComparison.OrdinalIgnoreCase)).ToList();
 
-        // Order by type: Starter → Main → Dessert → Side → Drink → Cocktail → everything else
+        // Order by type: Starter → Main → Dessert → Side → drink subtypes → everything else
         var typeOrder = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
         {
-            { "Starter", 1 }, { "Main", 2 }, { "Dessert", 3 }, { "Side", 4 }, { "Drink", 5 }, { "Cocktail", 6 }
+            { "Starter", 1 }, { "Main", 2 }, { "Dessert", 3 }, { "Side", 4 },
+            { "Cocktail", 5 }, { "Hot Drink", 6 }, { "Soft Drink", 7 }, { "Beer", 8 }, { "Wine", 9 }
         };
         search.MenuItems = filtered
             .OrderBy(i => typeOrder.TryGetValue(i.Type ?? "", out var order) ? order : 99)
