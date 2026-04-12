@@ -42,7 +42,23 @@
                     <td>@b.NumberOfGuests</td>
                     @if (User.IsInRole("admin") || User.IsInRole("owner") || User.IsInRole("manager") || User.IsInRole("staff"))
                     {
-                        <td>@(b.TableNumber > 0 ? $"T{b.TableNumber}" : "—")</td>
+                        <td>
+                            @if (b.TableNumber > 0)
+                            {
+                                <span>T@(b.TableNumber)</span>
+                                @if (!string.IsNullOrWhiteSpace(b.AdditionalTableNumbers))
+                                {
+                                    foreach (var n in b.AdditionalTableNumbers.Split(','))
+                                    {
+                                        <span class="ms-1">+ T@(n.Trim())</span>
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                <span>—</span>
+                            }
+                        </td>
                     }
                     <td>
                         @if (b.Status == "Active")

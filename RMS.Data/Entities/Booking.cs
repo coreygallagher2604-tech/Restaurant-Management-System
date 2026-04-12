@@ -34,6 +34,9 @@ namespace RMS.Data.Entities;
 
         public int TableNumber {get; set;}
 
+        // Comma-separated additional table numbers e.g. "3,5" — empty string means none
+        public string AdditionalTableNumbers {get; set;} = "";
+
         public bool IsActive {get; set;} = false;
 
         public string Status {get; set;} = "Booked";

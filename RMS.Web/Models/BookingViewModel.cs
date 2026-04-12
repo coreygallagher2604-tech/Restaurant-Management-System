@@ -47,6 +47,16 @@ public class BookingViewModel
 
     public int TableNumber { get; set; }
 
+    // Comma-separated additional table numbers stored as string; parsed for capacity checks
+    public string AdditionalTableNumbers { get; set; } = "";
+
+    // Parsed list \u2014 used in the view to pre-check checkboxes
+    public List<int> AdditionalTableNumbersList =>
+        string.IsNullOrWhiteSpace(AdditionalTableNumbers)
+            ? new List<int>()
+            : AdditionalTableNumbers.Split(',', System.StringSplitOptions.RemoveEmptyEntries)
+                                     .Select(int.Parse).ToList();
+
     public bool IsActive { get; set; } = true;
 
     public string Status { get; set; } = "Booked";
@@ -65,6 +75,7 @@ public class BookingViewModel
         vm.OrderId = b.OrderId;
         vm.BookingComments = b.BookingComments;
         vm.TableNumber = b.TableNumber;
+        vm.AdditionalTableNumbers = b.AdditionalTableNumbers ?? "";
         vm.IsActive = b.IsActive;
         vm.Status = b.Status;
         return vm;
@@ -84,6 +95,7 @@ public class BookingViewModel
         b.OrderId = OrderId;
         b.BookingComments = BookingComments;
         b.TableNumber = TableNumber;
+        b.AdditionalTableNumbers = AdditionalTableNumbers ?? "";
         b.IsActive = IsActive;
         b.Status = Status;
         return b;

@@ -64,7 +64,7 @@
         </div>
 
         <div class="mb-3">
-            <label asp-for="TableNumber" class="form-label">Table</label>
+            <label asp-for="TableNumber" class="form-label">Primary Table</label>
             <select asp-for="TableNumber" class="form-select">
                 @foreach (var t in (IEnumerable<RMS.Data.Entities.Table>)ViewBag.Tables)
                 {
@@ -72,6 +72,26 @@
                 }
             </select>
             <span asp-validation-for="TableNumber" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Additional Tables (for large parties)</label>
+            <div style="max-height:180px;overflow-y:auto;border:1px solid #dee2e6;border-radius:.375rem;padding:.5rem;">
+                @foreach (var t in (IEnumerable<RMS.Data.Entities.Table>)ViewBag.Tables)
+                {
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox"
+                               name="additionalTableNumbers"
+                               value="@t.TableNumber"
+                               id="tbl_@t.TableNumber"
+                               @(Model.AdditionalTableNumbersList.Contains(t.TableNumber) ? "checked" : "") />
+                        <label class="form-check-label" for="tbl_@t.TableNumber">
+                            T@(t.TableNumber) — seats @t.SeatingCapacity
+                        </label>
+                    </div>
+                }
+            </div>
+            <small class="text-muted">Tick extra tables to join with the primary. Combined capacity must cover the party size.</small>
         </div>
 
         <div class="mb-3 form-check">

@@ -279,7 +279,7 @@ public class BookingController : BaseController
     [HttpPost]
     [ValidateAntiForgeryToken]
     [Authorize(Roles = "admin,owner,manager,staff")]
-    public IActionResult Edit(int id, BookingViewModel vm, string bookingDatePart, string bookingTimePart)
+    public IActionResult Edit(int id, BookingViewModel vm, string bookingDatePart, string bookingTimePart, List<int> additionalTableNumbers)
     {
         // Combine the separate date and time inputs into BookingDateTime
         if (!string.IsNullOrEmpty(bookingDatePart) && !string.IsNullOrEmpty(bookingTimePart))
@@ -294,22 +294,38 @@ public class BookingController : BaseController
             }
         }
 
-        // Validate: table must be assigned
+        // Store additional tables as comma-separated string
+        vm.AdditionalTableNumbers = additionalTableNumbers != null && additionalTableNumbers.Any()
+            ? string.Join(",", additionalTableNumbers)
+            : "";
+
+        // Validate: primary table must be assigned
         if (vm.TableNumber <= 0)
         {
             ModelState.AddModelError("TableNumber", "A table must be selected.");
         }
         else
         {
-            // Validate: table must exist and have enough capacity
-            var table = svc.GetAllTables().FirstOrDefault(t => t.TableNumber == vm.TableNumber);
-            if (table == null)
+            var allTables = svc.GetAllTables().ToList();
+            var primaryTable = allTables.FirstOrDefault(t => t.TableNumber == vm.TableNumber);
+            if (primaryTable == null)
             {
                 ModelState.AddModelError("TableNumber", $"Table {vm.TableNumber} does not exist.");
             }
-            else if (table.SeatingCapacity < vm.NumberOfGuests)
+            else
             {
-                ModelState.AddModelError("TableNumber", $"Table {vm.TableNumber} has a capacity of {table.SeatingCapacity} but the booking is for {vm.NumberOfGuests} guest(s).");
+                // Calculate combined seating capacity across all selected tables
+                int totalCapacity = primaryTable.SeatingCapacity;
+                foreach (var tNum in additionalTableNumbers ?? new List<int>())
+                {
+                    var extra = allTables.FirstOrDefault(t => t.TableNumber == tNum);
+                    if (extra != null) totalCapacity += extra.SeatingCapacity;
+                }
+
+                if (totalCapacity < vm.NumberOfGuests)
+                {
+                    ModelState.AddModelError("TableNumber", $"Selected tables seat {totalCapacity} but the booking is for {vm.NumberOfGuests} guest(s).");
+                }
             }
         }
 
