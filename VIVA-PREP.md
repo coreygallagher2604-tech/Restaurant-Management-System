@@ -421,3 +421,55 @@ Client-side validation runs in the browser using JavaScript before the form is s
 Server-side validation runs in the controller after the form POST arrives. `ModelState.IsValid` checks the same annotations again. This is the one that actually matters for security — client-side validation can be bypassed by anyone with browser dev tools. Business rules that go beyond data annotations (like "table capacity must be >= guest count") must also be added server-side manually because there is no annotation for that.
 
 This project uses both.
+
+---
+
+## Bugs Found During Manual Testing — Pass 2 (12 April 2026, Owner Role)
+
+**Q: Why could the owner not see the Create Menu button when admin could?**
+
+The submit button on `Menu/Create.cshtml` used the `asp-condition` tag helper with `User.HasOneOfRoles("admin,authenticated")`. Owner is not in that list. The `asp-condition` tag helper suppresses the element entirely when the condition is false — the button rendered as nothing. Fixed by changing the roles string to `"admin,owner,manager,staff"` which matches what the controller's `[Authorize]` attribute already allowed.
+
+---
+
+**Q: The Drinks menu showed all its items on the Edit page but none on the Details page. How did that happen?**
+
+The `_MenuMenuItems` partial was typed as `@model List<MenuItem>` and detected whether it was a drinks menu by checking if *all* items in the list had drink types (`Model.All(...)`). The Details page was passing `Model.MenuItems` — correct. But the detection logic was fragile: one item with an unexpected type like "Mixer" would make `All()` return false and the partial would fall through to food sections, showing nothing.
+
+The fix was to change the partial's model to `MenuViewModel` so it can read `Model.Type` directly. `"Drinks"` is an explicit string comparison — clean and reliable. The Details view was updated to pass the full `Model` instead of just `Model.MenuItems`.
+
+---
+
+**Q: How did you handle the fact that seasonal menus were seeded with type "Seasonal" but the Edit form only offered Lunch, Dinner, Special, Drinks?**
+
+Simple oversight — the dropdown was never given a "Seasonal" option. Editing a Christmas or Summer BBQ menu would replace the type with blank or something invalid. Added "Seasonal" as an option to the `<select>` in both `Create.cshtml` and `Edit.cshtml`. No data layer change needed.
+
+---
+
+**Q: Why were allergen badge HTML tags showing as literal text in the ingredient search list?**
+
+Razor HTML-encodes the output of `@()` expressions by default as a security measure — this is protection against XSS (Cross-Site Scripting). When you write `@(ing.Allergen ? "<span class='badge'>Allergen</span>" : "")`, Razor escapes the angle brackets to `&lt;span&gt;` so they appear as text rather than rendering as HTML.
+
+The fix was to remove the badge entirely from the label — the user just needs the ingredient name. If you needed the badge to render you would use `@Html.Raw(...)`, but that should only be used with trusted content you control, never with user-supplied data.
+
+---
+
+**Q: How did you block deleting a booking when the customer already has an active order?**
+
+In `BookingController.DeleteConfirm`, before calling `svc.DeleteBooking`, the code now checks `booking.OrderId > 0` and if so fetches the order with `svc.GetOrderById`. If the order exists and is neither completed nor voided, the delete is blocked and the user gets a warning message. The booking is only deleted if there is no order, or the order is already finished.
+
+---
+
+**Q: How did you implement table joining for large party bookings?**
+
+Added a single string field `AdditionalTableNumbers` to the `Booking` entity — it stores a comma-separated list of table numbers, e.g. `"3,5"`. Zero configuration, no join table, no EF navigation property changes.
+
+On the Edit view, below the primary table dropdown there is a scrollable checkbox list of all active tables. The form posts the ticked values as `additionalTableNumbers[]`. In the controller Edit POST, the selected IDs are joined back into the comma-separated string and stored on the booking. Capacity validation adds up the seating capacity of the primary table plus every additional table and rejects the save if the total is less than the number of guests.
+
+On the booking list, joined tables display as `T2 + T5 + T8`.
+
+The production-correct approach would be a `BookingTable` join table with a proper many-to-many EF relationship. The string approach was chosen deliberately for scope — it achieves the same result with no added risk to a working system two days before a viva.
+
+---
+
+*Last updated: Owner role testing session, 12 April 2026.*
