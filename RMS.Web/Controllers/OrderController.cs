@@ -24,6 +24,24 @@ public class OrderController : BaseController
         return View(vms);
     }
 
+    // GET /Order/ByTable/{tableId} — active orders for a specific table
+    [HttpGet]
+    [Authorize(Roles = "admin,owner,manager,staff")]
+    public IActionResult ByTable(int tableId)
+    {
+        var table = svc.GetTableById(tableId);
+        if (table is null)
+        {
+            Alert("Table not found.", AlertType.warning);
+            return RedirectToAction(nameof(Index));
+        }
+        var orders = svc.GetOrdersByTableId(tableId)
+                        .Where(o => !o.IsCompleted && !o.IsVoid)
+                        .ToList();
+        ViewBag.TableNumber = table.TableNumber;
+        return View("Index", orders.Select(OrderViewModel.FromOrder).ToList());
+    }
+
     // GET /Order/Details/{id}
     [HttpGet]
     public IActionResult Details(int id)

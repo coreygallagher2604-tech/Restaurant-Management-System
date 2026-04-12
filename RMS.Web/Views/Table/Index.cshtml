@@ -36,6 +36,10 @@
                         </span>
                     </td>
                     <td class="text-end">
+                        @if (t.IsOccupied)
+                        {
+                            <a asp-controller="Order" asp-action="ByTable" asp-route-tableId="@t.Id" class="btn btn-sm btn-outline-info">Orders</a>
+                        }
                         <a asp-action="SetOccupancy" asp-route-id="@t.Id" class="btn btn-sm btn-outline-primary">Occupancy</a>
                         <a asp-action="Edit" asp-route-id="@t.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
                         <a asp-action="Delete" asp-route-id="@t.Id" class="btn btn-sm btn-outline-danger">Delete</a>

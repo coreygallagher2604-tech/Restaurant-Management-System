@@ -43,7 +43,7 @@
                         {
                             <tr>
                                 <td>@item.Name</td>
-                                <td class="text-end">€@item.Price.ToString("0.00")</td>
+                                <td class="text-end">£@item.Price.ToString("0.00")</td>
                                 <td class="text-end" style="width:1%">
                                     <form asp-action="RemoveItemFromMenu" method="post">
                                         @Html.AntiForgeryToken()
@@ -71,7 +71,7 @@
                     <select name="menuItemId" class="form-select">
                         @foreach (var item in Model.AvailableMenuItems.OrderBy(i => i.Type).ThenBy(i => i.Name))
                         {
-                            <option value="@item.Id">[@item.Type] @item.Name — €@item.Price.ToString("0.00")</option>
+                            <option value="@item.Id">[@item.Type] @item.Name — £@item.Price.ToString("0.00")</option>
                         }
                     </select>
                 </div>

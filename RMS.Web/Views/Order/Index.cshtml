@@ -7,10 +7,18 @@
 
 <div class="card rounded shadow p-4">
     <div class="border-bottom d-flex align-items-center justify-content-between mb-3">
-        <h3 class="text-primary">Orders</h3>
-        <a asp-action="Create" class="btn btn-sm btn-primary">
-            <i class="bi bi-plus"></i> New Order
-        </a>
+        @if (ViewBag.TableNumber != null)
+        {
+            <h3 class="text-primary">Active Orders — T@(ViewBag.TableNumber)</h3>
+            <a asp-controller="Table" asp-action="Index" class="btn btn-sm btn-outline-secondary">Back to Tables</a>
+        }
+        else
+        {
+            <h3 class="text-primary">Orders</h3>
+            <a asp-action="Create" class="btn btn-sm btn-primary">
+                <i class="bi bi-plus"></i> New Order
+            </a>
+        }
     </div>
 
     <table class="table table-hover">

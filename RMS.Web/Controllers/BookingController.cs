@@ -271,7 +271,27 @@ public class BookingController : BaseController
             return RedirectToAction(nameof(Index));
         }
 
-        ViewBag.Tables = svc.GetAllTables().Where(t => t.Active).OrderBy(t => t.TableNumber).ToList();
+        var allTables = svc.GetAllTables().Where(t => t.Active).OrderBy(t => t.TableNumber).ToList();
+        ViewBag.Tables = allTables;
+
+        // Calculate which table numbers are already taken by OTHER bookings in the same 135-minute slot
+        var slotStart = booking.BookingDateTime;
+        var slotEnd = slotStart.AddMinutes(135);
+        var takenTableNumbers = new HashSet<int>();
+        foreach (var b in svc.GetAllBookings())
+        {
+            if (b.Id == id || b.Status == "Cancelled") continue;
+            var bEnd = b.BookingDateTime.AddMinutes(135);
+            if (b.BookingDateTime < slotEnd && bEnd > slotStart)
+            {
+                if (b.TableNumber > 0) takenTableNumbers.Add(b.TableNumber);
+                if (!string.IsNullOrWhiteSpace(b.AdditionalTableNumbers))
+                    foreach (var n in b.AdditionalTableNumbers.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                        if (int.TryParse(n.Trim(), out var tn)) takenTableNumbers.Add(tn);
+            }
+        }
+        ViewBag.TakenTableNumbers = takenTableNumbers;
+
         return View(BookingViewModel.FromBooking(booking));
     }
 
@@ -332,8 +352,13 @@ public class BookingController : BaseController
         if (!ModelState.IsValid)
         {
             ViewBag.Tables = svc.GetAllTables().Where(t => t.Active).OrderBy(t => t.TableNumber).ToList();
+            ViewBag.TakenTableNumbers = new HashSet<int>();
             return View(vm);
         }
+
+        // Capture original table before updating, so we can sync occupancy and order
+        var originalBooking = svc.GetBookingById(id);
+        int originalTableNumber = originalBooking?.TableNumber ?? 0;
 
         var booking = vm.ToBooking();
         booking.Id = id;
@@ -341,6 +366,33 @@ public class BookingController : BaseController
 
         if (updated is not null)
         {
+            // If the primary table changed, update table occupancy and order table reference
+            if (updated.TableNumber != originalTableNumber)
+            {
+                // Free the old table
+                if (originalTableNumber > 0)
+                {
+                    var oldTable = svc.GetTableByTableNumber(originalTableNumber);
+                    if (oldTable != null) svc.SetTableOccupancy(oldTable.Id, false, 0);
+                }
+                // Mark the new table as occupied
+                if (updated.TableNumber > 0)
+                {
+                    var newTable = svc.GetTableByTableNumber(updated.TableNumber);
+                    if (newTable != null) svc.SetTableOccupancy(newTable.Id, true, updated.NumberOfGuests);
+                }
+                // Move the order to the new table if this booking has one
+                if (updated.OrderId > 0 && updated.TableNumber > 0)
+                {
+                    var order = svc.GetOrderById(updated.OrderId);
+                    var newTable = svc.GetTableByTableNumber(updated.TableNumber);
+                    if (order != null && newTable != null)
+                    {
+                        order.Table = newTable;
+                        svc.UpdateOrder(order);
+                    }
+                }
+            }
             Alert($"Booking for '{updated.CustomerName}' updated.", AlertType.success);
             return RedirectToAction(nameof(Index));
         }

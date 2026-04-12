@@ -113,7 +113,7 @@ public class MenuController : BaseController
         // Drinks menus only show drink types; food menus only show food types
         bool isDrinksMenu = string.Equals(m.Type, "Drinks", StringComparison.OrdinalIgnoreCase);
         var drinkTypes = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-            { "Cocktail", "Spirit", "Hot Drink", "Soft Drink", "Beer", "Wine" };
+            { "Cocktail", "Spirit", "Hot Drink", "Soft Drink", "Beer", "Wine", "Mixer", "Cider" };
 
         vm.AvailableMenuItems = isDrinksMenu
             ? allItems.Where(i => drinkTypes.Contains(i.Type ?? "")).ToList()
