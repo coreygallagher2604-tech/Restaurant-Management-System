@@ -88,6 +88,43 @@ public class AllergenConsentController : BaseController
         return View(vm);
     }
 
+    // GET /AllergenConsent/Edit/{id}
+    [HttpGet]
+    [Authorize(Roles = "admin,owner,manager,staff")]
+    public IActionResult Edit(int id)
+    {
+        var consents = svc.GetAllergenConsents();
+        var consent = consents.FirstOrDefault(c => c.Id == id);
+
+        if (consent is null)
+        {
+            Alert($"Allergen consent {id} not found.", AlertType.warning);
+            return RedirectToAction(nameof(Index));
+        }
+
+        var vm = AllergenConsentViewModel.FromConsent(consent);
+        vm.AvailableMenuItems = svc.GetAllMenuItems();
+        vm.SelectedMenuItemIds = consent.MenuItems.Select(m => m.Id).ToList();
+        return View(vm);
+    }
+
+    // POST /AllergenConsent/Edit/{id}
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [Authorize(Roles = "admin,owner,manager,staff")]
+    public IActionResult Edit(int id, AllergenConsentViewModel vm)
+    {
+        if (!ModelState.IsValid)
+        {
+            vm.AvailableMenuItems = svc.GetAllMenuItems();
+            return View(vm);
+        }
+
+        svc.UpdateAllergenConsent(id, vm.CustomerName, vm.CustomerEmail, vm.CustomerPhone, vm.ConsentGiven);
+        Alert($"Allergen consent for '{vm.CustomerName}' updated.", AlertType.success);
+        return RedirectToAction(nameof(Index));
+    }
+
     // GET /AllergenConsent/Delete/{id}
     [HttpGet]
     [Authorize(Roles = "admin,owner,manager,staff")]

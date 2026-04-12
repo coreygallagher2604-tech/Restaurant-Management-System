@@ -30,7 +30,7 @@ public class MenuController : BaseController
     public IActionResult Menus(MenuSearchViewModel search)
     {
         // Guests and anonymous users only see active menus
-        bool isStaff = User.IsInRole("admin") || User.IsInRole("autenticated");
+        bool isStaff = User.IsInRole("admin") || User.IsInRole("owner") || User.IsInRole("manager") || User.IsInRole("staff");
 
         if (isStaff)
         {
