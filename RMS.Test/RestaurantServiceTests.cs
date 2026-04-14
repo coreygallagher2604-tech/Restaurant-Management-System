@@ -1131,7 +1131,6 @@ public class BookingServiceTests
             4,
             true,
             true,
-            0,
             "Window table",
             12,
             true

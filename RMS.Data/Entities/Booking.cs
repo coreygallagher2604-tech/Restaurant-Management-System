@@ -27,8 +27,6 @@ namespace RMS.Data.Entities;
 
         public bool AllergenConsentGiven {get; set;} = false;
 
-        public int OrderId {get; set;}
-
         [MaxLength(500)]
         public string BookingComments {get; set;} = "";
 

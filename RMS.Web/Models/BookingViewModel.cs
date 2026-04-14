@@ -40,8 +40,6 @@ public class BookingViewModel
 
     public bool AllergenConsentGiven { get; set; } = false;
 
-    public int OrderId { get; set; }
-
     [MaxLength(500)]
     public string BookingComments { get; set; } = "";
 
@@ -72,7 +70,6 @@ public class BookingViewModel
         vm.NumberOfGuests = b.NumberOfGuests;
         vm.HasAllergen = b.HasAllergen;
         vm.AllergenConsentGiven = b.AllergenConsentGiven;
-        vm.OrderId = b.OrderId;
         vm.BookingComments = b.BookingComments;
         vm.TableNumber = b.TableNumber;
         vm.AdditionalTableNumbers = b.AdditionalTableNumbers ?? "";
@@ -92,7 +89,6 @@ public class BookingViewModel
         b.NumberOfGuests = NumberOfGuests;
         b.HasAllergen = HasAllergen;
         b.AllergenConsentGiven = AllergenConsentGiven;
-        b.OrderId = OrderId;
         b.BookingComments = BookingComments;
         b.TableNumber = TableNumber;
         b.AdditionalTableNumbers = AdditionalTableNumbers ?? "";

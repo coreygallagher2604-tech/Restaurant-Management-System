@@ -242,7 +242,6 @@ public class BookingController : BaseController
             vm.NumberOfGuests,
             vm.HasAllergen,
             vm.AllergenConsentGiven,
-            vm.OrderId,
             vm.BookingComments,
             assignedTableNumber,
             true  // IsActive is always true on creation — staff manage this via Edit
@@ -381,15 +380,20 @@ public class BookingController : BaseController
                     var newTable = svc.GetTableByTableNumber(updated.TableNumber);
                     if (newTable != null) svc.SetTableOccupancy(newTable.Id, true, updated.NumberOfGuests);
                 }
-                // Move the order to the new table if this booking has one
-                if (updated.OrderId > 0 && updated.TableNumber > 0)
+                // Move the order to the new table if one exists for the original table
+                if (originalTableNumber > 0 && updated.TableNumber > 0)
                 {
-                    var order = svc.GetOrderById(updated.OrderId);
-                    var newTable = svc.GetTableByTableNumber(updated.TableNumber);
-                    if (order != null && newTable != null)
+                    var oldTable = svc.GetTableByTableNumber(originalTableNumber);
+                    if (oldTable != null)
                     {
-                        order.Table = newTable;
-                        svc.UpdateOrder(order);
+                        var order = svc.GetOrdersByTableId(oldTable.Id)
+                            .FirstOrDefault(o => !o.IsCompleted && !o.IsVoid);
+                        var newTable = svc.GetTableByTableNumber(updated.TableNumber);
+                        if (order != null && newTable != null)
+                        {
+                            order.Table = newTable;
+                            svc.UpdateOrder(order);
+                        }
                     }
                 }
             }
@@ -431,14 +435,19 @@ public class BookingController : BaseController
             return RedirectToAction(nameof(Index));
         }
 
-        // Block delete if the booking has an active (non-completed, non-void) order
-        if (booking.OrderId > 0)
+        // Block delete if the booking's table has an active (non-completed, non-void) order
+        if (booking.TableNumber > 0)
         {
-            var order = svc.GetOrderById(booking.OrderId);
-            if (order != null && !order.IsCompleted && !order.IsVoid)
+            var table = svc.GetTableByTableNumber(booking.TableNumber);
+            if (table != null)
             {
-                Alert("Cannot delete this booking \u2014 the customer has an active order. Complete or void the order first.", AlertType.warning);
-                return RedirectToAction(nameof(Index));
+                var activeOrder = svc.GetOrdersByTableId(table.Id)
+                    .FirstOrDefault(o => !o.IsCompleted && !o.IsVoid);
+                if (activeOrder != null)
+                {
+                    Alert("Cannot delete this booking \u2014 the customer has an active order. Complete or void the order first.", AlertType.warning);
+                    return RedirectToAction(nameof(Index));
+                }
             }
         }
 
