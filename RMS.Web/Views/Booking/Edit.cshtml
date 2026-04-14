@@ -67,41 +67,68 @@
             var takenNums = ViewBag.TakenTableNumbers as System.Collections.Generic.HashSet<int>
                             ?? new System.Collections.Generic.HashSet<int>();
         }
-        <div class="mb-3">
-            <label asp-for="TableNumber" class="form-label">Primary Table</label>
-            <select asp-for="TableNumber" class="form-select" id="primaryTableSelect">
-                @foreach (var t in (IEnumerable<RMS.Data.Entities.Table>)ViewBag.Tables)
-                {
-                    bool taken = takenNums.Contains(t.TableNumber);
-                    <option value="@t.TableNumber">
-                        T@(t.TableNumber) — seats @t.SeatingCapacity@(taken ? " (already booked)" : "")
-                    </option>
-                }
-            </select>
-            <span asp-validation-for="TableNumber" class="text-danger"></span>
-        </div>
 
-        <div class="mb-3">
-            <label class="form-label">Additional Tables (for large parties)</label>
-            <div style="max-height:180px;overflow-y:auto;border:1px solid #dee2e6;border-radius:.375rem;padding:.5rem;" id="additionalTablesList">
-                @foreach (var t in (IEnumerable<RMS.Data.Entities.Table>)ViewBag.Tables)
-                {
-                    bool taken = takenNums.Contains(t.TableNumber);
-                    <div class="form-check additional-table-item" data-table-number="@t.TableNumber">
-                        <input class="form-check-input additional-table-checkbox" type="checkbox"
-                               name="additionalTableNumbers"
-                               value="@t.TableNumber"
-                               id="tbl_@t.TableNumber"
-                               @(Model.AdditionalTableNumbersList.Contains(t.TableNumber) ? "checked" : "")
-                               @(taken ? "disabled" : "") />
-                        <label class="form-check-label @(taken ? "text-muted" : "")" for="tbl_@t.TableNumber">
-                            T@(t.TableNumber) — seats @t.SeatingCapacity@(taken ? " (already booked)" : "")
-                        </label>
-                    </div>
-                }
+        @if (User.IsInRole("admin") || User.IsInRole("owner") || User.IsInRole("manager"))
+        {
+            <div class="alert alert-warning py-2" role="alert">
+                <strong>Table changes are restricted to managers and above.</strong> Removing a table will free it immediately if guests are seated. Adding a table above capacity will require confirmation.
             </div>
-            <small class="text-muted">Tick extra tables to join. Combined capacity must cover the party size. Tables already booked for this time slot are disabled.</small>
-        </div>
+
+            <div class="mb-3">
+                <label asp-for="TableNumber" class="form-label">Primary Table</label>
+                <select asp-for="TableNumber" class="form-select" id="primaryTableSelect">
+                    @foreach (var t in (IEnumerable<RMS.Data.Entities.Table>)ViewBag.Tables)
+                    {
+                        bool taken = takenNums.Contains(t.TableNumber);
+                        <option value="@t.TableNumber">
+                            T@(t.TableNumber) — seats @t.SeatingCapacity@(taken ? " (already booked)" : "")
+                        </option>
+                    }
+                </select>
+                <span asp-validation-for="TableNumber" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Additional Tables (for large parties)</label>
+                <div style="max-height:180px;overflow-y:auto;border:1px solid #dee2e6;border-radius:.375rem;padding:.5rem;" id="additionalTablesList">
+                    @foreach (var t in (IEnumerable<RMS.Data.Entities.Table>)ViewBag.Tables)
+                    {
+                        bool taken = takenNums.Contains(t.TableNumber);
+                        <div class="form-check additional-table-item" data-table-number="@t.TableNumber">
+                            <input class="form-check-input additional-table-checkbox" type="checkbox"
+                                   name="additionalTableNumbers"
+                                   value="@t.TableNumber"
+                                   id="tbl_@t.TableNumber"
+                                   @(Model.AdditionalTableNumbersList.Contains(t.TableNumber) ? "checked" : "")
+                                   @(taken ? "disabled" : "") />
+                            <label class="form-check-label @(taken ? "text-muted" : "")" for="tbl_@t.TableNumber">
+                                T@(t.TableNumber) — seats @t.SeatingCapacity@(taken ? " (already booked)" : "")
+                            </label>
+                        </div>
+                    }
+                </div>
+                <small class="text-muted">Tick extra tables to join. Combined capacity must cover the party size. Tables already booked for this time slot are disabled.</small>
+            </div>
+        }
+        else
+        {
+            <input type="hidden" asp-for="TableNumber" />
+            <input type="hidden" asp-for="AdditionalTableNumbers" />
+            <div class="mb-3">
+                <label class="form-label">Table Assignment</label>
+                <p class="form-control-plaintext">
+                    T@(Model.TableNumber)
+                    @if (!string.IsNullOrWhiteSpace(Model.AdditionalTableNumbers))
+                    {
+                        foreach (var n in Model.AdditionalTableNumbers.Split(','))
+                        {
+                            <span class="ms-1">+ T@(n.Trim())</span>
+                        }
+                    }
+                </p>
+                <small class="text-muted">Table assignment can only be changed by a manager or above.</small>
+            </div>
+        }
 
         <div class="mb-3 form-check">
             <input asp-for="HasAllergen" class="form-check-input" />
@@ -112,7 +139,8 @@
             <label asp-for="Status" class="form-label">Status</label>
             <select asp-for="Status" class="form-select">
                 <option value="Booked">Booked</option>
-                <option value="Active">Active</option>
+                <option value="Seated">Seated</option>
+                <option value="Completed">Completed</option>
                 <option value="Cancelled">Cancelled</option>
             </select>
         </div>
