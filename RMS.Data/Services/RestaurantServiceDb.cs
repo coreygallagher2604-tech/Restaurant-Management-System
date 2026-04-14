@@ -572,6 +572,7 @@ public class RestaurantServiceDb : IRestaurantService
         if (order.Table != null)
         {
             order.Table.IsOccupied = false;
+            order.Table.CustomersSeated = 0;
             db.Tables.Update(order.Table);
         }
 

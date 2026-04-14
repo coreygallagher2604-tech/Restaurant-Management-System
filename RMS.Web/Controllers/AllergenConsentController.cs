@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using RMS.Data.Entities;
 using RMS.Data.Services;
 using RMS.Web.Models;
 
@@ -39,14 +40,23 @@ public class AllergenConsentController : BaseController
         return View(vms);
     }
 
-    // GET /AllergenConsent/Create
+    // GET /AllergenConsent/Create?orderId=0
+    // orderId is optional — when the user picks an order from the dropdown the page
+    // reloads with that order's menu items shown in the checkbox list
     [HttpGet]
     [Authorize(Roles = "admin,owner,manager,staff")]
-    public IActionResult Create()
+    public IActionResult Create(int orderId = 0)
     {
         var vm = new AllergenConsentViewModel();
-        vm.AvailableOrders = svc.GetAllOrders();
-        vm.AvailableMenuItems = svc.GetAllMenuItems();
+        vm.AvailableOrders = svc.GetAllOrders().Where(o => !o.IsCompleted && !o.IsVoid).ToList();
+        vm.OrderId = orderId;
+
+        if (orderId > 0)
+        {
+            var order = svc.GetOrderById(orderId);
+            vm.AvailableMenuItems = order?.MenuItems ?? new List<MenuItem>();
+        }
+
         return View(vm);
     }
 
@@ -58,14 +68,19 @@ public class AllergenConsentController : BaseController
     {
         if (!ModelState.IsValid)
         {
-            vm.AvailableOrders = svc.GetAllOrders();
-            vm.AvailableMenuItems = svc.GetAllMenuItems();
+            vm.AvailableOrders = svc.GetAllOrders().Where(o => !o.IsCompleted && !o.IsVoid).ToList();
+            if (vm.OrderId > 0)
+            {
+                var order = svc.GetOrderById(vm.OrderId);
+                vm.AvailableMenuItems = order?.MenuItems ?? new List<MenuItem>();
+            }
             return View(vm);
         }
 
-        var selectedItems = svc.GetAllMenuItems()
-            .Where(mi => vm.SelectedMenuItemIds.Contains(mi.Id))
-            .ToList();
+        var selectedItems = vm.OrderId > 0
+            ? (svc.GetOrderById(vm.OrderId)?.MenuItems ?? new List<MenuItem>())
+                .Where(mi => vm.SelectedMenuItemIds.Contains(mi.Id)).ToList()
+            : new List<MenuItem>();
 
         var created = svc.AddAllergenConsent(
             vm.OrderId,
@@ -83,8 +98,7 @@ public class AllergenConsentController : BaseController
         }
 
         Alert("Allergen consent could not be recorded.", AlertType.warning);
-        vm.AvailableOrders = svc.GetAllOrders();
-        vm.AvailableMenuItems = svc.GetAllMenuItems();
+        vm.AvailableOrders = svc.GetAllOrders().Where(o => !o.IsCompleted && !o.IsVoid).ToList();
         return View(vm);
     }
 

@@ -10,15 +10,25 @@ public class AllergenConsentViewModel
     public int OrderId { get; set; }
 
     [Required(ErrorMessage = "Customer name is required.")]
+    [MinLength(2, ErrorMessage = "Customer name must be at least 2 characters.")]
+    [Display(Name = "Customer Name")]
     public string CustomerName { get; set; } = "";
 
     [Required(ErrorMessage = "Email is required.")]
-    [EmailAddress]
+    [RegularExpression(
+        @"^[^@\s]+@[^@\s]+\.[^@\s]{2,}$",
+        ErrorMessage = "Enter a valid email address (e.g. name@example.com).")]
+    [Display(Name = "Customer Email")]
     public string CustomerEmail { get; set; } = "";
 
     [Required(ErrorMessage = "Phone number is required.")]
+    [RegularExpression(
+        @"^(\+353|\+44|028)[0-9]{7,10}$|^0[0-9]{8,9}$",
+        ErrorMessage = "Enter a valid Irish (+353) or UK (+44) phone number.")]
+    [Display(Name = "Phone Number")]
     public string CustomerPhone { get; set; } = "";
 
+    [Display(Name = "Consent Given")]
     public bool ConsentGiven { get; set; } = false;
 
     public DateTime CreatedOn { get; set; }

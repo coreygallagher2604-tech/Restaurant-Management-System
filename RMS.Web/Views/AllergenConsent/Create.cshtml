@@ -15,15 +15,34 @@
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
         <div class="mb-3">
-            <label asp-for="OrderId" class="form-label"></label>
-            <select asp-for="OrderId" class="form-select">
-                <option value="0">-- No Order --</option>
-                @foreach (var o in Model.AvailableOrders)
-                {
-                    <option value="@o.Id">Order #@o.Id</option>
-                }
-            </select>
+            <label class="form-label">Order</label>
+            <div class="d-flex gap-2">
+                <select id="orderPicker" name="orderId" form="orderPickerForm" class="form-select">
+                    <option value="0">-- Select an Order --</option>
+                    @foreach (var o in Model.AvailableOrders)
+                    {
+                        if (o.Id == Model.OrderId)
+                        {
+                            <option value="@o.Id" selected>
+                                Order #@o.Id — T@(o.Table != null ? o.Table.TableNumber.ToString() : "—") (£@o.totalCost.ToString("F2"))
+                            </option>
+                        }
+                        else
+                        {
+                            <option value="@o.Id">
+                                Order #@o.Id — T@(o.Table != null ? o.Table.TableNumber.ToString() : "—") (£@o.totalCost.ToString("F2"))
+                            </option>
+                        }
+                    }
+                </select>
+                <button type="submit" form="orderPickerForm" class="btn btn-outline-secondary">Load Items</button>
+            </div>
+            <input asp-for="OrderId" type="hidden" />
         </div>
+
+        @* This is a separate GET form. Clicking Load Items sends orderId to the controller,
+           which reloads the page with only that order's menu items shown below. *@
+        <form id="orderPickerForm" method="get" asp-action="Create"></form>
 
         <div class="mb-3">
             <label asp-for="CustomerName" class="form-label"></label>
@@ -39,7 +58,7 @@
 
         <div class="mb-3">
             <label asp-for="CustomerPhone" class="form-label"></label>
-            <input asp-for="CustomerPhone" class="form-control" />
+            <input asp-for="CustomerPhone" class="form-control" placeholder="e.g. 07712345678 or +447712345678" />
             <span asp-validation-for="CustomerPhone" class="text-danger"></span>
         </div>
 
@@ -49,17 +68,25 @@
         </div>
 
         <div class="mt-3">
-            <label class="form-label">Menu Items</label>
+            <label class="form-label">Menu Items on this Order</label>
             <div class="border rounded p-3" style="max-height:250px; overflow-y:auto;">
-                @foreach (var item in Model.AvailableMenuItems)
+                @if (Model.AvailableMenuItems.Count == 0)
                 {
-                    <div class="form-check">
-                        <input type="checkbox" name="SelectedMenuItemIds" value="@item.Id"
-                               class="form-check-input" id="item_@item.Id" />
-                        <label class="form-check-label" for="item_@item.Id">
-                            @item.Name <span class="text-muted">(@item.Type)</span>
-                        </label>
-                    </div>
+                    <p class="text-muted mb-0">Select an order above to see its items.</p>
+                }
+                else
+                {
+                    @foreach (var item in Model.AvailableMenuItems)
+                    {
+                        <div class="form-check">
+                            <input type="checkbox" name="SelectedMenuItemIds" value="@item.Id"
+                                   class="form-check-input" id="item_@item.Id"
+                                   @(Model.SelectedMenuItemIds.Contains(item.Id) ? "checked" : "") />
+                            <label class="form-check-label" for="item_@item.Id">
+                                @item.Name <span class="text-muted">(@item.Type)</span>
+                            </label>
+                        </div>
+                    }
                 }
             </div>
         </div>

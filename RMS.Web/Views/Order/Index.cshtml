@@ -50,6 +50,15 @@
                             <a asp-action="MarkCompleted" asp-route-id="@o.Id" class="btn btn-sm btn-outline-success">Complete</a>
                             <a asp-action="Void" asp-route-id="@o.Id" class="btn btn-sm btn-outline-secondary">Void</a>
                         }
+                        @if (o.IsVoid)
+                        {
+                            <form asp-action="RestoreConfirm" method="post" style="display:inline">
+                                <input type="hidden" name="id" value="@o.Id" />
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-outline-warning"
+                                        onclick="return confirm('Restore this order?')">Restore</button>
+                            </form>
+                        }
                     </td>
                 </tr>
             }

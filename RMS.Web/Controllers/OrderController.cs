@@ -218,6 +218,19 @@ public class OrderController : BaseController
         return RedirectToAction(nameof(Index));
     }
 
+    // POST /Order/RestoreConfirm — undo a void, sets IsVoid back to false
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [Authorize(Roles = "admin,owner")]
+    public IActionResult RestoreConfirm(int id)
+    {
+        var updated = svc.VoidOrder(id, false);
+        Alert(updated is not null ? "Order has been restored." : "Order could not be restored.",
+              updated is not null ? AlertType.success : AlertType.warning);
+
+        return RedirectToAction(nameof(Index));
+    }
+
     // POST /Order/Delete
     [HttpPost]
     [ValidateAntiForgeryToken]
