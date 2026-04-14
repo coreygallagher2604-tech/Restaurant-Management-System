@@ -109,7 +109,7 @@ public class UserController : Controller
     [Authorize(Roles = "admin,owner")]
     public IActionResult EditRole(int id, UserViewModel vm)
     {
-        if (id == GetSignedInUserId())
+        if (id == User.GetSignedInUserId())
         {
             TempData["Alert.Message"] = "You cannot change your own role.";
             TempData["Alert.Type"] = "warning";
