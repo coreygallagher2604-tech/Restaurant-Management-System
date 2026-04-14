@@ -724,7 +724,7 @@ public class RestaurantServiceDb : IRestaurantService
  // -------- Booking Related Operations ------------
 
     // Add Booking
-    public Booking AddBooking(string customerName, string phoneNumber, string email, DateTime bookingDateTime, int numberOfGuests, bool hasAllergen = false, bool allergenConsentGiven = false, int orderId = 0, string bookingComments = "", int tableNumber = 0, bool isActive = true)
+    public Booking AddBooking(string customerName, string phoneNumber, string email, DateTime bookingDateTime, int numberOfGuests, bool hasAllergen = false, bool allergenConsentGiven = false, string bookingComments = "", int tableNumber = 0, bool isActive = true)
     {
         var booking = new Booking
         {
@@ -735,7 +735,6 @@ public class RestaurantServiceDb : IRestaurantService
             NumberOfGuests = numberOfGuests,
             HasAllergen = hasAllergen,
             AllergenConsentGiven = allergenConsentGiven,
-            OrderId = orderId,
             BookingComments = bookingComments,
             TableNumber = tableNumber,
             IsActive = isActive,
@@ -795,7 +794,6 @@ public class RestaurantServiceDb : IRestaurantService
         existingBooking.NumberOfGuests = booking.NumberOfGuests;
         existingBooking.HasAllergen = booking.HasAllergen;
         existingBooking.AllergenConsentGiven = booking.AllergenConsentGiven;
-        existingBooking.OrderId = booking.OrderId;
         existingBooking.BookingComments = booking.BookingComments;
         existingBooking.TableNumber = booking.TableNumber;
         existingBooking.IsActive = booking.IsActive;

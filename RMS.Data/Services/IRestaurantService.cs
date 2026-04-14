@@ -121,7 +121,7 @@ public interface IRestaurantService
 
     // ---------------- Booking Management ---------------
 
-    Booking AddBooking(string customerName, string phoneNumber, string email, DateTime bookingDateTime, int numberOfGuests, bool hasAllergen = false, bool allergenConsentGiven = false, int orderId = 0, string bookingComments = "", int tableNumber = 0, bool isActive = true);
+    Booking AddBooking(string customerName, string phoneNumber, string email, DateTime bookingDateTime, int numberOfGuests, bool hasAllergen = false, bool allergenConsentGiven = false, string bookingComments = "", int tableNumber = 0, bool isActive = true);
 
     List<Booking> GetAllBookings();
 
