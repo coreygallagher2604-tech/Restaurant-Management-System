@@ -93,7 +93,10 @@
                                     @Html.AntiForgeryToken()
                                     <button type="submit" class="btn btn-sm btn-outline-warning">Cancel</button>
                                 </form>
-                                <a asp-action="Delete" asp-route-id="@b.Id" class="btn btn-sm btn-outline-danger">Delete</a>
+                                <form asp-action="DeleteConfirm" asp-route-id="@b.Id" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this booking? This cannot be undone.')">Delete</button>
+                                </form>
                             }
                             else if (b.Status == "Seated")
                             {
@@ -105,7 +108,10 @@
                             }
                             else if (b.Status == "Cancelled")
                             {
-                                <a asp-action="Delete" asp-route-id="@b.Id" class="btn btn-sm btn-outline-danger">Delete</a>
+                                <form asp-action="DeleteConfirm" asp-route-id="@b.Id" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this booking? This cannot be undone.')">Delete</button>
+                                </form>
                             }
                         }
                     </td>
