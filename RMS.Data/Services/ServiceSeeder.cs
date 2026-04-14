@@ -638,7 +638,7 @@ public static class ServiceSeeder
             var order = CompletedOrder(s, tableNumber, orderItems, reviewer, stars, reviewText);
             var b = s.AddBooking(name, phone, email, dt, guests, allergen, allergen,
                                  comment, tableNumber, false);
-            if (b != null) { b.Status = "Cancelled"; s.UpdateBooking(b); }
+            if (b != null) { b.Status = "Completed"; s.UpdateBooking(b); }
         }
 
         // =========================================================
@@ -678,26 +678,33 @@ public static class ServiceSeeder
 
         // Lunch sittings — all completed and gone home
         var lunchO1 = CompletedOrder(svc, 4,  Items(chickenSandwich, fruitSalad),    "Siobhan Quinn",   4, "Quick and tasty lunch. Good value.");
-        svc.AddBooking("Siobhan Quinn",   "0871111001", "siobhan@example.com",   today.AddHours(12),               2, false, false, "",                                    4,  false);
+        var lb1 = svc.AddBooking("Siobhan Quinn",   "0871111001", "siobhan@example.com",   today.AddHours(12),               2, false, false, "",                                    4,  false);
+        if (lb1 != null) { lb1.Status = "Completed"; svc.UpdateBooking(lb1); }
 
         var lunchO2 = CompletedOrder(svc, 5,  Items(pasta, chocolateBrownie));
-        svc.AddBooking("Donal Hegarty",   "0852222002", "donal@example.com",     today.AddHours(12).AddMinutes(30), 4, false, false, "",                                   5,  false);
+        var lb2 = svc.AddBooking("Donal Hegarty",   "0852222002", "donal@example.com",     today.AddHours(12).AddMinutes(30), 4, false, false, "",                                   5,  false);
+        if (lb2 != null) { lb2.Status = "Completed"; svc.UpdateBooking(lb2); }
 
         var lunchO3 = CompletedOrder(svc, 6,  Items(chickenSandwich, pasta),         "Patricia Flynn",  5, "The pasta primavera is a must. Absolutely delicious.");
-        svc.AddBooking("Patricia Flynn",  "0863333003", "patricia@example.com",  today.AddHours(13),               3, false, false, "",                                    6,  false);
+        var lb3 = svc.AddBooking("Patricia Flynn",  "0863333003", "patricia@example.com",  today.AddHours(13),               3, false, false, "",                                    6,  false);
+        if (lb3 != null) { lb3.Status = "Completed"; svc.UpdateBooking(lb3); }
 
         var lunchO4 = CompletedOrder(svc, 7,  Items(chickenSandwich, fruitSalad));
-        svc.AddBooking("Gerard Higgins",  "0874444004", "gerard@example.com",    today.AddHours(13).AddMinutes(30), 2, false, false, "",                                   7,  false);
+        var lb4 = svc.AddBooking("Gerard Higgins",  "0874444004", "gerard@example.com",    today.AddHours(13).AddMinutes(30), 2, false, false, "",                                   7,  false);
+        if (lb4 != null) { lb4.Status = "Completed"; svc.UpdateBooking(lb4); }
 
         // Early dinner sittings (17:30 start) — all completed by 20:30
         var earlyO1 = CompletedOrder(svc, 8,  Items(bruschetta, salmon, cheesecake), "Nuala Sheridan",  5, "Salmon was the best I've ever had. Highly recommend.");
-        svc.AddBooking("Nuala Sheridan",  "0885555005", "nuala@example.com",     today.AddHours(17).AddMinutes(30), 2, false, false, "",                                   8,  false);
+        var eb1 = svc.AddBooking("Nuala Sheridan",  "0885555005", "nuala@example.com",     today.AddHours(17).AddMinutes(30), 2, false, false, "",                                   8,  false);
+        if (eb1 != null) { eb1.Status = "Completed"; svc.UpdateBooking(eb1); }
 
         var earlyO2 = CompletedOrder(svc, 9,  Items(prawnCocktail, steak, appleCrumble), "Ronan Gallagher", 4, "Great food, came for a birthday and were looked after really well.");
-        svc.AddBooking("Ronan Gallagher", "0896666006", "ronan@example.com",     today.AddHours(18),               4, false, false, "Birthday dinner",                     9,  false);
+        var eb2 = svc.AddBooking("Ronan Gallagher", "0896666006", "ronan@example.com",     today.AddHours(18),               4, false, false, "Birthday dinner",                     9,  false);
+        if (eb2 != null) { eb2.Status = "Completed"; svc.UpdateBooking(eb2); }
 
         var earlyO3 = CompletedOrder(svc, 10, Items(bruschetta, salmon, cheesecake));
-        svc.AddBooking("Kathleen Doherty","0817777007", "kathleen@example.com",  today.AddHours(18).AddMinutes(30), 6, true,  true,  "Nut allergy — please advise kitchen", 10, false);
+        var eb3 = svc.AddBooking("Kathleen Doherty","0817777007", "kathleen@example.com",  today.AddHours(18).AddMinutes(30), 6, true,  true,  "Nut allergy — please advise kitchen", 10, false);
+        if (eb3 != null) { eb3.Status = "Completed"; svc.UpdateBooking(eb3); }
         if (earlyO3 != null)
             svc.AddAllergenConsent(earlyO3.Id, "Kathleen Doherty", "kathleen@example.com", "0817777007", true, earlyO3.MenuItems);
 

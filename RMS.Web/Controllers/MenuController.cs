@@ -190,6 +190,12 @@ public class MenuController : BaseController
             return RedirectToAction(nameof(Index));
         }
 
+        if (m.IsActive)
+        {
+            Alert("Cannot delete an active menu. Deactivate it first.", AlertType.warning);
+            return RedirectToAction(nameof(Index));
+        }
+
         var deleted = svc.DeleteMenu(id);
         Alert(deleted ? "Menu has been deleted." : "Menu could not be deleted.",
               deleted ? AlertType.success : AlertType.danger);

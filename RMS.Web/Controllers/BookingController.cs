@@ -21,7 +21,24 @@ public class BookingController : BaseController
     [HttpGet]
     public IActionResult Index()
     {
-        var bookings = svc.GetAllBookings();
+        var bookings = svc.GetAllBookings()
+            .Where(b => b.Status != "Cancelled")
+            .OrderBy(b => b.Status == "Seated" ? 0 : b.Status == "Booked" ? 1 : 2)
+            .ThenBy(b => b.BookingDateTime)
+            .ToList();
+        var vms = bookings.Select(BookingViewModel.FromBooking).ToList();
+        return View(vms);
+    }
+
+    // GET /Booking/Cancelled — cancelled bookings, managers and above only
+    [HttpGet]
+    [Authorize(Roles = "admin,owner,manager")]
+    public IActionResult Cancelled()
+    {
+        var bookings = svc.GetAllBookings()
+            .Where(b => b.Status == "Cancelled")
+            .OrderByDescending(b => b.BookingDateTime)
+            .ToList();
         var vms = bookings.Select(BookingViewModel.FromBooking).ToList();
         return View(vms);
     }
