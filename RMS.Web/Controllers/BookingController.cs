@@ -47,18 +47,20 @@ public class BookingController : BaseController
     {
         DateTime bookingDateTime;
 
+        // Calculate the next 15-minute boundary from now — never allow a past slot
+        var now = DateTime.Now;
+        var nextSlot = new DateTime(now.Year, now.Month, now.Day, now.Hour, 0, 0)
+            .AddMinutes(15 * (int)Math.Ceiling(now.Minute / 15.0));
+
         // Try to combine the date and time values passed from the Home partial
         if (!string.IsNullOrEmpty(bookingDate) && !string.IsNullOrEmpty(bookingTime)
             && DateTime.TryParse($"{bookingDate} {bookingTime}", out var parsed))
         {
-            bookingDateTime = parsed;
+            bookingDateTime = parsed < nextSlot ? nextSlot : parsed;
         }
         else
         {
-            // Fall back to the next 15-minute boundary
-            var now = DateTime.Now;
-            var minutes = 15 * (int)Math.Ceiling(now.Minute / 15.0);
-            bookingDateTime = new DateTime(now.Year, now.Month, now.Day, now.Hour, 0, 0).AddMinutes(minutes);
+            bookingDateTime = nextSlot;
         }
 
         int guestCount = numberOfGuests ?? 1;
@@ -171,6 +173,13 @@ public class BookingController : BaseController
         if (!ModelState.IsValid)
         {
             return View(vm);
+        }
+
+        // Reject bookings in the past
+        if (vm.BookingDateTime < DateTime.Now)
+        {
+            ModelState.AddModelError("", $"Booking time must be in the future. The earliest available slot is after {DateTime.Now:h:mm tt}.");
+            return View("Create", vm);
         }
 
         // Each booking occupies a 2-hour slot plus 15 minutes for table turnaround
@@ -343,7 +352,12 @@ public class BookingController : BaseController
 
                 if (totalCapacity < vm.NumberOfGuests)
                 {
-                    ModelState.AddModelError("TableNumber", $"Selected tables seat {totalCapacity} but the booking is for {vm.NumberOfGuests} guest(s).");
+                    bool canOverride = User.IsInRole("admin") || User.IsInRole("owner") || User.IsInRole("manager");
+                    if (!canOverride)
+                    {
+                        ModelState.AddModelError("TableNumber", $"Selected tables seat {totalCapacity} but the booking is for {vm.NumberOfGuests} guest(s). A manager or owner must approve this override.");
+                    }
+                    // managers/owners/admins proceed — capacity warning shown after save
                 }
             }
         }
@@ -355,9 +369,27 @@ public class BookingController : BaseController
             return View(vm);
         }
 
-        // Capture original table before updating, so we can sync occupancy and order
+        // Capture original tables before updating, so we can sync occupancy
         var originalBooking = svc.GetBookingById(id);
         int originalTableNumber = originalBooking?.TableNumber ?? 0;
+        var originalAdditional = (originalBooking?.AdditionalTableNumbers ?? "")
+            .Split(',', StringSplitOptions.RemoveEmptyEntries)
+            .Select(s => int.TryParse(s.Trim(), out var n) ? n : 0)
+            .Where(n => n > 0).ToHashSet();
+        var newAdditional = (vm.AdditionalTableNumbers ?? "")
+            .Split(',', StringSplitOptions.RemoveEmptyEntries)
+            .Select(s => int.TryParse(s.Trim(), out var n) ? n : 0)
+            .Where(n => n > 0).ToHashSet();
+        bool wasSeated = originalBooking?.Status == "Seated";
+
+        // Calculate total capacity for override warning (after ModelState check)
+        var allTablesForCapacity = svc.GetAllTables().ToList();
+        int updatedTotalCapacity = allTablesForCapacity.FirstOrDefault(t => t.TableNumber == vm.TableNumber)?.SeatingCapacity ?? 0;
+        foreach (var tNum in additionalTableNumbers ?? new List<int>())
+        {
+            var extra = allTablesForCapacity.FirstOrDefault(t => t.TableNumber == tNum);
+            if (extra != null) updatedTotalCapacity += extra.SeatingCapacity;
+        }
 
         var booking = vm.ToBooking();
         booking.Id = id;
@@ -365,22 +397,20 @@ public class BookingController : BaseController
 
         if (updated is not null)
         {
-            // If the primary table changed, update table occupancy and order table reference
-            if (updated.TableNumber != originalTableNumber)
+            // If the primary table changed on a seated booking, sync occupancy
+            if (wasSeated && updated.TableNumber != originalTableNumber)
             {
-                // Free the old table
                 if (originalTableNumber > 0)
                 {
                     var oldTable = svc.GetTableByTableNumber(originalTableNumber);
                     if (oldTable != null) svc.SetTableOccupancy(oldTable.Id, false, 0);
                 }
-                // Mark the new table as occupied
                 if (updated.TableNumber > 0)
                 {
                     var newTable = svc.GetTableByTableNumber(updated.TableNumber);
                     if (newTable != null) svc.SetTableOccupancy(newTable.Id, true, updated.NumberOfGuests);
                 }
-                // Move the order to the new table if one exists for the original table
+                // Move any active order to the new table
                 if (originalTableNumber > 0 && updated.TableNumber > 0)
                 {
                     var oldTable = svc.GetTableByTableNumber(originalTableNumber);
@@ -397,7 +427,29 @@ public class BookingController : BaseController
                     }
                 }
             }
-            Alert($"Booking for '{updated.CustomerName}' updated.", AlertType.success);
+
+            // Sync additional tables for seated bookings
+            if (wasSeated)
+            {
+                // Free tables that were removed
+                foreach (var tn in originalAdditional.Except(newAdditional))
+                {
+                    var t = svc.GetTableByTableNumber(tn);
+                    if (t != null) svc.SetTableOccupancy(t.Id, false, 0);
+                }
+                // Occupy tables that were added
+                foreach (var tn in newAdditional.Except(originalAdditional))
+                {
+                    var t = svc.GetTableByTableNumber(tn);
+                    if (t != null) svc.SetTableOccupancy(t.Id, true, updated.NumberOfGuests);
+                }
+            }
+
+            // Warn if capacity exceeded (manager/owner/admin override)
+            if (updated.NumberOfGuests > updatedTotalCapacity)
+                Alert($"Warning: booking saved with {updated.NumberOfGuests} guests but combined table capacity is only {updatedTotalCapacity}. Capacity limit exceeded \u2014 approved override.", AlertType.warning);
+            else
+                Alert($"Booking for '{updated.CustomerName}' updated.", AlertType.success);
             return RedirectToAction(nameof(Index));
         }
 
@@ -435,20 +487,11 @@ public class BookingController : BaseController
             return RedirectToAction(nameof(Index));
         }
 
-        // Block delete if the booking's table has an active (non-completed, non-void) order
-        if (booking.TableNumber > 0)
+        // Block delete if guests are currently seated
+        if (booking.Status == "Seated")
         {
-            var table = svc.GetTableByTableNumber(booking.TableNumber);
-            if (table != null)
-            {
-                var activeOrder = svc.GetOrdersByTableId(table.Id)
-                    .FirstOrDefault(o => !o.IsCompleted && !o.IsVoid);
-                if (activeOrder != null)
-                {
-                    Alert("Cannot delete this booking \u2014 the customer has an active order. Complete or void the order first.", AlertType.warning);
-                    return RedirectToAction(nameof(Index));
-                }
-            }
+            Alert("Cannot delete \u2014 guests are currently seated. Close the booking when they leave.", AlertType.warning);
+            return RedirectToAction(nameof(Index));
         }
 
         var deleted = svc.DeleteBooking(id);
@@ -465,23 +508,78 @@ public class BookingController : BaseController
         return RedirectToAction(nameof(Index));
     }
 
-    // POST /Booking/SetActive/{id}
+    // POST /Booking/SeatGuests/{id}
     [HttpPost]
     [ValidateAntiForgeryToken]
     [Authorize(Roles = "admin,owner,manager,staff")]
-    public IActionResult SetActive(int id, bool isActive)
+    public IActionResult SeatGuests(int id)
     {
-        var updated = svc.SetBookingActiveStatus(id, isActive);
+        var booking = svc.GetBookingById(id);
+        if (booking is null)
+        {
+            Alert("Booking not found.", AlertType.warning);
+            return RedirectToAction(nameof(Index));
+        }
 
+        // Calculate total capacity across all linked tables
+        var allTables = svc.GetAllTables().ToList();
+        int totalCapacity = 0;
+        var primaryTable = allTables.FirstOrDefault(t => t.TableNumber == booking.TableNumber);
+        if (primaryTable != null) totalCapacity += primaryTable.SeatingCapacity;
+        foreach (var part in (booking.AdditionalTableNumbers ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries))
+            if (int.TryParse(part.Trim(), out var tn))
+            {
+                var extra = allTables.FirstOrDefault(t => t.TableNumber == tn);
+                if (extra != null) totalCapacity += extra.SeatingCapacity;
+            }
+
+        bool capacityExceeded = booking.NumberOfGuests > totalCapacity;
+        bool canOverride = User.IsInRole("admin") || User.IsInRole("owner") || User.IsInRole("manager");
+
+        if (capacityExceeded && !canOverride)
+        {
+            Alert($"Cannot seat {booking.NumberOfGuests} guests \u2014 combined table capacity is {totalCapacity}. A manager or owner must approve this override.", AlertType.warning);
+            return RedirectToAction(nameof(Index));
+        }
+
+        var updated = svc.SeatGuests(id);
         if (updated is not null)
         {
-            Alert($"Booking status updated.", AlertType.success);
+            if (capacityExceeded)
+                Alert($"Warning: {updated.NumberOfGuests} guests seated on tables with combined capacity of {totalCapacity}. Capacity limit exceeded \u2014 approved override.", AlertType.warning);
+            else
+                Alert($"'{updated.CustomerName}' seated. Table {updated.TableNumber} marked occupied.", AlertType.success);
         }
         else
-        {
-            Alert("Booking status could not be updated.", AlertType.warning);
-        }
+            Alert("Could not seat guests \u2014 booking may already be seated or not found.", AlertType.warning);
+        return RedirectToAction(nameof(Index));
+    }
 
+    // POST /Booking/CloseBooking/{id}
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [Authorize(Roles = "admin,owner,manager,staff")]
+    public IActionResult CloseBooking(int id)
+    {
+        var updated = svc.CloseBooking(id);
+        if (updated is not null)
+            Alert($"Booking for '{updated.CustomerName}' closed. Table freed.", AlertType.success);
+        else
+            Alert("Could not close booking \u2014 guests must be seated first.", AlertType.warning);
+        return RedirectToAction(nameof(Index));
+    }
+
+    // POST /Booking/CancelBooking/{id}
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [Authorize(Roles = "admin,owner,manager,staff")]
+    public IActionResult CancelBooking(int id)
+    {
+        var updated = svc.CancelBooking(id);
+        if (updated is not null)
+            Alert($"Booking for '{updated.CustomerName}' cancelled.", AlertType.success);
+        else
+            Alert("Could not cancel \u2014 only Booked reservations can be cancelled.", AlertType.warning);
         return RedirectToAction(nameof(Index));
     }
 }

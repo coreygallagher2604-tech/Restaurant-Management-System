@@ -135,7 +135,11 @@ public interface IRestaurantService
 
     bool DeleteBooking(int id);
 
-    Booking SetBookingActiveStatus(int id, bool isActive);
+    Booking SeatGuests(int bookingId);
+
+    Booking CloseBooking(int bookingId);
+
+    Booking CancelBooking(int bookingId);
 
 
     // ---------------- MenuItem Management ---------------

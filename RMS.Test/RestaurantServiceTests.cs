@@ -1236,14 +1236,15 @@ public class BookingServiceTests
     }
 
     [Fact]
-    public void Can_set_booking_active_status()
+    public void Can_seat_guests()
     {
-        var booking = svc.AddBooking("Toggle", "1", "t@test.com", DateTime.UtcNow.AddHours(1), 2, isActive: true);
+        var booking = svc.AddBooking("Toggle", "0871234567", "t@test.com", DateTime.Today.AddHours(19), 2);
 
-        var updated = svc.SetBookingActiveStatus(booking.Id, false);
+        var updated = svc.SeatGuests(booking.Id);
 
         Assert.NotNull(updated);
-        Assert.False(updated.IsActive);
+        Assert.Equal("Seated", updated.Status);
+        Assert.True(updated.IsActive);
     }
 
     [Fact]
@@ -1257,16 +1258,15 @@ public class BookingServiceTests
     }
 
     [Fact]
-    public void Can_update_booking_status_to_active()
+    public void Can_update_booking_status_to_seated()
     {
-        // Staff seat the guests — status changes from Booked to Active
+        // Staff seat the guests — status changes from Booked to Seated
         var booking = svc.AddBooking("Bob", "0851234567", "bob@test.com", DateTime.Today.AddHours(19), 2);
-        booking.Status = "Active";
 
-        var updated = svc.UpdateBooking(booking);
+        var updated = svc.SeatGuests(booking.Id);
 
         Assert.NotNull(updated);
-        Assert.Equal("Active", updated.Status);
+        Assert.Equal("Seated", updated.Status);
     }
 
     [Fact]
