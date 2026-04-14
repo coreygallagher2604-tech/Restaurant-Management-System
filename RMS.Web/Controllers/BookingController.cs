@@ -47,18 +47,20 @@ public class BookingController : BaseController
     {
         DateTime bookingDateTime;
 
+        // Calculate the next 15-minute boundary from now — never allow a past slot
+        var now = DateTime.Now;
+        var nextSlot = new DateTime(now.Year, now.Month, now.Day, now.Hour, 0, 0)
+            .AddMinutes(15 * (int)Math.Ceiling(now.Minute / 15.0));
+
         // Try to combine the date and time values passed from the Home partial
         if (!string.IsNullOrEmpty(bookingDate) && !string.IsNullOrEmpty(bookingTime)
             && DateTime.TryParse($"{bookingDate} {bookingTime}", out var parsed))
         {
-            bookingDateTime = parsed;
+            bookingDateTime = parsed < nextSlot ? nextSlot : parsed;
         }
         else
         {
-            // Fall back to the next 15-minute boundary
-            var now = DateTime.Now;
-            var minutes = 15 * (int)Math.Ceiling(now.Minute / 15.0);
-            bookingDateTime = new DateTime(now.Year, now.Month, now.Day, now.Hour, 0, 0).AddMinutes(minutes);
+            bookingDateTime = nextSlot;
         }
 
         int guestCount = numberOfGuests ?? 1;
@@ -171,6 +173,13 @@ public class BookingController : BaseController
         if (!ModelState.IsValid)
         {
             return View(vm);
+        }
+
+        // Reject bookings in the past
+        if (vm.BookingDateTime < DateTime.Now)
+        {
+            ModelState.AddModelError("", $"Booking time must be in the future. The earliest available slot is after {DateTime.Now:h:mm tt}.");
+            return View("Create", vm);
         }
 
         // Each booking occupies a 2-hour slot plus 15 minutes for table turnaround
@@ -433,22 +442,6 @@ public class BookingController : BaseController
         {
             Alert("Booking not found.", AlertType.warning);
             return RedirectToAction(nameof(Index));
-        }
-
-        // Block delete if the booking's table has an active (non-completed, non-void) order
-        if (booking.TableNumber > 0)
-        {
-            var table = svc.GetTableByTableNumber(booking.TableNumber);
-            if (table != null)
-            {
-                var activeOrder = svc.GetOrdersByTableId(table.Id)
-                    .FirstOrDefault(o => !o.IsCompleted && !o.IsVoid);
-                if (activeOrder != null)
-                {
-                    Alert("Cannot delete this booking \u2014 the customer has an active order. Complete or void the order first.", AlertType.warning);
-                    return RedirectToAction(nameof(Index));
-                }
-            }
         }
 
         var deleted = svc.DeleteBooking(id);
