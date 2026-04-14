@@ -7,6 +7,7 @@ using RMS.Web.Models;
 
 namespace RMS.Web.Controllers;
 
+[Authorize(Roles = "admin,owner,manager,staff")]
 public class BookingController : BaseController
 {
     private IRestaurantService svc;
@@ -40,9 +41,23 @@ public class BookingController : BaseController
         return View(BookingViewModel.FromBooking(booking));
     }
 
+    // GET /Booking/Confirmation/{id} — open to all users so guests can see their booking confirmation
+    [HttpGet]
+    [AllowAnonymous]
+    public IActionResult Confirmation(int id)
+    {
+        var booking = svc.GetBookingById(id);
+        if (booking is null)
+        {
+            return RedirectToAction("Index", "Home");
+        }
+        return View(BookingViewModel.FromBooking(booking));
+    }
+
     // GET /Booking/CreateBooking — open to all users including guests and anonymous
     // Accepts optional query params from the Home page booking partial
     [HttpGet]
+    [AllowAnonymous]
     public IActionResult CreateBooking(string bookingDate = null, string bookingTime = null, int? numberOfGuests = null)
     {
         DateTime bookingDateTime;
@@ -154,6 +169,7 @@ public class BookingController : BaseController
 
     // POST /Booking/CreateBooking — open to all users including guests and anonymous
     [HttpPost]
+    [AllowAnonymous]
     [ValidateAntiForgeryToken]
     public IActionResult CreateBooking(BookingViewModel vm, string bookingDatePart, string bookingTimePart)
     {
@@ -258,8 +274,7 @@ public class BookingController : BaseController
 
         if (created is not null)
         {
-            Alert($"Booking for '{created.CustomerName}' added.", AlertType.success);
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Confirmation), new { id = created.Id });
         }
 
         Alert("Booking could not be created.", AlertType.warning);

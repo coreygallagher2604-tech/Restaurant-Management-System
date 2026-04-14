@@ -6,6 +6,7 @@ using RMS.Web.Models;
 
 namespace RMS.Web.Controllers;
 
+[Authorize(Roles = "admin,owner,manager,staff")]
 public class IngredientController : BaseController
 {
     private IRestaurantService svc;
