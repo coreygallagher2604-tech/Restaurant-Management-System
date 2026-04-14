@@ -109,6 +109,12 @@ public class UserController : Controller
     [Authorize(Roles = "admin,owner")]
     public IActionResult EditRole(int id, UserViewModel vm)
     {
+        if (id == GetSignedInUserId())
+        {
+            TempData["Alert.Message"] = "You cannot change your own role.";
+            TempData["Alert.Type"] = "warning";
+            return RedirectToAction(nameof(Index));
+        }
         var updated = _svc.UpdateUserRole(id, vm.Role);
         if (updated is not null)
         {

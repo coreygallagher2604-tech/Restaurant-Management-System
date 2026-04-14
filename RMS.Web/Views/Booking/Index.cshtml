@@ -86,10 +86,13 @@
                         {
                             @if (b.Status == "Booked")
                             {
-                                <form asp-action="SeatGuests" asp-route-id="@b.Id" method="post" class="d-inline">
-                                    @Html.AntiForgeryToken()
-                                    <button type="submit" class="btn btn-sm btn-success">Seat Guests</button>
-                                </form>
+                                @if (b.BookingDateTime.Date == DateTime.Today)
+                                {
+                                    <form asp-action="SeatGuests" asp-route-id="@b.Id" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-success">Seat Guests</button>
+                                    </form>
+                                }
                                 <a asp-action="Edit" asp-route-id="@b.Id" class="btn btn-sm btn-outline-primary">Edit</a>
                                 <form asp-action="CancelBooking" asp-route-id="@b.Id" method="post" class="d-inline">
                                     @Html.AntiForgeryToken()
