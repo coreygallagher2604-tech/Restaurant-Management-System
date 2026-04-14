@@ -818,19 +818,85 @@ public class RestaurantServiceDb : IRestaurantService
         return true;
     }
 
-    // Set Booking Active Status
-    public Booking SetBookingActiveStatus(int id, bool isActive)
+    // Seat guests — Booked → Seated, mark all linked tables occupied
+    public Booking SeatGuests(int bookingId)
     {
-        var booking = GetBookingById(id);
-        if (booking == null)
+        var booking = GetBookingById(bookingId);
+        if (booking == null || booking.Status != "Booked") return null;
+
+        booking.Status = "Seated";
+        booking.IsActive = true;
+        db.Bookings.Update(booking);
+
+        // Set primary table occupied
+        if (booking.TableNumber > 0)
         {
-            return null; // Booking not found
+            var table = GetTableByTableNumber(booking.TableNumber);
+            if (table != null) SetTableOccupancy(table.Id, true, booking.NumberOfGuests);
         }
 
-        booking.IsActive = isActive;
+        // Set all additional tables occupied with same guest count
+        if (!string.IsNullOrWhiteSpace(booking.AdditionalTableNumbers))
+        {
+            foreach (var part in booking.AdditionalTableNumbers.Split(',', StringSplitOptions.RemoveEmptyEntries))
+            {
+                if (int.TryParse(part.Trim(), out var tn))
+                {
+                    var extra = GetTableByTableNumber(tn);
+                    if (extra != null) SetTableOccupancy(extra.Id, true, booking.NumberOfGuests);
+                }
+            }
+        }
+
+        db.SaveChanges();
+        return GetBookingById(bookingId);
+    }
+
+    // Close booking — Seated → Completed, free all linked tables
+    public Booking CloseBooking(int bookingId)
+    {
+        var booking = GetBookingById(bookingId);
+        if (booking == null || booking.Status != "Seated") return null;
+
+        booking.Status = "Completed";
+        booking.IsActive = false;
+        db.Bookings.Update(booking);
+
+        // Free primary table
+        if (booking.TableNumber > 0)
+        {
+            var table = GetTableByTableNumber(booking.TableNumber);
+            if (table != null) SetTableOccupancy(table.Id, false, 0);
+        }
+
+        // Free all additional tables
+        if (!string.IsNullOrWhiteSpace(booking.AdditionalTableNumbers))
+        {
+            foreach (var part in booking.AdditionalTableNumbers.Split(',', StringSplitOptions.RemoveEmptyEntries))
+            {
+                if (int.TryParse(part.Trim(), out var tn))
+                {
+                    var extra = GetTableByTableNumber(tn);
+                    if (extra != null) SetTableOccupancy(extra.Id, false, 0);
+                }
+            }
+        }
+
+        db.SaveChanges();
+        return GetBookingById(bookingId);
+    }
+
+    // Cancel booking — only valid from Booked
+    public Booking CancelBooking(int bookingId)
+    {
+        var booking = GetBookingById(bookingId);
+        if (booking == null || booking.Status != "Booked") return null;
+
+        booking.Status = "Cancelled";
+        booking.IsActive = false;
         db.Bookings.Update(booking);
         db.SaveChanges();
-        return GetBookingById(booking.Id);
+        return GetBookingById(bookingId);
     }
 
 

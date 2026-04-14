@@ -444,6 +444,13 @@ public class BookingController : BaseController
             return RedirectToAction(nameof(Index));
         }
 
+        // Block delete if guests are currently seated
+        if (booking.Status == "Seated")
+        {
+            Alert("Cannot delete \u2014 guests are currently seated. Close the booking when they leave.", AlertType.warning);
+            return RedirectToAction(nameof(Index));
+        }
+
         var deleted = svc.DeleteBooking(id);
 
         if (deleted)
@@ -458,23 +465,45 @@ public class BookingController : BaseController
         return RedirectToAction(nameof(Index));
     }
 
-    // POST /Booking/SetActive/{id}
+    // POST /Booking/SeatGuests/{id}
     [HttpPost]
     [ValidateAntiForgeryToken]
     [Authorize(Roles = "admin,owner,manager,staff")]
-    public IActionResult SetActive(int id, bool isActive)
+    public IActionResult SeatGuests(int id)
     {
-        var updated = svc.SetBookingActiveStatus(id, isActive);
-
+        var updated = svc.SeatGuests(id);
         if (updated is not null)
-        {
-            Alert($"Booking status updated.", AlertType.success);
-        }
+            Alert($"'{updated.CustomerName}' seated. Table {updated.TableNumber} marked occupied.", AlertType.success);
         else
-        {
-            Alert("Booking status could not be updated.", AlertType.warning);
-        }
+            Alert("Could not seat guests \u2014 booking may already be seated or not found.", AlertType.warning);
+        return RedirectToAction(nameof(Index));
+    }
 
+    // POST /Booking/CloseBooking/{id}
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [Authorize(Roles = "admin,owner,manager,staff")]
+    public IActionResult CloseBooking(int id)
+    {
+        var updated = svc.CloseBooking(id);
+        if (updated is not null)
+            Alert($"Booking for '{updated.CustomerName}' closed. Table freed.", AlertType.success);
+        else
+            Alert("Could not close booking \u2014 guests must be seated first.", AlertType.warning);
+        return RedirectToAction(nameof(Index));
+    }
+
+    // POST /Booking/CancelBooking/{id}
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [Authorize(Roles = "admin,owner,manager,staff")]
+    public IActionResult CancelBooking(int id)
+    {
+        var updated = svc.CancelBooking(id);
+        if (updated is not null)
+            Alert($"Booking for '{updated.CustomerName}' cancelled.", AlertType.success);
+        else
+            Alert("Could not cancel \u2014 only Booked reservations can be cancelled.", AlertType.warning);
         return RedirectToAction(nameof(Index));
     }
 }

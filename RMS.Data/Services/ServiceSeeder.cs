@@ -707,19 +707,19 @@ public static class ServiceSeeder
         var order1 = svc.AddOrder(Items(prawnCocktail, steak, cheesecake), 1);
         svc.SetTableOccupancy(1, true, 4);
         var b1 = svc.AddBooking("Alice Murphy",   "0871234567", "alice@example.com",  today.AddHours(19),               4, false, false, "",                      1, true);
-        if (b1 != null) { b1.Status = "Active"; svc.UpdateBooking(b1); }
+        if (b1 != null) { b1.Status = "Seated"; svc.UpdateBooking(b1); }
 
         // T2 — James Brady, 2 guests, active order, seated
         var order2 = svc.AddOrder(Items(bruschetta, salmon, appleCrumble), 2);
         svc.SetTableOccupancy(2, true, 2);
         var b2 = svc.AddBooking("James Brady",    "0852345678", "james@example.com",  today.AddHours(19).AddMinutes(30), 2, false, false, "",                     2, true);
-        if (b2 != null) { b2.Status = "Active"; svc.UpdateBooking(b2); }
+        if (b2 != null) { b2.Status = "Seated"; svc.UpdateBooking(b2); }
 
         // T3 — Sarah O'Neill, 3 guests, active order, allergen consent captured
         var order3 = svc.AddOrder(Items(prawnCocktail, salmon, cheesecake), 3);
         svc.SetTableOccupancy(3, true, 3);
         var b3 = svc.AddBooking("Sarah O'Neill",  "0863456789", "sarah@example.com",  today.AddHours(20),               3, true,  true,  "Window seat preferred", 3, true);
-        if (b3 != null) { b3.Status = "Active"; svc.UpdateBooking(b3); }
+        if (b3 != null) { b3.Status = "Seated"; svc.UpdateBooking(b3); }
         if (order3 != null)
             svc.AddAllergenConsent(order3.Id, "Sarah O'Neill", "sarah@example.com", "0863456789", true, order3.MenuItems);
 

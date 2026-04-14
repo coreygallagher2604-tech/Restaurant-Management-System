@@ -61,9 +61,13 @@
                         </td>
                     }
                     <td>
-                        @if (b.Status == "Active")
+                        @if (b.Status == "Seated")
                         {
-                            <span class="badge bg-success">Active</span>
+                            <span class="badge bg-success">Seated</span>
+                        }
+                        else if (b.Status == "Completed")
+                        {
+                            <span class="badge bg-dark">Completed</span>
                         }
                         else if (b.Status == "Cancelled")
                         {
@@ -78,8 +82,31 @@
                         <a asp-action="Details" asp-route-id="@b.Id" class="btn btn-sm btn-outline-secondary">View</a>
                         @if (User.IsInRole("admin") || User.IsInRole("owner") || User.IsInRole("manager") || User.IsInRole("staff"))
                         {
-                            <a asp-action="Edit" asp-route-id="@b.Id" class="btn btn-sm btn-outline-primary">Edit</a>
-                            <a asp-action="Delete" asp-route-id="@b.Id" class="btn btn-sm btn-outline-danger">Delete</a>
+                            @if (b.Status == "Booked")
+                            {
+                                <form asp-action="SeatGuests" asp-route-id="@b.Id" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-success">Seat Guests</button>
+                                </form>
+                                <a asp-action="Edit" asp-route-id="@b.Id" class="btn btn-sm btn-outline-primary">Edit</a>
+                                <form asp-action="CancelBooking" asp-route-id="@b.Id" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-outline-warning">Cancel</button>
+                                </form>
+                                <a asp-action="Delete" asp-route-id="@b.Id" class="btn btn-sm btn-outline-danger">Delete</a>
+                            }
+                            else if (b.Status == "Seated")
+                            {
+                                <form asp-action="CloseBooking" asp-route-id="@b.Id" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-primary">Close Booking</button>
+                                </form>
+                                <a asp-action="Edit" asp-route-id="@b.Id" class="btn btn-sm btn-outline-primary">Edit</a>
+                            }
+                            else if (b.Status == "Cancelled")
+                            {
+                                <a asp-action="Delete" asp-route-id="@b.Id" class="btn btn-sm btn-outline-danger">Delete</a>
+                            }
                         }
                     </td>
                 </tr>
