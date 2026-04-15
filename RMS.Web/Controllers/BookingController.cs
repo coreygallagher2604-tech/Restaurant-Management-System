@@ -614,4 +614,120 @@ public class BookingController : BaseController
             Alert("Could not cancel \u2014 only Booked reservations can be cancelled.", AlertType.warning);
         return RedirectToAction(nameof(Index));
     }
+
+    // GET /Booking/WalkIn — seat walk-in guests immediately
+    [HttpGet]
+    [Authorize(Roles = "admin,owner,manager,staff")]
+    public IActionResult WalkIn(int? tableNumber = null)
+    {
+        var now = DateTime.Now;
+        var horizon = now.AddHours(2);
+
+        // Upcoming reservations within the next 2 hours, keyed by table number
+        var reservations = svc.GetAllBookings()
+            .Where(b => b.Status == "Booked"
+                     && b.BookingDateTime >= now
+                     && b.BookingDateTime <= horizon)
+            .ToDictionary(b => b.TableNumber, b => b.BookingDateTime);
+
+        ViewBag.AvailableTables = svc.GetAllTables()
+            .Where(t => t.Active && !t.IsOccupied)
+            .OrderBy(t => t.TableNumber)
+            .ToList();
+
+        ViewBag.Reservations = reservations;
+
+        var vm = new BookingViewModel
+        {
+            TableNumber = tableNumber ?? 0,
+            NumberOfGuests = 1,
+            BookingDateTime = now,
+            CustomerName = "Walk-in"
+        };
+
+        return View(vm);
+    }
+
+    // POST /Booking/WalkIn
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [Authorize(Roles = "admin,owner,manager,staff")]
+    public IActionResult WalkIn(BookingViewModel vm)
+    {
+        var now = DateTime.Now;
+        var horizon = now.AddHours(2);
+
+        var reservations = svc.GetAllBookings()
+            .Where(b => b.Status == "Booked"
+                     && b.BookingDateTime >= now
+                     && b.BookingDateTime <= horizon)
+            .ToDictionary(b => b.TableNumber, b => b.BookingDateTime);
+
+        bool tableIsReserved = reservations.ContainsKey(vm.TableNumber);
+        bool canOverrideReserved = User.IsInRole("admin") || User.IsInRole("owner") || User.IsInRole("manager");
+
+        if (tableIsReserved && !canOverrideReserved)
+        {
+            ModelState.AddModelError("TableNumber",
+                $"Table {vm.TableNumber} is reserved at {reservations[vm.TableNumber]:HH:mm}. Only a manager or above can seat walk-in guests here.");
+        }
+
+        if (vm.TableNumber <= 0)
+        {
+            ModelState.AddModelError("TableNumber", "Please select a table.");
+        }
+
+        if (string.IsNullOrWhiteSpace(vm.CustomerName))
+        {
+            vm.CustomerName = "Walk-in";
+            ModelState.Remove("CustomerName");
+        }
+
+        if (!ModelState.IsValid)
+        {
+            ViewBag.AvailableTables = svc.GetAllTables()
+                .Where(t => t.Active && !t.IsOccupied)
+                .OrderBy(t => t.TableNumber)
+                .ToList();
+            ViewBag.Reservations = reservations;
+            return View(vm);
+        }
+
+        var created = svc.AddBooking(
+            vm.CustomerName,
+            vm.PhoneNumber ?? "",
+            vm.Email ?? "",
+            now,
+            vm.NumberOfGuests,
+            tableNumber: vm.TableNumber,
+            isActive: true
+        );
+
+        if (created is null)
+        {
+            Alert("Could not create walk-in booking.", AlertType.warning);
+            ViewBag.AvailableTables = svc.GetAllTables()
+                .Where(t => t.Active && !t.IsOccupied)
+                .OrderBy(t => t.TableNumber)
+                .ToList();
+            ViewBag.Reservations = reservations;
+            return View(vm);
+        }
+
+        // Immediately seat — transitions Booked → Seated and marks table occupied
+        var seated = svc.SeatGuests(created.Id);
+        if (seated is not null)
+        {
+            if (tableIsReserved)
+                Alert($"Walk-in seated at T{vm.TableNumber}. Note: this table has a reservation at {reservations[vm.TableNumber]:HH:mm}.", AlertType.warning);
+            else
+                Alert($"Walk-in guests seated at T{vm.TableNumber}.", AlertType.success);
+        }
+        else
+        {
+            Alert("Booking created but could not be seated automatically. Use the Bookings list to seat manually.", AlertType.warning);
+        }
+
+        return RedirectToAction(nameof(Index), "Table");
+    }
 }
