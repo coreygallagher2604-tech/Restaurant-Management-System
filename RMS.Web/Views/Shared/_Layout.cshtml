@@ -11,7 +11,7 @@
 <body>
 
     <header>
-        <nav style="background-color: rgb(2, 110, 42);" class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-banks navbar-expand-sm navbar-toggleable-sm border-bottom box-shadow mb-3">
             <div class="container-fluid">
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">The Banks</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
@@ -25,48 +25,48 @@
                     <ul class="navbar-nav flex-grow-1">
 
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Menu" asp-action="Menus">Menus</a>
+                            <a class="nav-link" asp-area="" asp-controller="Menu" asp-action="Menus">Menus</a>
                         </li>
 
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="About">About Us</a>
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="About">About Us</a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Review" asp-action="Index">Reviews</a>
                         </li>
 
                         @if (User.IsInRole("admin") || User.IsInRole("owner") || User.IsInRole("manager") || User.IsInRole("staff"))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Menu" asp-action="MenuItems">Menu Items</a>
+                                <a class="nav-link" asp-area="" asp-controller="Menu" asp-action="MenuItems">Menu Items</a>
                             </li>
 
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Table" asp-action="Index">Tables</a>
+                                <a class="nav-link" asp-area="" asp-controller="Table" asp-action="Index">Tables</a>
                             </li>
 
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Order" asp-action="Index">Orders</a>
+                                <a class="nav-link" asp-area="" asp-controller="Order" asp-action="Index">Orders</a>
                             </li>
 
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Ingredient" asp-action="Index">Ingredients</a>
+                                <a class="nav-link" asp-area="" asp-controller="Ingredient" asp-action="Index">Ingredients</a>
                             </li>
 
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Booking" asp-action="Index">Bookings</a>
+                                <a class="nav-link" asp-area="" asp-controller="Booking" asp-action="Index">Bookings</a>
                             </li>
 
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="AllergenConsent" asp-action="Index">Allergen Consents</a>
-                            </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Review" asp-action="Index">Reviews</a>
+                                <a class="nav-link" asp-area="" asp-controller="AllergenConsent" asp-action="Index">Allergen Consents</a>
                             </li>
                         }
 
                         @if (User.IsInRole("admin") || User.IsInRole("owner"))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="Index">Users</a>
+                                <a class="nav-link" asp-area="" asp-controller="User" asp-action="Index">Users</a>
                             </li>
                         }
 

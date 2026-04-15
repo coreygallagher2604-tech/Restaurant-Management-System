@@ -23,49 +23,52 @@
     }
 
     <!-- Results -->
-    <table class="table table-hover mt-3">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Type</th>
-                @if (User.IsInRole("admin") || User.IsInRole("owner") || User.IsInRole("manager") || User.IsInRole("staff"))
-                {
-                    <th>Status</th>
-                    <th>Items</th>
-                }
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
+    @if (!Model.Menus.Any())
+    {
+        <p class="text-muted mt-3">No menus found.</p>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mt-2">
             @foreach (var m in Model.Menus)
             {
-                <tr>
-                    <td>@m.Name</td>
-                    <td>@m.Type</td>
-                    @if (User.IsInRole("admin") || User.IsInRole("owner") || User.IsInRole("manager") || User.IsInRole("staff"))
-                    {
-                        <td>
-                            <span class="badge @(m.IsActive ? "bg-success" : "bg-secondary")">
-                                @(m.IsActive ? "Active" : "Inactive")
-                            </span>
-                        </td>
-                        <td>@m.MenuItems?.Count</td>
-                    }
-                    <td class="text-end">
-                        <a asp-action="Details" asp-route-id="@m.Id" class="btn btn-sm btn-outline-primary">View</a>
-                        @if (User.IsInRole("admin") || User.IsInRole("owner") || User.IsInRole("manager") || User.IsInRole("staff"))
-                        {
-                            <a asp-action="Edit" asp-route-id="@m.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
-                            <form asp-action="DeleteConfirm" asp-route-id="@m.Id" method="post" class="d-inline">
-                                @Html.AntiForgeryToken()
-                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this menu? This cannot be undone.')">Delete</button>
-                            </form>
-                        }
-                    </td>
-                </tr>
+                string bannerClass = "bg-banks-green";
+                string desc = m.Description?.Length > 100 ? m.Description.Substring(0, 100) + "\u2026" : m.Description ?? "";
+
+                <div class="col">
+                    <div class="card h-100 shadow-sm overflow-hidden">
+                        <div class="@bannerClass p-3">
+                            <h5 class="card-title mb-0 fw-bold">@m.Name</h5>
+                            <small>@m.Type</small>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <p class="card-text text-muted flex-grow-1">@desc</p>
+                            @if (User.IsInRole("admin") || User.IsInRole("owner") || User.IsInRole("manager") || User.IsInRole("staff"))
+                            {
+                                <span class="badge @(m.IsActive ? "bg-success" : "bg-secondary") mb-2 align-self-start">
+                                    @(m.IsActive ? "Active" : "Inactive")
+                                </span>
+                            }
+                        </div>
+                        <div class="card-footer bg-transparent border-top-0 d-flex gap-2 pb-3">
+                            <a asp-action="Details" asp-route-id="@m.Id" class="btn btn-primary btn-sm flex-grow-1">View Menu</a>
+                            @if (User.IsInRole("admin") || User.IsInRole("owner") || User.IsInRole("manager") || User.IsInRole("staff"))
+                            {
+                                <a asp-action="Edit" asp-route-id="@m.Id" class="btn btn-outline-secondary btn-sm">Edit</a>
+                                @if (!m.IsActive)
+                                {
+                                    <form asp-action="DeleteConfirm" asp-route-id="@m.Id" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Delete this menu? This cannot be undone.')">Delete</button>
+                                    </form>
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
             }
-        </tbody>
-    </table>
+        </div>
+    }
 </div>
 
 

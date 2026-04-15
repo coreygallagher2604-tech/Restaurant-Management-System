@@ -14,9 +14,8 @@ public class ReviewController : BaseController
         svc = new RestaurantServiceDb();
     }
 
-    // GET /Review/Index — staff and above can see all reviews
+    // GET /Review/Index — public, all users can see reviews
     [HttpGet]
-    [Authorize(Roles = "admin,owner,manager,staff")]
     public IActionResult Index()
     {
         var reviews = svc.GetAllReviews();

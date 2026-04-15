@@ -21,7 +21,12 @@ public class OrderController : BaseController
     public IActionResult Index()
     {
         var orders = svc.GetAllOrders();
-        var vms = orders.Select(OrderViewModel.FromOrder).ToList();
+        // Open orders first, then completed/voided — most recent within each group
+        var sorted = orders
+            .OrderBy(o => o.IsCompleted || o.IsVoid ? 1 : 0)
+            .ThenByDescending(o => o.CreatedOn)
+            .ToList();
+        var vms = sorted.Select(OrderViewModel.FromOrder).ToList();
         return View(vms);
     }
 
