@@ -1,0 +1,106 @@
+@model RMS.Web.Models.BookingViewModel
+@using RMS.Data.Entities
+@{
+    var availableTables = ViewBag.AvailableTables as List<Table> ?? new List<Table>();
+    var reservations    = ViewBag.Reservations as Dictionary<int, DateTime> ?? new Dictionary<int, DateTime>();
+    bool isManagerOrAbove = User.IsInRole("admin") || User.IsInRole("owner") || User.IsInRole("manager");
+}
+
+<partial name="_BreadCrumbs" model=@(new [] {
+    ("/","Home"),
+    ("/Table/Index","Tables"),
+    ("","Walk-in")
+}) />
+
+<div class="card rounded shadow p-4">
+    <div class="border-bottom d-flex align-items-center justify-content-between mb-3">
+        <h3 class="text-primary">Seat Walk-in Guests</h3>
+    </div>
+
+    <form asp-action="WalkIn" method="post">
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        @* Warning banner — shown/updated by JS when a reserved table is selected *@
+        <div id="reservedWarning" class="alert alert-warning d-none" role="alert">
+            <strong>Reserved table selected.</strong>
+            This table has a booking arriving at <span id="reservedTime"></span>.
+            @if (!isManagerOrAbove)
+            {
+                <br /><span class="fw-semibold">Only a manager or above can seat walk-in guests here.</span>
+            }
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="TableNumber" class="form-label">Table</label>
+            <select asp-for="TableNumber" id="tableSelect" class="form-select">
+                <option value="0">-- Select table --</option>
+                @foreach (var t in availableTables)
+                {
+                    var reservedAt = reservations.ContainsKey(t.TableNumber)
+                        ? reservations[t.TableNumber].ToString("HH:mm")
+                        : "";
+                    <option value="@t.TableNumber"
+                            data-reserved-at="@reservedAt">
+                        T@(t.TableNumber) — seats @(t.SeatingCapacity)
+                        @if (!string.IsNullOrEmpty(reservedAt))
+                        {
+                            <text> (Reserved @reservedAt)</text>
+                        }
+                    </option>
+                }
+            </select>
+            <span asp-validation-for="TableNumber" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="NumberOfGuests" class="form-label">Number of Guests</label>
+            <input asp-for="NumberOfGuests" class="form-control" type="number" min="1" max="20" />
+            <span asp-validation-for="NumberOfGuests" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="CustomerName" class="form-label">Customer Name <span class="text-muted fw-normal">(optional)</span></label>
+            <input asp-for="CustomerName" class="form-control" placeholder="Walk-in" />
+            <span asp-validation-for="CustomerName" class="text-danger"></span>
+        </div>
+
+        <div class="d-flex gap-2">
+            <button type="submit" id="submitBtn" class="btn btn-success">Seat Guests</button>
+            <a asp-controller="Table" asp-action="Index" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        (function () {
+            var select  = document.getElementById('tableSelect');
+            var warning = document.getElementById('reservedWarning');
+            var timeSpan = document.getElementById('reservedTime');
+            var submitBtn = document.getElementById('submitBtn');
+            var isManagerOrAbove = @(isManagerOrAbove ? "true" : "false");
+
+            function updateWarning() {
+                var selected = select.options[select.selectedIndex];
+                var reservedAt = selected ? selected.getAttribute('data-reserved-at') : '';
+
+                if (reservedAt) {
+                    warning.classList.remove('d-none');
+                    timeSpan.textContent = reservedAt;
+                    if (!isManagerOrAbove) {
+                        submitBtn.disabled = true;
+                        submitBtn.title = 'Only a manager or above can seat guests at a reserved table.';
+                    }
+                } else {
+                    warning.classList.add('d-none');
+                    submitBtn.disabled = false;
+                    submitBtn.title = '';
+                }
+            }
+
+            select.addEventListener('change', updateWarning);
+            updateWarning(); // run on page load for pre-selected table
+        })();
+    </script>
+}

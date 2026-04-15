@@ -21,7 +21,28 @@ public class TableController : BaseController
     public IActionResult Index()
     {
         var tables = svc.GetAllTables();
-        return View(tables.Select(TableViewModel.FromTable).ToList());
+        var vms = tables.Select(TableViewModel.FromTable).ToList();
+
+        // Mark tables reserved if they have a Booked booking within the next 2 hours
+        var now = DateTime.Now;
+        var horizon = now.AddHours(2);
+        var upcomingBookings = svc.GetAllBookings()
+            .Where(b => b.Status == "Booked"
+                     && b.BookingDateTime >= now
+                     && b.BookingDateTime <= horizon)
+            .ToList();
+
+        foreach (var vm in vms)
+        {
+            var match = upcomingBookings.FirstOrDefault(b => b.TableNumber == vm.TableNumber);
+            if (match != null)
+            {
+                vm.IsReserved = true;
+                vm.ReservedAt = match.BookingDateTime;
+            }
+        }
+
+        return View(vms);
     }
 
     // GET /Table/Create

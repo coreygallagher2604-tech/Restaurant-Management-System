@@ -31,14 +31,34 @@
                     <td>@t.SeatingCapacity</td>
                     <td>@t.CustomersSeated</td>
                     <td>
-                        <span class="badge @(t.IsOccupied ? "bg-danger" : "bg-success")">
+                        @{
+                            var badgeClass = !t.Active    ? "bg-secondary" :
+                                              t.IsOccupied ? "bg-danger"    :
+                                              t.IsReserved ? "bg-warning text-dark" :
+                                                             "bg-success";
+                        }
+                        <span class="badge @badgeClass"
+                              @(t.IsReserved && t.ReservedAt.HasValue
+                                  ? $"title=\"Reserved at {t.ReservedAt.Value:HH:mm}\" data-bs-toggle=\"tooltip\""
+                                  : "")>
                             @t.StatusDisplay
+                            @if (t.IsReserved && t.ReservedAt.HasValue)
+                            {
+                                <span class="ms-1 fw-normal">@t.ReservedAt.Value.ToString("HH:mm")</span>
+                            }
                         </span>
                     </td>
                     <td class="text-end">
                         @if (t.IsOccupied)
                         {
                             <a asp-controller="Order" asp-action="ByTable" asp-route-tableId="@t.Id" class="btn btn-sm btn-outline-info">Orders</a>
+                        }
+                        @if (!t.IsOccupied && t.Active)
+                        {
+                            @if (User.IsInRole("admin") || User.IsInRole("owner") || User.IsInRole("manager") || (!t.IsReserved && User.IsInRole("staff")))
+                            {
+                                <a asp-controller="Booking" asp-action="WalkIn" asp-route-tableNumber="@t.TableNumber" class="btn btn-sm btn-outline-success">Walk-in</a>
+                            }
                         }
                         <a asp-action="SetOccupancy" asp-route-id="@t.Id" class="btn btn-sm btn-outline-primary">Occupancy</a>
                         <a asp-action="Edit" asp-route-id="@t.Id" class="btn btn-sm btn-outline-secondary">Edit</a>

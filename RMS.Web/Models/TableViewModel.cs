@@ -26,7 +26,15 @@ public class TableViewModel
 
     public bool Active { get; set; } = true;
 
-    public string StatusDisplay => IsOccupied ? "Occupied" : "Available";
+    // Set by TableController.Index — not stored on the entity
+    public bool IsReserved { get; set; } = false;
+    public DateTime? ReservedAt { get; set; } = null;
+
+    public string StatusDisplay =>
+        !Active    ? "Inactive" :
+        IsOccupied ? "Occupied" :
+        IsReserved ? "Reserved" :
+                     "Available";
 
     public Table ToTable()
     {
