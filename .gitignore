@@ -37,3 +37,4 @@ SPRINT-NOTES.md
 *.db
 *.db-shm
 *.db-wal
+*.md
