@@ -35,3 +35,5 @@ SPRINT-NOTES.md
 # Ignore local README if present
 *.md
 *.db
+*.db-shm
+*.db-wal

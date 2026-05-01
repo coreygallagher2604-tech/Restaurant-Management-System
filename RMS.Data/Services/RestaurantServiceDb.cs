@@ -517,10 +517,10 @@ public class RestaurantServiceDb : IRestaurantService
             table.IsOccupied = true;
             db.Tables.Update(table);
 
-            // Count active bookings at this table where a customer declared an allergy.
-            // That number is how many allergen consent forms are required for this order.
+            // If any active booking at this table declared an allergy, one consent form
+            // is required for the group — regardless of how many people declared an allergy.
             order.AllergyCountRequired = db.Bookings
-                .Count(b => b.IsActive && b.TableNumber == table.TableNumber && b.HasAllergen);
+                .Any(b => b.IsActive && b.TableNumber == table.TableNumber && b.HasAllergen) ? 1 : 0;
         }
 
         db.SaveChanges();

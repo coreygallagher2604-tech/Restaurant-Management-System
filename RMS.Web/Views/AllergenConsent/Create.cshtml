@@ -38,9 +38,6 @@
             <input asp-for="OrderId" type="hidden" />
         </div>
 
-        @* This is a separate GET form. Clicking Load Items sends orderId to the controller,
-           which reloads the page with only that order's menu items shown below. *@
-        <form id="orderPickerForm" method="get" asp-action="Create"></form>
 
         <div class="mb-3">
             <label asp-for="CustomerName" class="form-label"></label>
@@ -96,6 +93,9 @@
         </div>
     </form>
 </div>
+
+@* Separate GET form for order picker — must live outside the POST form *@
+<form id="orderPickerForm" method="get" asp-action="Create"></form>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
