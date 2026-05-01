@@ -1,0 +1,22 @@
+Question Number,Section,Question,Scale: 1 = Strongly Disagree  /  5 = Strongly Agree,R1 - Head Chef (Kitchen),R2 - Floor Staff,R3 - Manager / Owner,R4 - Bar Staff
+Q1,General — Current Process Reliability,The current process for communicating orders from the floor to the kitchen is reliable during busy service periods.,1–5,3,2,3,3
+Q2,General — Current Process Reliability,"When a customer amends their order after it has been placed, the kitchen reliably receives the updated information before preparation begins.",1–5,2,2,2,3
+Q3,General — Current Process Reliability,"Allergen information declared by a customer consistently reaches the kitchen in a clear, reliable format.",1–5,2,2,2,3
+Q4,General — Current Process Reliability,"I can independently determine the current status of any table on the floor — whether it is free, occupied, or has an active order — without asking a colleague.",1–5,3,2,2,3
+Q5,General — Risk and Safety,"The volume of verbal communication required between front-of-house and the kitchen creates an unacceptable risk of information being lost during busy periods.",1–5,4,5,4,3
+Q6,General — Risk and Safety,The current process for handling allergen declarations provides a sufficient audit trail in the event of a customer incident.,1–5,2,2,2,3
+Q7,General — Risk and Safety,"I am confident that allergen information declared by a customer at the time of booking is visible to the staff member who serves them on the night.",1–5,2,2,2,3
+Q8,General — A New System,"A single digital system covering table management, bookings, orders, and allergen records would reduce communication errors during service.",1–5,5,5,5,4
+Q9,General — A New System,Having a formal digital record of allergen declarations and staff consent acknowledgements would better protect the business in the event of a customer incident.,1–5,5,5,5,4
+Q10,Kitchen Staff — Role Specific,"Allergy and amendment information currently arrives on the kitchen ticket in a structured format, rather than verbally after the ticket has already been sent.",1–5,2,N/A,N/A,N/A
+Q11,Kitchen Staff — Role Specific,The current ticket format gives me sufficient detail to prepare dishes correctly without needing to seek clarification from floor staff during service.,1–5,2,N/A,N/A,N/A
+Q12,Kitchen Staff — Role Specific,"I am confident that if a customer declares an allergy at the point of ordering, I will be informed before preparation of their dish begins.",1–5,1,N/A,N/A,N/A
+Q13,Floor Staff — Role Specific,"When I seat a customer with a booking, I have easy access to any allergen information they declared at the time of booking.",1–5,N/A,2,N/A,N/A
+Q14,Floor Staff — Role Specific,"I can quickly answer a customer's question about which menu items contain specific allergens, without asking another staff member or consulting a printed document.",1–5,N/A,2,N/A,N/A
+Q15,Floor Staff — Role Specific,The process for handing over my tables to a colleague mid-service is clear and reliable.,1–5,N/A,2,N/A,N/A
+Q16,Management — Role Specific,"I can accurately assess the current state of the floor — which tables are occupied, waiting, or clear — without physically walking the room.",1–5,N/A,N/A,2,N/A
+Q17,Management — Role Specific,"I am confident that all allergen consent records are complete and retrievable in the event of a customer complaint or regulatory inspection.",1–5,N/A,N/A,2,N/A
+Q18,Management — Role Specific,"I can review the previous service period — covers served, orders voided, and allergen consents recorded — without spending significant time gathering information from multiple sources.",1–5,N/A,N/A,2,N/A
+Q19,Bar Staff — Role Specific,"Drinks on the current menu are clearly flagged for allergens (e.g. dairy in cocktails, sulphites in wine).",1–5,N/A,N/A,N/A,2
+Q20,Bar Staff — Role Specific,"When a customer asks whether a drink contains a specific allergen, I can answer accurately.",1–5,N/A,N/A,N/A,2
+Q21,Bar Staff — Role Specific,"Bar orders are currently processed through the same system as kitchen orders, ensuring allergen information is captured consistently.",1–5,N/A,N/A,N/A,2

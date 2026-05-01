@@ -436,7 +436,9 @@ public class RestaurantServiceDb : IRestaurantService
    // Add MenuItem to Order
     public Order AddMenuItemToOrder(int orderId, int menuItemId)
     {
-        var order = db.Orders.FirstOrDefault(o => o.Id == orderId);
+        var order = db.Orders
+            .Include(o => o.OrderItems)
+            .FirstOrDefault(o => o.Id == orderId);
         var menuItem = GetMenuItemById(menuItemId);
 
         if (order == null || menuItem == null)
@@ -444,17 +446,31 @@ public class RestaurantServiceDb : IRestaurantService
             return null; // Order or MenuItem not found
         }
 
-        order.MenuItems.Add(menuItem);
-        db.Orders.Update(order);
+        var existing = order.OrderItems.FirstOrDefault(oi => oi.MenuItemId == menuItemId);
+        if (existing != null)
+        {
+            existing.Quantity++;
+        }
+        else
+        {
+            order.OrderItems.Add(new OrderItem
+            {
+                MenuItemId = menuItemId,
+                MenuItem = menuItem,
+                Quantity = 1,
+                UnitPrice = menuItem.Price
+            });
+        }
+
         db.SaveChanges();
-        return order;
+        return GetOrderById(orderId);
     }
 
 
  // -------- Order Related Operations ------------
 
     // Add Order
-    public Order AddOrder(List<MenuItem> menuItems, int? tableId = null)
+    public Order AddOrder(Dictionary<int, int> itemQuantities, int? tableId = null)
     {
         Table table = null;
         if (tableId.HasValue)
@@ -462,12 +478,32 @@ public class RestaurantServiceDb : IRestaurantService
             table = db.Tables.FirstOrDefault(t => t.Id == tableId.Value);
         }
 
-        var items = menuItems ?? new List<MenuItem>();
-        var totalCost = items.Sum(mi => mi.Price);
+        var quantities = itemQuantities ?? new Dictionary<int, int>();
+        var menuItemIds = quantities.Keys.ToList();
+        var menuItems = db.MenuItems.Where(mi => menuItemIds.Contains(mi.Id)).ToList();
+
+        var orderItems = quantities
+            .Where(kvp => kvp.Value > 0)
+            .Select(kvp =>
+            {
+                var mi = menuItems.FirstOrDefault(m => m.Id == kvp.Key);
+                if (mi == null) return null;
+                return new OrderItem
+                {
+                    MenuItemId = kvp.Key,
+                    MenuItem = mi,
+                    Quantity = kvp.Value,
+                    UnitPrice = mi.Price
+                };
+            })
+            .Where(oi => oi != null)
+            .ToList();
+
+        var totalCost = orderItems.Sum(oi => oi.UnitPrice * oi.Quantity);
 
         var order = new Order
         {
-            MenuItems = items,
+            OrderItems = orderItems,
             Table = table,
             totalCost = totalCost,
             FinalPrice = totalCost
@@ -480,6 +516,11 @@ public class RestaurantServiceDb : IRestaurantService
         {
             table.IsOccupied = true;
             db.Tables.Update(table);
+
+            // Count active bookings at this table where a customer declared an allergy.
+            // That number is how many allergen consent forms are required for this order.
+            order.AllergyCountRequired = db.Bookings
+                .Count(b => b.IsActive && b.TableNumber == table.TableNumber && b.HasAllergen);
         }
 
         db.SaveChanges();
@@ -490,7 +531,7 @@ public class RestaurantServiceDb : IRestaurantService
     public List<Order> GetAllOrders()
     {
         return db.Orders
-            .Include(o => o.MenuItems)
+            .Include(o => o.OrderItems).ThenInclude(oi => oi.MenuItem)
             .Include(o => o.Table)
             .ToList();
     }
@@ -499,8 +540,9 @@ public class RestaurantServiceDb : IRestaurantService
     public Order GetOrderById(int id)
     {
         return db.Orders
-            .Include(o => o.MenuItems)
+            .Include(o => o.OrderItems).ThenInclude(oi => oi.MenuItem)
             .Include(o => o.Table)
+            .Include(o => o.AllergenConsents)
             .FirstOrDefault(o => o.Id == id);
     }
 
@@ -508,7 +550,7 @@ public class RestaurantServiceDb : IRestaurantService
     public List<Order> GetOrdersByTableId(int tableId)
     {
         return db.Orders
-            .Include(o => o.MenuItems)
+            .Include(o => o.OrderItems).ThenInclude(oi => oi.MenuItem)
             .Include(o => o.Table)
             .Where(o => o.Table != null && o.Table.Id == tableId)
             .ToList();
@@ -523,8 +565,19 @@ public class RestaurantServiceDb : IRestaurantService
             return null; // Order not found
         }
 
-        existingOrder.MenuItems = order.MenuItems ?? new List<MenuItem>();
-        existingOrder.totalCost = existingOrder.MenuItems.Sum(mi => mi.Price);
+        // Replace order items — load from DB directly to avoid deleting unsaved (Id=0) items
+        // that may have been swapped into the navigation property by the caller
+        var itemsToRemove = db.Entry(existingOrder).Collection(o => o.OrderItems).Query().ToList();
+        db.OrderItems.RemoveRange(itemsToRemove);
+        existingOrder.OrderItems = new List<OrderItem>();
+        var newItems = order.OrderItems ?? new List<OrderItem>();
+        foreach (var oi in newItems)
+        {
+            oi.Id = 0;
+            existingOrder.OrderItems.Add(oi);
+        }
+
+        existingOrder.totalCost = newItems.Sum(oi => oi.UnitPrice * oi.Quantity);
         existingOrder.discount = order.discount;
         existingOrder.IsCompleted = order.IsCompleted;
         existingOrder.IsVoid = order.IsVoid;
@@ -537,7 +590,6 @@ public class RestaurantServiceDb : IRestaurantService
             existingOrder.Table = table;
         }
 
-        db.Orders.Update(existingOrder);
         db.SaveChanges();
         return GetOrderById(existingOrder.Id);
     }

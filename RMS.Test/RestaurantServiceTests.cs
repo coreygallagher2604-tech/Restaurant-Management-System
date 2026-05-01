@@ -801,8 +801,8 @@ public class RestaurantServiceDbExtraTests
 
         Assert.NotNull(updatedOrder);
         Assert.Equal(order.Id, updatedOrder.Id);
-        Assert.Single(updatedOrder.MenuItems);
-        Assert.Equal(menuItem.Id, updatedOrder.MenuItems[0].Id);
+        Assert.Single(updatedOrder.OrderItems);
+        Assert.Equal(menuItem.Id, updatedOrder.OrderItems[0].MenuItemId);
     }
 
     [Fact]
@@ -838,11 +838,11 @@ public class OrderServiceTests
         var item1 = svc.AddMenuItem("Wrap", "Main", "Chicken wrap", 8.50, new List<Ingredient> { ingredient });
         var item2 = svc.AddMenuItem("Fries", "Main", "Crispy fries", 3.00, new List<Ingredient> { ingredient });
 
-        var order = svc.AddOrder(new List<MenuItem> { item1, item2 });
+        var order = svc.AddOrder(new Dictionary<int, int> { { item1.Id, 1 }, { item2.Id, 1 } });
 
         Assert.NotNull(order);
         Assert.True(order.Id > 0);
-        Assert.Equal(2, order.MenuItems.Count);
+        Assert.Equal(2, order.OrderItems.Count);
         Assert.Equal(11.50, order.totalCost);
         Assert.Equal(11.50, order.FinalPrice);
     }
@@ -853,8 +853,8 @@ public class OrderServiceTests
         var ingredient = svc.AddIngredient("Beef");
         var item = svc.AddMenuItem("Burger", "Main", "Beef burger", 9.00, new List<Ingredient> { ingredient });
 
-        svc.AddOrder(new List<MenuItem> { item });
-        svc.AddOrder(new List<MenuItem> { item });
+        svc.AddOrder(new Dictionary<int, int> { { item.Id, 1 } });
+        svc.AddOrder(new Dictionary<int, int> { { item.Id, 1 } });
 
         var orders = svc.GetAllOrders();
 
@@ -866,14 +866,14 @@ public class OrderServiceTests
     {
         var ingredient = svc.AddIngredient("Salmon");
         var item = svc.AddMenuItem("Salmon Plate", "Main", "Grilled salmon", 14.00, new List<Ingredient> { ingredient });
-        var order = svc.AddOrder(new List<MenuItem> { item });
+        var order = svc.AddOrder(new Dictionary<int, int> { { item.Id, 1 } });
 
         var found = svc.GetOrderById(order.Id);
 
         Assert.NotNull(found);
         Assert.Equal(order.Id, found.Id);
-        Assert.Single(found.MenuItems);
-        Assert.Equal("Salmon Plate", found.MenuItems[0].Name);
+        Assert.Single(found.OrderItems);
+        Assert.Equal("Salmon Plate", found.OrderItems[0].MenuItem.Name);
     }
 
     [Fact]
@@ -898,7 +898,7 @@ public class OrderServiceTests
 
         var ingredient = svc.AddIngredient("Pasta");
         var item = svc.AddMenuItem("Pasta", "Main", "Creamy pasta", 10.00, new List<Ingredient> { ingredient });
-        svc.AddOrder(new List<MenuItem> { item }, tableId);
+        svc.AddOrder(new Dictionary<int, int> { { item.Id, 1 } }, tableId);
 
         var orders = svc.GetOrdersByTableId(tableId);
 
@@ -913,12 +913,15 @@ public class OrderServiceTests
         var ingredient = svc.AddIngredient("Rice");
         var item1 = svc.AddMenuItem("Rice Bowl", "Main", "Original", 9.00, new List<Ingredient> { ingredient });
         var item2 = svc.AddMenuItem("Rice Deluxe", "Main", "Updated", 12.00, new List<Ingredient> { ingredient });
-        var order = svc.AddOrder(new List<MenuItem> { item1 });
+        var order = svc.AddOrder(new Dictionary<int, int> { { item1.Id, 1 } });
 
         var updatePayload = new Order
         {
             Id = order.Id,
-            MenuItems = new List<MenuItem> { item2 },
+            OrderItems = new List<OrderItem>
+            {
+                new OrderItem { MenuItemId = item2.Id, MenuItem = item2, Quantity = 1, UnitPrice = item2.Price }
+            },
             discount = 10,
             IsCompleted = true,
             IsVoid = false,
@@ -929,8 +932,8 @@ public class OrderServiceTests
 
         Assert.NotNull(updated);
         Assert.Equal(order.Id, updated.Id);
-        Assert.Single(updated.MenuItems);
-        Assert.Equal("Rice Deluxe", updated.MenuItems[0].Name);
+        Assert.Single(updated.OrderItems);
+        Assert.Equal("Rice Deluxe", updated.OrderItems[0].MenuItem.Name);
         Assert.Equal(12.00, updated.totalCost);
         Assert.Equal(10, updated.discount);
         Assert.True(updated.IsCompleted);
@@ -944,7 +947,7 @@ public class OrderServiceTests
     {
         var ingredient = svc.AddIngredient("Potato");
         var item = svc.AddMenuItem("Wedges", "Main", "Potato wedges", 4.00, new List<Ingredient> { ingredient });
-        var order = svc.AddOrder(new List<MenuItem> { item });
+        var order = svc.AddOrder(new Dictionary<int, int> { { item.Id, 1 } });
 
         var deleted = svc.DeleteOrder(order.Id);
         var found = svc.GetOrderById(order.Id);
@@ -958,7 +961,7 @@ public class OrderServiceTests
     {
         var ingredient = svc.AddIngredient("Chicken");
         var item = svc.AddMenuItem("Chicken Bites", "Main", "Starter", 5.00, new List<Ingredient> { ingredient });
-        var order = svc.AddOrder(new List<MenuItem> { item });
+        var order = svc.AddOrder(new Dictionary<int, int> { { item.Id, 1 } });
 
         var updated = svc.MarkOrderCompleted(order.Id, true);
 
@@ -971,7 +974,7 @@ public class OrderServiceTests
     {
         var ingredient = svc.AddIngredient("Bread");
         var item = svc.AddMenuItem("Toast", "Main", "Buttered toast", 2.00, new List<Ingredient> { ingredient });
-        var order = svc.AddOrder(new List<MenuItem> { item });
+        var order = svc.AddOrder(new Dictionary<int, int> { { item.Id, 1 } });
 
         var updated = svc.VoidOrder(order.Id, true);
 
@@ -1301,7 +1304,7 @@ public class OrderTests
     public void Can_create_order_with_no_items()
     {
         // An order can be created with an empty item list
-        var order = svc.AddOrder(new List<MenuItem>());
+        var order = svc.AddOrder(new Dictionary<int, int>());
 
         Assert.NotNull(order);
         Assert.True(order.Id > 0);
@@ -1318,11 +1321,11 @@ public class OrderTests
         var item1 = svc.AddMenuItem("Toast", "Starter", "Buttered toast", 3.00, new List<Ingredient> { ingredient });
         var item2 = svc.AddMenuItem("Coffee", "Hot Drink", "Americano", 3.50, new List<Ingredient>());
 
-        var order = svc.AddOrder(new List<MenuItem> { item1, item2 });
+        var order = svc.AddOrder(new Dictionary<int, int> { { item1.Id, 1 }, { item2.Id, 1 } });
 
         Assert.NotNull(order);
         Assert.Equal(6.50, order.totalCost);
-        Assert.Equal(2, order.MenuItems.Count);
+        Assert.Equal(2, order.OrderItems.Count);
     }
 
     [Fact]

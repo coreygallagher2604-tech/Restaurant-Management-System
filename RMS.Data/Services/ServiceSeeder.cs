@@ -239,7 +239,7 @@ public static class ServiceSeeder
         var peppers = svc.AddIngredient("Mixed Peppers");
         var courgette = svc.AddIngredient("Courgette");
 
-        // ===================== CHRISTMAS MENU =====================
+        // -------------- CHRISTMAS MENU -------------------
         var christmasStarter1 = new MenuItem
         {
             Name = "Smoked Salmon Blini",
@@ -301,7 +301,7 @@ public static class ServiceSeeder
             christmasDessert1, christmasDessert2
         };
 
-        // ===================== VALENTINES MENU =====================
+        // -------------- VALENTINES MENU -------------------
         var valentinesStarter1 = new MenuItem
         {
             Name = "Lobster Bisque",
@@ -363,7 +363,7 @@ public static class ServiceSeeder
             valentinesDessert1, valentinesDessert2
         };
 
-        // ===================== SUMMER BBQ MENU =====================
+        // -------------- SUMMER BBQ MENU -------------------
         var bbqStarter1 = new MenuItem
         {
             Name = "BBQ Pulled Pork Sliders",
@@ -426,7 +426,7 @@ public static class ServiceSeeder
         };
 
 
-        // ===================== SIDES =====================
+        // -------------- SIDES -------------------
         var side1 = new MenuItem
         {
             Name = "Chunky Chips",
@@ -482,7 +482,7 @@ public static class ServiceSeeder
         svc.AddMenu("Valentines Menu", "Seasonal", "A romantic Valentines Day dining experience for two.", false, valentinesMenuItems.Concat(sideItems).ToList());
         svc.AddMenu("Summer BBQ Menu", "Seasonal", "A sun-soaked outdoor barbecue experience with grilled favourites and refreshing desserts.", false, bbqMenuItems.Concat(sideItems).ToList());
 
-        // ===================== DRINKS MENU =====================
+        // -------------- DRINKS MENU -------------------
         // Allergen ingredients already seeded above — reuse: milk, eggs, gluten, sulfites, lupin
 
         // Soft Drinks
@@ -613,22 +613,24 @@ public static class ServiceSeeder
         var chocolateBrownie = lunchMenu.MenuItems.FirstOrDefault(i => i.Name == "Chocolate Brownie");
         var fruitSalad       = lunchMenu.MenuItems.FirstOrDefault(i => i.Name == "Fresh Fruit Salad");
 
-        // Helper: build a safe item list, skipping nulls
+        
         List<MenuItem> Items(params MenuItem[] menuItems) =>
             menuItems.Where(i => i != null).ToList();
 
-        // Helper: create a completed past order and optional review
         Order CompletedOrder(IRestaurantService s, int tableId, List<MenuItem> orderItems,
                              string reviewer = null, int stars = 5, string comment = null)
         {
-            var o = s.AddOrder(orderItems, tableId);
+            var quantities = orderItems
+                .GroupBy(mi => mi.Id)
+                .ToDictionary(g => g.Key, g => g.Count());
+            var o = s.AddOrder(quantities, tableId);
             var completed = s.MarkOrderCompleted(o?.Id ?? 0);
             if (completed != null && reviewer != null)
                 s.AddReview(completed.Id, reviewer, stars, comment ?? "");
             return completed;
         }
 
-        // Helper: create a completed booking with a completed order already done
+       
         void PastBooking(IRestaurantService s, string name, string phone, string email,
                          DateTime dt, int guests, int tableNumber,
                          List<MenuItem> orderItems, bool allergen = false,
@@ -641,39 +643,31 @@ public static class ServiceSeeder
             if (b != null) { b.Status = "Completed"; s.UpdateBooking(b); }
         }
 
-        // =========================================================
-        // TWO DAYS AGO — Monday 11 April — lunch and dinner service
-        // =========================================================
-        var d2 = DateTime.Today.AddDays(-2);
+      
+        var dMinus2 = DateTime.Today.AddDays(-2);
 
-        PastBooking(svc, "Connor Burke",    "0871112233", "connor@example.com",    d2.AddHours(12),        2, 4,  Items(chickenSandwich, fruitSalad),           reviewer: "Connor Burke",    stars: 4, reviewText: "Lovely lunch, chicken sandwich was fresh.");
-        PastBooking(svc, "Niamh Gallagher", "0852223344", "niamh@example.com",     d2.AddHours(12).AddMinutes(30), 4, 5, Items(pasta, chocolateBrownie),        reviewer: "Niamh Gallagher", stars: 5, reviewText: "Pasta was incredible, will definitely be back.");
-        PastBooking(svc, "Padraig Duffy",   "0863334455", "padraig@example.com",   d2.AddHours(13),        3, 6,  Items(chickenSandwich, pasta, fruitSalad));
-        PastBooking(svc, "Roisin Doherty",  "0874445566", "roisin@example.com",    d2.AddHours(19),        2, 7,  Items(bruschetta, salmon, appleCrumble),       reviewer: "Roisin Doherty",  stars: 5, reviewText: "Salmon was perfectly cooked. Lovely atmosphere.");
-        PastBooking(svc, "Seamus Kelly",    "0885556677", "seamus@example.com",    d2.AddHours(19).AddMinutes(30), 4, 8, Items(prawnCocktail, steak, cheesecake), reviewer: "Seamus Kelly",    stars: 3, reviewText: "Steak was a little overcooked but service was friendly.");
-        PastBooking(svc, "Aisling Brennan", "0896667788", "aisling@example.com",   d2.AddHours(20),        2, 9,  Items(bruschetta, salmon, cheesecake),         allergen: true);
-        PastBooking(svc, "Ciaran Walsh",    "0817778899", "ciaran@example.com",    d2.AddHours(20).AddMinutes(30), 6, 1, Items(prawnCocktail, steak, cheesecake, appleCrumble));
-        PastBooking(svc, "Maeve McGuigan",  "0828889900", "maeve@example.com",     d2.AddHours(21),        4, 2,  Items(bruschetta, salmon, appleCrumble),       reviewer: "Maeve McGuigan",  stars: 4, reviewText: "Great food, slightly slow service but worth the wait.");
+        PastBooking(svc, "Connor Burke",    "0871112233", "connor@example.com",    dMinus2.AddHours(12),        2, 4,  Items(chickenSandwich, fruitSalad),           reviewer: "Connor Burke",    stars: 4, reviewText: "Lovely lunch, chicken sandwich was fresh.");
+        PastBooking(svc, "Niamh Gallagher", "0852223344", "niamh@example.com",     dMinus2.AddHours(12).AddMinutes(30), 4, 5, Items(pasta, chocolateBrownie),        reviewer: "Niamh Gallagher", stars: 5, reviewText: "Pasta was incredible, will definitely be back.");
+        PastBooking(svc, "Padraig Duffy",   "0863334455", "padraig@example.com",   dMinus2.AddHours(13),        3, 6,  Items(chickenSandwich, pasta, fruitSalad));
+        PastBooking(svc, "Roisin Doherty",  "0874445566", "roisin@example.com",    dMinus2.AddHours(19),        2, 7,  Items(bruschetta, salmon, appleCrumble),       reviewer: "Roisin Doherty",  stars: 5, reviewText: "Salmon was perfectly cooked. Lovely atmosphere.");
+        PastBooking(svc, "Seamus Kelly",    "0885556677", "seamus@example.com",    dMinus2.AddHours(19).AddMinutes(30), 4, 8, Items(prawnCocktail, steak, cheesecake), reviewer: "Seamus Kelly",    stars: 3, reviewText: "Steak was a little overcooked but service was friendly.");
+        PastBooking(svc, "Aisling Brennan", "0896667788", "aisling@example.com",   dMinus2.AddHours(20),        2, 9,  Items(bruschetta, salmon, cheesecake),         allergen: true);
+        PastBooking(svc, "Ciaran Walsh",    "0817778899", "ciaran@example.com",    dMinus2.AddHours(20).AddMinutes(30), 6, 1, Items(prawnCocktail, steak, cheesecake, appleCrumble));
+        PastBooking(svc, "Maeve McGuigan",  "0828889900", "maeve@example.com",     dMinus2.AddHours(21),        4, 2,  Items(bruschetta, salmon, appleCrumble),       reviewer: "Maeve McGuigan",  stars: 4, reviewText: "Great food, slightly slow service but worth the wait.");
 
-        // =========================================================
-        // YESTERDAY — Tuesday 12 April — lunch and dinner service
-        // =========================================================
-        var d1 = DateTime.Today.AddDays(-1);
+        
+        var dMinus1 = DateTime.Today.AddDays(-1);
 
-        PastBooking(svc, "Fionnuala Daly",  "0871234500", "fionnuala@example.com", d1.AddHours(12),        2, 4,  Items(chickenSandwich, fruitSalad));
-        PastBooking(svc, "Declan O'Brien",  "0852345600", "declan@example.com",    d1.AddHours(12).AddMinutes(30), 4, 5, Items(pasta, chocolateBrownie),         reviewer: "Declan O'Brien", stars: 5, reviewText: "Best pasta I've had outside of Italy. Genuinely impressed.");
-        PastBooking(svc, "Sinead Maguire",  "0863456700", "sinead@example.com",    d1.AddHours(13),        2, 6,  Items(chickenSandwich, chocolateBrownie),     allergen: true);
-        PastBooking(svc, "Brendan Carr",    "0874567800", "brendan@example.com",   d1.AddHours(19),        4, 7,  Items(prawnCocktail, steak, cheesecake),       reviewer: "Brendan Carr",   stars: 4, reviewText: "Excellent steak night. Could do with more sauce options.");
-        PastBooking(svc, "Orla Fitzsimmons","0885678900", "orla@example.com",      d1.AddHours(19).AddMinutes(30), 2, 8, Items(bruschetta, salmon, cheesecake));
-        PastBooking(svc, "Tadhg Boyle",     "0896789000", "tadhg@example.com",     d1.AddHours(20),        6, 1,  Items(prawnCocktail, steak, appleCrumble, cheesecake), reviewer: "Tadhg Boyle", stars: 5, reviewText: "Celebrated my mum's birthday here. Perfect evening.");
-        PastBooking(svc, "Aoife Murray",    "0817890100", "aoife@example.com",     d1.AddHours(20).AddMinutes(30), 4, 2, Items(bruschetta, salmon, appleCrumble));
-        PastBooking(svc, "Cillian Power",   "0828901200", "cillian@example.com",   d1.AddHours(21),        3, 3,  Items(prawnCocktail, steak, cheesecake),       allergen: true);
+        PastBooking(svc, "Fionnuala Daly",  "0871234500", "fionnuala@example.com", dMinus1.AddHours(12),        2, 4,  Items(chickenSandwich, fruitSalad));
+        PastBooking(svc, "Declan O'Brien",  "0852345600", "declan@example.com",    dMinus1.AddHours(12).AddMinutes(30), 4, 5, Items(pasta, chocolateBrownie),         reviewer: "Declan O'Brien", stars: 5, reviewText: "Best pasta I've had outside of Italy. Genuinely impressed.");
+        PastBooking(svc, "Sinead Maguire",  "0863456700", "sinead@example.com",    dMinus1.AddHours(13),        2, 6,  Items(chickenSandwich, chocolateBrownie),     allergen: true);
+        PastBooking(svc, "Brendan Carr",    "0874567800", "brendan@example.com",   dMinus1.AddHours(19),        4, 7,  Items(prawnCocktail, steak, cheesecake),       reviewer: "Brendan Carr",   stars: 4, reviewText: "Excellent steak night. Could do with more sauce options.");
+        PastBooking(svc, "Orla Fitzsimmons","0885678900", "orla@example.com",      dMinus1.AddHours(19).AddMinutes(30), 2, 8, Items(bruschetta, salmon, cheesecake));
+        PastBooking(svc, "Tadhg Boyle",     "0896789000", "tadhg@example.com",     dMinus1.AddHours(20),        6, 1,  Items(prawnCocktail, steak, appleCrumble, cheesecake), reviewer: "Tadhg Boyle", stars: 5, reviewText: "Celebrated my mum's birthday here. Perfect evening.");
+        PastBooking(svc, "Aoife Murray",    "0817890100", "aoife@example.com",     dMinus1.AddHours(20).AddMinutes(30), 4, 2, Items(bruschetta, salmon, appleCrumble));
+        PastBooking(svc, "Cillian Power",   "0828901200", "cillian@example.com",   dMinus1.AddHours(21),        3, 3,  Items(prawnCocktail, steak, cheesecake),       allergen: true);
 
-        // =========================================================
-        // TODAY — Monday 13 April — fictional time is 20:30
-        // Earlier sittings are completed. Current sitting is active (19:00-20:30).
-        // T4 has a 21:00 booking that hasn't arrived yet — status stays Booked.
-        // =========================================================
+       
         var today = DateTime.Today;
 
         // Lunch sittings — all completed and gone home
@@ -706,29 +700,29 @@ public static class ServiceSeeder
         var eb3 = svc.AddBooking("Kathleen Doherty","0817777007", "kathleen@example.com",  today.AddHours(18).AddMinutes(30), 6, true,  true,  "Nut allergy — please advise kitchen", 10, false);
         if (eb3 != null) { eb3.Status = "Completed"; svc.UpdateBooking(eb3); }
         if (earlyO3 != null)
-            svc.AddAllergenConsent(earlyO3.Id, "Kathleen Doherty", "kathleen@example.com", "0817777007", true, earlyO3.MenuItems);
+            svc.AddAllergenConsent(earlyO3.Id, "Kathleen Doherty", "kathleen@example.com", "0817777007", true, earlyO3.OrderItems.Select(oi => oi.MenuItem).ToList());
 
         // ---- Current sitting — active at 20:30 ----
 
         // T1 — Alice Murphy, 4 guests, active order, seated
-        var order1 = svc.AddOrder(Items(prawnCocktail, steak, cheesecake), 1);
+        var order1 = svc.AddOrder(Items(prawnCocktail, steak, cheesecake).GroupBy(mi => mi.Id).ToDictionary(g => g.Key, g => g.Count()), 1);
         svc.SetTableOccupancy(1, true, 4);
         var b1 = svc.AddBooking("Alice Murphy",   "0871234567", "alice@example.com",  today.AddHours(19),               4, false, false, "",                      1, true);
         if (b1 != null) { b1.Status = "Seated"; svc.UpdateBooking(b1); }
 
         // T2 — James Brady, 2 guests, active order, seated
-        var order2 = svc.AddOrder(Items(bruschetta, salmon, appleCrumble), 2);
+        var order2 = svc.AddOrder(Items(bruschetta, salmon, appleCrumble).GroupBy(mi => mi.Id).ToDictionary(g => g.Key, g => g.Count()), 2);
         svc.SetTableOccupancy(2, true, 2);
         var b2 = svc.AddBooking("James Brady",    "0852345678", "james@example.com",  today.AddHours(19).AddMinutes(30), 2, false, false, "",                     2, true);
         if (b2 != null) { b2.Status = "Seated"; svc.UpdateBooking(b2); }
 
         // T3 — Sarah O'Neill, 3 guests, active order, allergen consent captured
-        var order3 = svc.AddOrder(Items(prawnCocktail, salmon, cheesecake), 3);
+        var order3 = svc.AddOrder(Items(prawnCocktail, salmon, cheesecake).GroupBy(mi => mi.Id).ToDictionary(g => g.Key, g => g.Count()), 3);
         svc.SetTableOccupancy(3, true, 3);
         var b3 = svc.AddBooking("Sarah O'Neill",  "0863456789", "sarah@example.com",  today.AddHours(20),               3, true,  true,  "Window seat preferred", 3, true);
         if (b3 != null) { b3.Status = "Seated"; svc.UpdateBooking(b3); }
         if (order3 != null)
-            svc.AddAllergenConsent(order3.Id, "Sarah O'Neill", "sarah@example.com", "0863456789", true, order3.MenuItems);
+            svc.AddAllergenConsent(order3.Id, "Sarah O'Neill", "sarah@example.com", "0863456789", true, order3.OrderItems.Select(oi => oi.MenuItem).ToList());
 
         // T4 — Martin Fox, 2 guests, booked for 21:00 — not arrived yet, table is free
         svc.AddBooking("Martin Fox",      "0874567891", "martin@example.com",    today.AddHours(21),               2, false, false, "",                              4, true);
@@ -736,9 +730,7 @@ public static class ServiceSeeder
         // T5 — Emma Byrne, 4 guests, booked for 21:00 birthday dinner — not arrived yet
         svc.AddBooking("Emma Byrne",      "0865678901", "emma@example.com",      today.AddHours(21),               4, false, false, "Celebrating a birthday",        5, true);
 
-        // =========================================================
-        // TOMORROW — Tuesday 14 April — advance bookings only, nobody seated yet
-        // =========================================================
+        
         var tom = DateTime.Today.AddDays(1);
 
         svc.AddBooking("Liam Walsh",      "0874567890", "liam@example.com",      tom.AddHours(12).AddMinutes(30), 2, false, false, "",                            4, true);
@@ -750,23 +742,55 @@ public static class ServiceSeeder
         svc.AddBooking("Fergus Timmins",  "0816789012", "fergus@example.com",    tom.AddHours(20).AddMinutes(30), 6, false, false, "Large group — need highchair", 2, true);
         svc.AddBooking("Sorcha Keenan",   "0827890123", "sorcha@example.com",    tom.AddHours(21),               4, false, false, "",                             3, true);
 
-        // =========================================================
-        // WEDNESDAY 15 APRIL to SUNDAY 19 APRIL — advance bookings spread across the week
-        // =========================================================
-        for (int d = 2; d <= 6; d++)
-        {
-            var day = DateTime.Today.AddDays(d);
-            // Lunch bookings
-            svc.AddBooking("Lunch Guest A" + d, "0871000" + d + "00", $"luncha{d}@example.com", day.AddHours(12),               2, false, false, "", 4, true);
-            svc.AddBooking("Lunch Guest B" + d, "0852000" + d + "00", $"lunchb{d}@example.com", day.AddHours(12).AddMinutes(30), 4, false, false, "", 5, true);
-            svc.AddBooking("Lunch Guest C" + d, "0863000" + d + "00", $"lunchc{d}@example.com", day.AddHours(13),               3, false, false, "", 6, true);
-            // Dinner bookings
-            svc.AddBooking("Dinner Guest A" + d, "0874000" + d + "00", $"dinnera{d}@example.com", day.AddHours(19),               4, false, false, "", 1, true);
-            svc.AddBooking("Dinner Guest B" + d, "0885000" + d + "00", $"dinnerb{d}@example.com", day.AddHours(19).AddMinutes(30), 2, false, false, "", 7, true);
-            svc.AddBooking("Dinner Guest C" + d, "0896000" + d + "00", $"dinnerc{d}@example.com", day.AddHours(20),               6, false, false, "", 2, true);
-            svc.AddBooking("Dinner Guest D" + d, "0817000" + d + "00", $"dinnerd{d}@example.com", day.AddHours(20).AddMinutes(30), 4, false, false, "", 3, true);
-            svc.AddBooking("Dinner Guest E" + d, "0828000" + d + "00", $"dinnere{d}@example.com", day.AddHours(21),               2, false, false, "", 8, true);
-        }
+        var d2 = DateTime.Today.AddDays(2);
+        svc.AddBooking("Siobhan Ryan",      "0871234521", "siobhan.ryan@example.com",      d2.AddHours(12),               2, false, false, "",                        4, true);
+        svc.AddBooking("Colm Brennan",      "0852345632", "colm.brennan@example.com",      d2.AddHours(12).AddMinutes(30), 4, false, false, "",                       5, true);
+        svc.AddBooking("Fiona O'Sullivan",  "0863456743", "fiona.osullivan@example.com",   d2.AddHours(13),               3, false, false, "",                        6, true);
+        svc.AddBooking("Cormac Lynch",      "0874567854", "cormac.lynch@example.com",      d2.AddHours(19),               4, false, false, "",                        1, true);
+        svc.AddBooking("Deirdre Nolan",     "0885678965", "deirdre.nolan@example.com",     d2.AddHours(19).AddMinutes(30), 2, false, false, "",                       7, true);
+        svc.AddBooking("Patrick Mulligan",  "0896789076", "patrick.mulligan@example.com",  d2.AddHours(20),               6, false, false, "",                        2, true);
+        svc.AddBooking("Una McCarthy",      "0817890187", "una.mccarthy@example.com",      d2.AddHours(20).AddMinutes(30), 4, false, false, "",                       3, true);
+        svc.AddBooking("Barry Kavanagh",    "0828901298", "barry.kavanagh@example.com",    d2.AddHours(21),               2, false, false, "",                        8, true);
+
+        var d3 = DateTime.Today.AddDays(3);
+        svc.AddBooking("Lorraine Fahy",     "0871112301", "lorraine.fahy@example.com",     d3.AddHours(12),               2, false, false, "",                        4, true);
+        svc.AddBooking("Shane Doyle",       "0852223402", "shane.doyle@example.com",       d3.AddHours(12).AddMinutes(30), 4, false, false, "",                       5, true);
+        svc.AddBooking("Eileen Costello",   "0863334503", "eileen.costello@example.com",   d3.AddHours(13),               3, true,  false, "Nut allergy",             6, true);
+        svc.AddBooking("Niall Connolly",    "0874445604", "niall.connolly@example.com",    d3.AddHours(19),               4, false, false, "",                        1, true);
+        svc.AddBooking("Yvonne Burke",      "0885556705", "yvonne.burke@example.com",      d3.AddHours(19).AddMinutes(30), 2, false, false, "",                       7, true);
+        svc.AddBooking("Tomas Forde",       "0896667806", "tomas.forde@example.com",       d3.AddHours(20),               6, false, false, "Large work group",        2, true);
+        svc.AddBooking("Caoimhe Sheridan",  "0817778907", "caoimhe.sheridan@example.com",  d3.AddHours(20).AddMinutes(30), 4, false, false, "",                       3, true);
+        svc.AddBooking("Donal Fitzpatrick", "0828889008", "donal.fitzpatrick@example.com", d3.AddHours(21),               2, false, false, "",                        8, true);
+
+        var d4 = DateTime.Today.AddDays(4);
+        svc.AddBooking("Mairead Walsh",     "0871223401", "mairead.walsh@example.com",     d4.AddHours(12),               2, false, false, "",                        4, true);
+        svc.AddBooking("Ronan Healy",       "0852334502", "ronan.healy@example.com",       d4.AddHours(12).AddMinutes(30), 4, false, false, "",                       5, true);
+        svc.AddBooking("Cliodhna Murray",   "0863445603", "cliodhna.murray@example.com",   d4.AddHours(13),               3, false, false, "",                        6, true);
+        svc.AddBooking("Seamus O'Brien",    "0874556704", "seamus.obrien@example.com",     d4.AddHours(19),               4, true,  false, "Gluten intolerance",      1, true);
+        svc.AddBooking("Aoibheann Power",   "0885667805", "aoibheann.power@example.com",   d4.AddHours(19).AddMinutes(30), 2, false, false, "",                       7, true);
+        svc.AddBooking("Ruairi Gallagher",  "0896778906", "ruairi.gallagher@example.com",  d4.AddHours(20),               6, false, false, "",                        2, true);
+        svc.AddBooking("Maire Boyle",       "0817889007", "maire.boyle@example.com",       d4.AddHours(20).AddMinutes(30), 4, false, false, "",                       3, true);
+        svc.AddBooking("Fintan Moran",      "0828990108", "fintan.moran@example.com",      d4.AddHours(21),               2, false, false, "",                        8, true);
+
+        var d5 = DateTime.Today.AddDays(5);
+        svc.AddBooking("Bridget Quinn",     "0871334501", "bridget.quinn@example.com",     d5.AddHours(12),               2, false, false, "",                        4, true);
+        svc.AddBooking("Kevin Doherty",     "0852445602", "kevin.doherty@example.com",     d5.AddHours(12).AddMinutes(30), 4, false, false, "",                       5, true);
+        svc.AddBooking("Nuala Higgins",     "0863556703", "nuala.higgins@example.com",     d5.AddHours(13),               3, false, false, "",                        6, true);
+        svc.AddBooking("Eamonn Casey",      "0874667804", "eamonn.casey@example.com",      d5.AddHours(19),               4, false, false, "Business dinner",         1, true);
+        svc.AddBooking("Sorcha Maguire",    "0885778905", "sorcha.maguire@example.com",    d5.AddHours(19).AddMinutes(30), 2, false, false, "",                       7, true);
+        svc.AddBooking("Cathal O'Neill",    "0896889006", "cathal.oneill@example.com",     d5.AddHours(20),               6, false, false, "",                        2, true);
+        svc.AddBooking("Ronan Carthy",      "0817990107", "ronan.carthy@example.com",      d5.AddHours(20).AddMinutes(30), 4, false, false, "",                       3, true);
+        svc.AddBooking("Meadhbh Flynn",     "0828001208", "meadhbh.flynn@example.com",     d5.AddHours(21),               2, false, false, "",                        8, true);
+
+        var d6 = DateTime.Today.AddDays(6);
+        svc.AddBooking("Aidan Lawlor",      "0871445601", "aidan.lawlor@example.com",      d6.AddHours(12),               2, false, false, "",                        4, true);
+        svc.AddBooking("Sinead Farrell",    "0852556702", "sinead.farrell@example.com",    d6.AddHours(12).AddMinutes(30), 4, false, false, "",                       5, true);
+        svc.AddBooking("Ciaran McNamara",   "0863667803", "ciaran.mcnamara@example.com",   d6.AddHours(13),               3, false, false, "",                        6, true);
+        svc.AddBooking("Grainne Timmons",   "0874778904", "grainne.timmons@example.com",   d6.AddHours(19),               4, false, false, "",                        1, true);
+        svc.AddBooking("Padraig Sheridan",  "0885889005", "padraig.sheridan@example.com",  d6.AddHours(19).AddMinutes(30), 2, true,  false, "Dairy allergy",          7, true);
+        svc.AddBooking("Niamh Keenan",      "0896990106", "niamh.keenan@example.com",      d6.AddHours(20),               6, false, false, "Graduation celebration",  2, true);
+        svc.AddBooking("Conor Dowd",        "0817001207", "conor.dowd@example.com",        d6.AddHours(20).AddMinutes(30), 4, false, false, "",                       3, true);
+        svc.AddBooking("Aine Naughton",     "0828112308", "aine.naughton@example.com",     d6.AddHours(21),               2, false, false, "",                        8, true);
     }
 
 }

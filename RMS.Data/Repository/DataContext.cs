@@ -15,6 +15,7 @@ public class DataContext : DbContext
     public DbSet<MenuItem> MenuItems { get; set; }
     public DbSet<Ingredient> Ingredients { get; set; }
     public DbSet<Order> Orders { get; set; }
+    public DbSet<OrderItem> OrderItems { get; set; }
     public DbSet<Table> Tables { get; set; }
     public DbSet<Booking> Bookings { get; set; }
     public DbSet<AllergenConsent> AllergenConsents { get; set; }
@@ -34,6 +35,12 @@ public class DataContext : DbContext
         modelBuilder.Entity<MenuItem>()
             .HasMany(mi => mi.Ingredients)
             .WithMany();
+
+        modelBuilder.Entity<OrderItem>()
+            .HasOne(oi => oi.MenuItem)
+            .WithMany()
+            .HasForeignKey(oi => oi.MenuItemId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 
     public void Initialise() 

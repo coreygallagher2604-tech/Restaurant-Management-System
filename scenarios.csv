@@ -1,0 +1,12 @@
+Scenario,Observations
+Order written on pad entered into till after course,Time delay between order placed and kitchen informed
+Two staff serving the same table at different points,Risk of duplicate entry or missing lines
+Amendment made verbally after original ticket sent,Original ticket not updated; kitchen working from outdated information
+Allergy noted on pad but not entered into system,No digital record; no traceability if an incident occurs
+Customer declares allergen after ordering,Server verbally tells kitchen; no record created and kitchen may not receive the message during a busy period
+Customer requests removal of an ingredient,Server shouts to kitchen or re-enters full order; original ticket may still reach the kitchen first
+Order voided mid-service,Verbal notification passed on; kitchen may have already begun preparation
+Staff member covers another's section,Must ask colleague or guess table status
+Manager assessing table turnover,No live view; must walk the floor or ask FOH
+New booking arrives; table availability unclear,Risk of double-seating or refusing a walk-in incorrectly
+Order at different stages for same table,FOH and kitchen have different mental models of where the order is

@@ -6,7 +6,7 @@ using RMS.Web.Models;
 
 namespace RMS.Web.Controllers;
 
-[Authorize(Roles = "admin,owner,manager,staff")]
+[Authorize(Roles = "admin,owner,manager")]
 public class IngredientController : BaseController
 {
     private IRestaurantService svc;
@@ -27,7 +27,7 @@ public class IngredientController : BaseController
 
     // GET /Ingredient/Create
     [HttpGet]
-    [Authorize(Roles = "admin,owner,manager,staff")]
+    [Authorize(Roles = "admin,owner,manager")]
     public IActionResult Create()
     {
         return View(new IngredientViewModel());
@@ -36,7 +36,7 @@ public class IngredientController : BaseController
     // POST /Ingredient/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [Authorize(Roles = "admin,owner,manager,staff")]
+    [Authorize(Roles = "admin,owner,manager")]
     public IActionResult Create(IngredientViewModel vm)
     {
         if (!ModelState.IsValid)
@@ -58,7 +58,7 @@ public class IngredientController : BaseController
 
     // GET /Ingredient/Edit/{id}
     [HttpGet]
-    [Authorize(Roles = "admin,owner,manager,staff")]
+    [Authorize(Roles = "admin,owner,manager")]
     public IActionResult Edit(int id)
     {
         var ingredient = svc.GetIngredientById(id);
@@ -72,12 +72,26 @@ public class IngredientController : BaseController
         return View(IngredientViewModel.FromIngredient(ingredient));
     }
 
+    // The 14 allergens with protected status under EU food law — allergen flag cannot be removed
+    private static readonly string[] ProtectedAllergens =
+    {
+        "Milk", "Eggs", "Gluten", "Crustaceans", "Fish", "Tree Nuts",
+        "Sulfites", "Mustard", "Celery", "Soya", "Peanuts", "Lupin", "Molluscs", "Sesame"
+    };
+
     // POST /Ingredient/Edit/{id}
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [Authorize(Roles = "admin,owner,manager,staff")]
+    [Authorize(Roles = "admin,owner,manager")]
     public IActionResult Edit(int id, IngredientViewModel vm)
     {
+        // Prevent removing allergen status from any of the 14 legally protected allergens
+        if (ProtectedAllergens.Contains(vm.Name) && !vm.Allergen)
+        {
+            ModelState.AddModelError(nameof(vm.Allergen),
+                $"'{vm.Name}' is one of the 14 EU-listed allergens. Its allergen status cannot be removed.");
+        }
+
         if (!ModelState.IsValid)
         {
             return View(vm);
@@ -99,7 +113,7 @@ public class IngredientController : BaseController
 
     // GET /Ingredient/Delete/{id}
     [HttpGet]
-    [Authorize(Roles = "admin,owner,manager,staff")]
+    [Authorize(Roles = "admin,owner,manager")]
     public IActionResult Delete(int id)
     {
         var ingredient = svc.GetIngredientById(id);
@@ -116,7 +130,7 @@ public class IngredientController : BaseController
     // POST /Ingredient/DeleteConfirm/{id}
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [Authorize(Roles = "admin,owner,manager,staff")]
+    [Authorize(Roles = "admin,owner,manager")]
     public IActionResult DeleteConfirm(int id)
     {
         var deleted = svc.DeleteIngredient(id);

@@ -46,9 +46,12 @@
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Order" asp-action="Index">Orders</a>
                             </li>
 
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Ingredient" asp-action="Index">Ingredients</a>
-                            </li>
+                            @if (User.IsInRole("admin") || User.IsInRole("owner") || User.IsInRole("manager"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Ingredient" asp-action="Index">Ingredients</a>
+                                </li>
+                            }
 
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Booking" asp-action="Index">Bookings</a>

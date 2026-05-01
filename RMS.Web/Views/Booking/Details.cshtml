@@ -60,6 +60,9 @@
         @if (User.IsInRole("admin") || User.IsInRole("owner") || User.IsInRole("manager") || User.IsInRole("staff"))
         {
             <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
+        }
+        @if (User.IsInRole("admin") || User.IsInRole("owner") || User.IsInRole("manager"))
+        {
             <form asp-action="DeleteConfirm" asp-route-id="@Model.Id" method="post" class="d-inline">
                 @Html.AntiForgeryToken()
                 <button type="submit" class="btn btn-outline-danger" onclick="return confirm('Delete this booking? This cannot be undone.')">Delete</button>

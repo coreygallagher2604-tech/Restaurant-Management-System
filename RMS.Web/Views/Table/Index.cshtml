@@ -32,10 +32,11 @@
                     <td>@t.CustomersSeated</td>
                     <td>
                         @{
-                            var badgeClass = !t.Active    ? "bg-secondary" :
-                                              t.IsOccupied ? "bg-danger"    :
-                                              t.IsReserved ? "bg-warning text-dark" :
-                                                             "bg-success";
+                            var badgeClass = !t.Active     ? "bg-secondary"        :
+                                              t.OrderNeeded ? "bg-warning text-dark" :
+                                              t.IsOccupied  ? "bg-danger"            :
+                                              t.IsReserved  ? "bg-warning text-dark" :
+                                                              "bg-success";
                         }
                         <span class="badge @badgeClass"
                               @(t.IsReserved && t.ReservedAt.HasValue
@@ -62,10 +63,13 @@
                         }
                         <a asp-action="SetOccupancy" asp-route-id="@t.Id" class="btn btn-sm btn-outline-primary">Occupancy</a>
                         <a asp-action="Edit" asp-route-id="@t.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
-                        <form asp-action="DeleteConfirm" asp-route-id="@t.Id" method="post" class="d-inline">
-                            @Html.AntiForgeryToken()
-                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this table? This cannot be undone.')">Delete</button>
-                        </form>
+                        @if (User.IsInRole("admin") || User.IsInRole("owner") || User.IsInRole("manager"))
+                        {
+                            <form asp-action="DeleteConfirm" asp-route-id="@t.Id" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this table? This cannot be undone.')">Delete</button>
+                            </form>
+                        }
                     </td>
                 </tr>
             }

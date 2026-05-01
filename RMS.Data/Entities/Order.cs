@@ -10,14 +10,14 @@ namespace RMS.Data.Entities;
     
     public DateTime CreatedOn {get; set;} = DateTime.Now;
 
-    public List<MenuItem> MenuItems {get; set;} = new List<MenuItem>();
+    public List<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
 
     public double totalCost {get; set;}
 
     public Table Table {get; set;}
 
 
-    List<AllergenConsent> AllergenConsents {get; set;} = new List<AllergenConsent>();
+    public List<AllergenConsent> AllergenConsents {get; set;} = new List<AllergenConsent>();
 
     public bool IsCompleted {get; set;} = false;
 

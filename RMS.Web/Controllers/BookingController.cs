@@ -509,7 +509,7 @@ public class BookingController : BaseController
     // POST /Booking/DeleteConfirm/{id}
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [Authorize(Roles = "admin,owner,manager,staff")]
+    [Authorize(Roles = "admin,owner,manager")]
     public IActionResult DeleteConfirm(int id)
     {
         var booking = svc.GetBookingById(id);
@@ -564,6 +564,25 @@ public class BookingController : BaseController
                 var extra = allTables.FirstOrDefault(t => t.TableNumber == tn);
                 if (extra != null) totalCapacity += extra.SeatingCapacity;
             }
+
+        // Block seating if any of the assigned tables are already occupied
+        var occupiedTableNumbers = new List<int>();
+        if (primaryTable != null && primaryTable.IsOccupied)
+            occupiedTableNumbers.Add(primaryTable.TableNumber);
+        foreach (var part in (booking.AdditionalTableNumbers ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries))
+            if (int.TryParse(part.Trim(), out var tn))
+            {
+                var extra = allTables.FirstOrDefault(t => t.TableNumber == tn);
+                if (extra != null && extra.IsOccupied)
+                    occupiedTableNumbers.Add(extra.TableNumber);
+            }
+
+        if (occupiedTableNumbers.Any())
+        {
+            var tableList = string.Join(", ", occupiedTableNumbers.Select(n => $"T{n}"));
+            Alert($"Table {tableList} is already occupied. Please assign a different table to this booking before seating these guests.", AlertType.warning);
+            return RedirectToAction(nameof(Edit), new { id });
+        }
 
         bool capacityExceeded = booking.NumberOfGuests > totalCapacity;
         bool canOverride = User.IsInRole("admin") || User.IsInRole("owner") || User.IsInRole("manager");

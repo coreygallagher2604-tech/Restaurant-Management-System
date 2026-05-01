@@ -55,7 +55,7 @@ public class AllergenConsentController : BaseController
         if (orderId > 0)
         {
             var order = svc.GetOrderById(orderId);
-            vm.AvailableMenuItems = order?.MenuItems ?? new List<MenuItem>();
+            vm.AvailableMenuItems = order?.OrderItems.Select(oi => oi.MenuItem).ToList() ?? new List<MenuItem>();
         }
 
         return View(vm);
@@ -67,19 +67,24 @@ public class AllergenConsentController : BaseController
     [Authorize(Roles = "admin,owner,manager,staff")]
     public IActionResult Create(AllergenConsentViewModel vm)
     {
+        if (!vm.ConsentGiven)
+        {
+            ModelState.AddModelError("ConsentGiven", "Consent must be confirmed before this record can be saved.");
+        }
+
         if (!ModelState.IsValid)
         {
             vm.AvailableOrders = svc.GetAllOrders().Where(o => !o.IsCompleted && !o.IsVoid).ToList();
             if (vm.OrderId > 0)
             {
                 var order = svc.GetOrderById(vm.OrderId);
-                vm.AvailableMenuItems = order?.MenuItems ?? new List<MenuItem>();
+                vm.AvailableMenuItems = order?.OrderItems.Select(oi => oi.MenuItem).ToList() ?? new List<MenuItem>();
             }
             return View(vm);
         }
 
         var selectedItems = vm.OrderId > 0
-            ? (svc.GetOrderById(vm.OrderId)?.MenuItems ?? new List<MenuItem>())
+            ? (svc.GetOrderById(vm.OrderId)?.OrderItems.Select(oi => oi.MenuItem).ToList() ?? new List<MenuItem>())
                 .Where(mi => vm.SelectedMenuItemIds.Contains(mi.Id)).ToList()
             : new List<MenuItem>();
 
@@ -95,7 +100,7 @@ public class AllergenConsentController : BaseController
         if (created is not null)
         {
             Alert($"Allergen consent recorded for '{created.CustomerName}'.", AlertType.success);
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Details", "Order", new { id = created.OrderId });
         }
 
         Alert("Allergen consent could not be recorded.", AlertType.warning);
@@ -105,7 +110,7 @@ public class AllergenConsentController : BaseController
 
     // GET /AllergenConsent/Edit/{id}
     [HttpGet]
-    [Authorize(Roles = "admin,owner,manager,staff")]
+    [Authorize(Roles = "admin,owner,manager")]
     public IActionResult Edit(int id)
     {
         var consents = svc.GetAllergenConsents();
@@ -126,7 +131,7 @@ public class AllergenConsentController : BaseController
     // POST /AllergenConsent/Edit/{id}
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [Authorize(Roles = "admin,owner,manager,staff")]
+    [Authorize(Roles = "admin,owner,manager")]
     public IActionResult Edit(int id, AllergenConsentViewModel vm)
     {
         if (!ModelState.IsValid)
@@ -142,7 +147,7 @@ public class AllergenConsentController : BaseController
 
     // GET /AllergenConsent/Delete/{id}
     [HttpGet]
-    [Authorize(Roles = "admin,owner,manager,staff")]
+    [Authorize(Roles = "admin,owner,manager")]
     public IActionResult Delete(int id)
     {
         var consents = svc.GetAllergenConsents();
@@ -160,7 +165,7 @@ public class AllergenConsentController : BaseController
     // POST /AllergenConsent/DeleteConfirm/{id}
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [Authorize(Roles = "admin,owner,manager,staff")]
+    [Authorize(Roles = "admin,owner,manager")]
     public IActionResult DeleteConfirm(int id)
     {
         svc.DeleteAllergenConsent(id);

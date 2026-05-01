@@ -291,3 +291,47 @@ First full browser test of the completed application. Nine bugs found and fixed 
 **Fix:** Rewrote `About.cshtml` with real content about The Banks restaurant in Strabane. Updated `HomeController.cs` with the correct title and founding date (2010).
 
 ---
+
+---
+
+# Code Review Fixes — 14 April 2026
+**Branches:** `fix/remove-booking-orderid-fk`, `fix/booking-past-time-and-delete-guard`, `fix/table-override-and-unlink`  
+**Goal:** Fix all findings from the structured code review in `FK_fix.md`.
+
+---
+
+### Fix 1 — Redundant `Booking.OrderId` FK causing a two-pass EF save
+**Observed:** `Booking` carried an `OrderId` foreign key pointing to `Order`. Every time a booking was created, EF Core had to INSERT the booking first, then UPDATE it with the FK once the order was saved. The EF console was logging FK constraint errors on seed because the orderId was passed as `0` for bookings with no order.
+**Why it matters:** `Order` already has a `TableId` FK. `GetOrdersByTableId()` already exists. `Booking.OrderId` was a second path to the same relationship — a redundant FK that added complexity, caused a two-pass save, and introduced bugs when the booking was moved to a new table (the OrderId pointed to an order on the old table).
+**Solution:** Removed `OrderId` from the `Booking` entity, `IRestaurantService`, `RestaurantServiceDb`, and `BookingViewModel`. Replaced the two `OrderId`-based lookups in `BookingController` (delete guard and order-move on edit) with `GetOrdersByTableId()` calls. Removed the `orderId` argument from all `AddBooking` calls in `ServiceSeeder` and `RestaurantServiceTests`.
+**Files changed:** `Booking.cs`, `IRestaurantService.cs`, `RestaurantServiceDb.cs`, `BookingViewModel.cs`, `BookingController.cs`, `ServiceSeeder.cs`, `RestaurantServiceTests.cs`
+
+---
+
+### Fix 2 — Bookings could be made for past times
+**Observed:** The booking Create form allowed submitting a time in the past. The GET action pre-filled the next 15-minute slot correctly, but if a date/time was passed in from the home page widget that was already past, it was accepted as-is. The POST had no server-side check.
+**Why it matters:** A customer should never be able to book a table for 12:15pm when it is already 9pm. The home page time picker could also pass a past time if the page had been open for a while.
+**Fix:** GET action: clamp any incoming requested time to at least the next 15-minute boundary from `DateTime.Now` before pre-filling the form. POST action: reject any submission where `BookingDateTime < DateTime.Now` with a clear error message.
+
+---
+
+### Fix 3 — Booking status lifecycle: Booked → Seated → Completed → Cancelled
+**Observed:** The booking status was managed by a vague `SetActive(bool)` toggle that only flipped `IsActive` and did nothing to table occupancy. There was no formal state machine.
+**Why it matters:** A restaurant needs to know which bookings have guests physically seated (as opposed to just reserved), which tables are occupied, and when a booking is closed so the table is freed for the next party. The old toggle could not represent this.
+**Solution:** Replaced `SetBookingActiveStatus` with three focused service methods:
+- `SeatGuests(bookingId)` — transitions `Booked → Seated`, marks all linked tables (primary + additional) as occupied with the full party count
+- `CloseBooking(bookingId)` — transitions `Seated → Completed`, frees all linked tables. Manual staff trigger when guests physically leave
+- `CancelBooking(bookingId)` — transitions `Booked → Cancelled` only. Cannot cancel a seated booking
+
+Delete guard updated: `Seated` bookings cannot be deleted. The `Index` view shows status-conditional buttons — staff see "Seat Guests", "Cancel", "Edit", "Delete" on a `Booked` booking; only "Close Booking" and "Edit" on a `Seated` booking; nothing modifiable on `Completed`.
+
+---
+
+### Fix 4 — Table assignment gated by role, capacity override for managers
+**Observed:** Any staff member could change table assignments, including removing tables from a seated party. There was also no warning when seating more guests than a table's capacity (e.g. a party of 8 at a table that seats 6).
+**Why it matters:** Removing a table during a sitting frees it in the system, which could allow double-booking of an occupied table. Capacity overrides should be possible (e.g. children joining a table) but should never be silent.
+**Solution:**
+- Table assignment fields (primary table + additional tables) in the Edit view are visible only to `manager`, `owner`, `admin`. Staff see a read-only display with a note.
+- `SeatGuests` action: calculates combined capacity across all linked tables. If guests exceed capacity and the user is a staff member, hard block. If they are manager/owner/admin, allowed but a warning alert always fires.
+- Edit POST: same role-based capacity check. Manager/owner/admin can save an over-capacity booking but a warning alert is shown. Staff get a hard model error.
+- When a seated booking's table list is changed via Edit, occupancy is synced immediately — removed tables freed, added tables occupied.

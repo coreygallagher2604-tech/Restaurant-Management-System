@@ -9,9 +9,9 @@ public class OrderViewModel
 
     public DateTime CreatedOn { get; set; }
 
-    public List<MenuItem> MenuItems { get; set; } = new List<MenuItem>();
+    public List<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
 
-    public List<int> SelectedMenuItemIds { get; set; } = new List<int>();
+    public Dictionary<int, int> ItemQuantities { get; set; } = new Dictionary<int, int>();
 
     public List<MenuItem> AvailableMenuItems { get; set; } = new List<MenuItem>();
 
@@ -27,6 +27,12 @@ public class OrderViewModel
     public bool IsVoid { get; set; } = false;
 
     public string CourseStatus { get; set; } = "NotStarted";
+
+    public int AllergyCountRequired { get; set; } = 0;
+
+    public int AllergenConsentCount { get; set; } = 0;
+
+    public bool NeedsAllergenConsent => AllergyCountRequired > 0 && AllergenConsentCount < AllergyCountRequired;
 
     public string StatusDisplay
     {
@@ -53,12 +59,16 @@ public class OrderViewModel
         var vm = new OrderViewModel();
         vm.Id = o.Id;
         vm.CreatedOn = o.CreatedOn;
-        vm.MenuItems = o.MenuItems ?? new List<MenuItem>();
+        vm.OrderItems = o.OrderItems ?? new List<OrderItem>();
+        vm.ItemQuantities = (o.OrderItems ?? new List<OrderItem>())
+            .ToDictionary(oi => oi.MenuItemId, oi => oi.Quantity);
         vm.TableId = o.Table?.Id;
         vm.TotalCost = o.totalCost;
         vm.IsCompleted = o.IsCompleted;
         vm.IsVoid = o.IsVoid;
         vm.CourseStatus = o.CourseStatus;
+        vm.AllergyCountRequired = o.AllergyCountRequired;
+        vm.AllergenConsentCount = o.AllergenConsents?.Count ?? 0;
         return vm;
     }
 }

@@ -42,6 +42,20 @@ public class TableController : BaseController
             }
         }
 
+        // Mark occupied tables that have no open order as "Order Needed"
+        var openOrders = svc.GetAllOrders()
+            .Where(o => !o.IsCompleted && !o.IsVoid)
+            .ToList();
+
+        foreach (var vm in vms.Where(v => v.IsOccupied))
+        {
+            bool hasOpenOrder = openOrders.Any(o => o.Table != null && o.Table.Id == vm.Id);
+            if (!hasOpenOrder)
+            {
+                vm.OrderNeeded = true;
+            }
+        }
+
         return View(vms);
     }
 
@@ -140,7 +154,7 @@ public class TableController : BaseController
     // POST /Table/DeleteConfirm
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [Authorize(Roles = "admin,owner,manager,staff")]
+    [Authorize(Roles = "admin,owner,manager")]
     public IActionResult DeleteConfirm(int id)
     {
         var table = svc.GetTableById(id);

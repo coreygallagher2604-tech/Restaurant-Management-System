@@ -532,3 +532,47 @@ A production project would also have integration tests or end-to-end tests (usin
 ---
 
 *Last updated: 13 April 2026 — 90 unit tests passing, 50 manual test cases documented.*
+
+---
+
+## 9. Code Review Findings — 14 April 2026
+
+**Q: You had a `Booking.OrderId` FK. Why did you remove it?**
+
+`Booking.OrderId` was a foreign key pointing from a booking to an order. The problem was that `Order` already has a `TableId` FK — an order already knows which table it belongs to, and `GetOrdersByTableId()` exists on the service layer to look up orders by table. `Booking.OrderId` was a second path to the same relationship — it was redundant.
+
+It also caused a practical bug: EF Core had to do a two-pass save on every booking creation (INSERT first, then UPDATE to set the FK once the order ID was known). And it broke when a booking was moved to a different table — the `OrderId` still pointed to an order on the old table.
+
+Removing it simplified the model, fixed the EF save, and clarified the design: bookings and orders are independent things that both link to a table. You do not need one to find the other.
+
+---
+
+**Q: What is a state machine and does your booking flow use one?**
+
+A state machine is a way of modelling something that can be in one of a fixed set of states, with defined rules about which transitions between states are allowed.
+
+The booking lifecycle in this project is a state machine with four states:
+- `Booked` — reservation confirmed, guests not yet arrived
+- `Seated` — staff have confirmed guests are at the table, table is occupied
+- `Completed` — booking closed by staff when guests leave, table freed
+- `Cancelled` — booking cancelled (only allowed from `Booked`)
+
+The transitions are enforced in the service layer. `SeatGuests()` only works from `Booked`. `CloseBooking()` only works from `Seated`. `CancelBooking()` only works from `Booked`. You cannot delete a `Seated` booking. These rules live in the service layer, not the view — the view cannot be trusted to enforce them.
+
+---
+
+**Q: Why is capacity override only allowed for managers and not staff?**
+
+The principle of least privilege — a user should only have the permissions they need for their role. A front-of-house staff member should not be able to seat 10 people at a table that holds 6 without a manager sign-off. This could create safety issues, violate fire regulations, or cause complaints.
+
+Managers and above can override because they carry accountability — they can make the judgement call. Staff cannot. The check is enforced in the controller at the POST action level using `User.IsInRole()`. The view also hides the table assignment fields from staff, but the real guard is the controller — never trust the browser alone.
+
+---
+
+**Q: Why does the Close Booking action need to be manual rather than automatic?**
+
+Because a completed order does not mean the guests have left. Guests sometimes pay and then sit and chat for 15-20 minutes. If the system automatically freed the table and marked the booking complete the moment the order was marked paid, it could create a ghost occupation — the table appears free in the system but is still physically occupied, leading to a double-booking for the next party.
+
+Staff closing the booking manually when they physically see the table empty is the only reliable source of truth. The system supports the staff, it does not replace their judgement.
+
+*Last updated: 14 April 2026*

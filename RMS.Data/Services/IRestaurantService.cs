@@ -81,7 +81,7 @@ public interface IRestaurantService
 
     // ---------------- Order Management ---------------
 
-    Order AddOrder(List<MenuItem> menuItems, int? tableId = null);
+    Order AddOrder(Dictionary<int, int> itemQuantities, int? tableId = null);
 
     List<Order> GetAllOrders();
 

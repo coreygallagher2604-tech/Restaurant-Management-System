@@ -38,7 +38,7 @@
                 <tr>
                     <td>@o.Id</td>
                     <td>@(o.TableId.HasValue ? $"T{o.TableId}" : "—")</td>
-                    <td>@o.MenuItems.Count</td>
+                    <td>@o.OrderItems.Count</td>
                     <td>£@o.TotalCost.ToString("F2")</td>
                     <td>
                         <span class="badge @o.StatusBadgeClass">@o.StatusDisplay</span>

@@ -23,22 +23,39 @@
         <dd class="col-8">£@Model.TotalCost.ToString("F2")</dd>
     </dl>
 
+    @if (Model.NeedsAllergenConsent && !Model.IsCompleted && !Model.IsVoid)
+    {
+        <div class="alert alert-danger d-flex align-items-center justify-content-between" role="alert">
+            <div>
+                <strong>Allergen consent required.</strong>
+                @Model.AllergyCountRequired consent form(s) required &mdash; @Model.AllergenConsentCount recorded.
+                This order cannot be completed until all consents are on file.
+            </div>
+            <a asp-controller="AllergenConsent" asp-action="Create" asp-route-orderId="@Model.Id"
+               class="btn btn-sm btn-danger ms-3">Add Consent</a>
+        </div>
+    }
+
     <h5 class="mt-3">Items</h5>
     <table class="table table-sm">
         <thead>
             <tr>
                 <th>Name</th>
                 <th>Type</th>
-                <th>Price</th>
+                <th>Unit Price</th>
+                <th>Qty</th>
+                <th>Subtotal</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var item in Model.MenuItems)
+            @foreach (var oi in Model.OrderItems)
             {
                 <tr>
-                    <td>@item.Name</td>
-                    <td>@item.Type</td>
-                    <td>£@item.Price.ToString("F2")</td>
+                    <td>@oi.MenuItem?.Name</td>
+                    <td>@oi.MenuItem?.Type</td>
+                    <td>£@oi.UnitPrice.ToString("F2")</td>
+                    <td>@oi.Quantity</td>
+                    <td>£@((oi.UnitPrice * oi.Quantity).ToString("F2"))</td>
                 </tr>
             }
         </tbody>

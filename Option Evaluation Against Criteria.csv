@@ -1,0 +1,7 @@
+Evaluation Criterion,Option A — Separate Tools,Option B — Integrated RMS
+Speed of order transmission to kitchen,Dependent on which tool handles orders; integration between tools adds latency,Single system; order created and immediately visible to relevant roles
+Visibility of table and order state,State split across multiple systems; staff must switch tools to get a complete picture,Single source of truth; table and order state visible in one interface
+Handling of order amendments,Amendments must be reflected across multiple systems manually; risk of divergence,Amendment updates a single record; all roles see the updated state immediately
+Consistency of allergen communication,Allergen records held in a separate compliance tool; not connected to live order data,Allergen consent linked directly to the order entity; cannot be separated from the order
+Role-based access control,Each tool has its own access model; consistent role enforcement across tools is difficult to maintain,Single access model enforced uniformly across all functions via one role system
+Affordability and training cost,Multiple licensing costs; staff must be trained on each tool separately; onboarding time multiplied,One system to learn; consistent interface across all tasks; lower training burden per new staff member

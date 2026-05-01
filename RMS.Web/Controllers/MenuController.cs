@@ -19,6 +19,7 @@ public class MenuController : BaseController
 
     // GET /Menu/Index
     [HttpGet]
+    [Authorize(Roles = "admin,owner,manager")]
     public IActionResult Index(string orderBy = "id", string direction = "asc")
     {
         var data = svc.GetAllMenus(orderBy, direction);
@@ -69,7 +70,7 @@ public class MenuController : BaseController
 
     // GET /Menu/Create
     [HttpGet]
-    [Authorize(Roles = "admin,owner,manager,staff")]
+    [Authorize(Roles = "admin,owner,manager")]
     public IActionResult Create()
     {
         return View(new MenuViewModel());
@@ -78,7 +79,7 @@ public class MenuController : BaseController
     // POST /Menu/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [Authorize(Roles = "admin,owner,manager,staff")]
+    [Authorize(Roles = "admin,owner,manager")]
     public IActionResult Create(MenuViewModel vm)
     {
         if (ModelState.IsValid)
@@ -96,7 +97,7 @@ public class MenuController : BaseController
 
     // GET /Menu/Edit/{id}
     [HttpGet]
-    [Authorize(Roles = "admin,owner,manager,staff")]
+    [Authorize(Roles = "admin,owner,manager")]
     public IActionResult Edit(int id)
     {
         var m = svc.GetMenuById(id);
@@ -125,7 +126,7 @@ public class MenuController : BaseController
     // POST /Menu/Edit/{id}
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [Authorize(Roles = "admin,owner,manager,staff")]
+    [Authorize(Roles = "admin,owner,manager")]
     public IActionResult Edit(int id, MenuViewModel vm)
     {
         if (ModelState.IsValid)
@@ -144,7 +145,7 @@ public class MenuController : BaseController
     // POST /Menu/AddItemToMenu
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [Authorize(Roles = "admin,owner,manager,staff")]
+    [Authorize(Roles = "admin,owner,manager")]
     public IActionResult AddItemToMenu(int menuId, int menuItemId)
     {
         svc.AddMenuItemToMenu(menuId, menuItemId);
@@ -154,7 +155,7 @@ public class MenuController : BaseController
     // POST /Menu/RemoveItemFromMenu
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [Authorize(Roles = "admin,owner,manager,staff")]
+    [Authorize(Roles = "admin,owner,manager")]
     public IActionResult RemoveItemFromMenu(int menuId, int menuItemId)
     {
         svc.RemoveMenuItemFromMenu(menuId, menuItemId);
@@ -163,7 +164,7 @@ public class MenuController : BaseController
 
     // GET /Menu/Delete/{id}
     [HttpGet]
-    [Authorize(Roles = "admin,owner,manager,staff")]
+    [Authorize(Roles = "admin,owner,manager")]
     public IActionResult Delete(int id)
     {
         var m = svc.GetMenuById(id);
@@ -179,7 +180,7 @@ public class MenuController : BaseController
     // POST /Menu/DeleteConfirm
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [Authorize(Roles = "admin,owner,manager,staff")]
+    [Authorize(Roles = "admin,owner,manager")]
     public IActionResult DeleteConfirm(int id)
     {
         var m = svc.GetMenuById(id);
@@ -230,7 +231,7 @@ public class MenuController : BaseController
 
     // GET /Menu/AddMenuItem
     [HttpGet]
-    [Authorize(Roles = "admin,owner,manager,staff")]
+    [Authorize(Roles = "admin,owner,manager")]
     public IActionResult AddMenuItem()
     {
         var vm = new MenuItemViewModel();
@@ -241,7 +242,7 @@ public class MenuController : BaseController
     // POST /Menu/AddMenuItem
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [Authorize(Roles = "admin,owner,manager,staff")]
+    [Authorize(Roles = "admin,owner,manager")]
     public IActionResult AddMenuItem(MenuItemViewModel vm)
     {
         if (ModelState.IsValid)
@@ -277,7 +278,7 @@ public class MenuController : BaseController
 
     // GET /Menu/EditMenuItem/{id}
     [HttpGet]
-    [Authorize(Roles = "admin,owner,manager,staff")]
+    [Authorize(Roles = "admin,owner,manager")]
     public IActionResult EditMenuItem(int id)
     {
         var item = svc.GetMenuItemById(id);
@@ -295,7 +296,7 @@ public class MenuController : BaseController
     // POST /Menu/EditMenuItem/{id}
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [Authorize(Roles = "admin,owner,manager,staff")]
+    [Authorize(Roles = "admin,owner,manager")]
     public IActionResult EditMenuItem(int id, MenuItemViewModel vm)
     {
         if (ModelState.IsValid)
@@ -319,7 +320,7 @@ public class MenuController : BaseController
 
     // GET /Menu/DeleteMenuItem/{id}
     [HttpGet]
-    [Authorize(Roles = "admin,owner,manager,staff")]
+    [Authorize(Roles = "admin,owner,manager")]
     public IActionResult DeleteMenuItem(int id)
     {
         var item = svc.GetMenuItemById(id);
@@ -335,7 +336,7 @@ public class MenuController : BaseController
     // POST /Menu/DeleteMenuItemConfirm
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [Authorize(Roles = "admin,owner,manager,staff")]
+    [Authorize(Roles = "admin,owner,manager")]
     public IActionResult DeleteMenuItemConfirm(int id)
     {
         var deleted = svc.DeleteMenuItem(id);

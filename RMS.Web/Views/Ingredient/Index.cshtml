@@ -40,10 +40,13 @@
                     <td>@i.AllergenInfo</td>
                     <td class="text-end">
                         <a asp-action="Edit" asp-route-id="@i.Id" class="btn btn-sm btn-outline-primary">Edit</a>
-                        <form asp-action="DeleteConfirm" asp-route-id="@i.Id" method="post" class="d-inline">
-                            @Html.AntiForgeryToken()
-                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this ingredient? This cannot be undone.')">Delete</button>
-                        </form>
+                        @if (User.IsInRole("admin") || User.IsInRole("owner") || User.IsInRole("manager"))
+                        {
+                            <form asp-action="DeleteConfirm" asp-route-id="@i.Id" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this ingredient? This cannot be undone.')">Delete</button>
+                            </form>
+                        }
                     </td>
                 </tr>
             }

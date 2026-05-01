@@ -19,7 +19,7 @@
         <dd class="col-8">@(Model.TableId.HasValue ? $"T{Model.TableId}" : "No table assigned")</dd>
 
         <dt class="col-4">Items</dt>
-        <dd class="col-8">@Model.MenuItems.Count item(s)</dd>
+        <dd class="col-8">@Model.OrderItems.Count item(s)</dd>
 
         <dt class="col-4">Total</dt>
         <dd class="col-8">£@Model.TotalCost.ToString("F2")</dd>

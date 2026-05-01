@@ -21,7 +21,11 @@ public class OrderController : BaseController
     public IActionResult Index()
     {
         var orders = svc.GetAllOrders();
-        var vms = orders.Select(OrderViewModel.FromOrder).ToList();
+        var vms = orders
+            .OrderBy(o => o.IsCompleted || o.IsVoid ? 1 : 0)
+            .ThenByDescending(o => o.CreatedOn)
+            .Select(OrderViewModel.FromOrder)
+            .ToList();
         return View(vms);
     }
 
@@ -74,14 +78,20 @@ public class OrderController : BaseController
     [Authorize(Roles = "admin,owner,manager,staff")]
     public IActionResult Create(OrderViewModel vm)
     {
-        var selectedItems = svc.GetAllMenuItems()
-            .Where(mi => vm.SelectedMenuItemIds.Contains(mi.Id))
-            .ToList();
+        var quantities = (vm.ItemQuantities ?? new Dictionary<int, int>())
+            .Where(kvp => kvp.Value > 0)
+            .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
-        var created = svc.AddOrder(selectedItems, vm.TableId);
+        var created = svc.AddOrder(quantities, vm.TableId);
 
         if (created is not null)
         {
+            if (created.AllergyCountRequired > 0)
+            {
+                Alert($"Order created. This table has {created.AllergyCountRequired} customer(s) who declared an allergy — allergen consent form(s) must be completed before the order can be closed.", AlertType.warning);
+                return RedirectToAction("Create", "AllergenConsent", new { orderId = created.Id });
+            }
+
             Alert("Order has been created.", AlertType.success);
             return RedirectToAction(nameof(Details), new { id = created.Id });
         }
@@ -104,6 +114,14 @@ public class OrderController : BaseController
             Alert($"Order {id} could not be found.", AlertType.warning);
             return NotFound();
         }
+
+        var consentCount = order.AllergenConsents?.Count ?? 0;
+        if (order.AllergyCountRequired > 0 && consentCount < order.AllergyCountRequired)
+        {
+            Alert($"This order cannot be completed. {order.AllergyCountRequired} allergen consent form(s) required — {consentCount} recorded. Please add the missing consent(s) first.", AlertType.warning);
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
         return View(OrderViewModel.FromOrder(order));
     }
 
@@ -113,6 +131,17 @@ public class OrderController : BaseController
     [Authorize(Roles = "admin,owner,manager,staff")]
     public IActionResult MarkCompletedConfirm(int id)
     {
+        var order = svc.GetOrderById(id);
+        if (order is not null)
+        {
+            var consentCount = order.AllergenConsents?.Count ?? 0;
+            if (order.AllergyCountRequired > 0 && consentCount < order.AllergyCountRequired)
+            {
+                Alert($"This order cannot be completed. {order.AllergyCountRequired} allergen consent form(s) required — {consentCount} recorded.", AlertType.warning);
+                return RedirectToAction(nameof(Details), new { id });
+            }
+        }
+
         var updated = svc.MarkOrderCompleted(id);
         Alert(updated is not null ? "Order marked as completed." : "Order could not be updated.",
               updated is not null ? AlertType.success : AlertType.warning);
@@ -136,7 +165,6 @@ public class OrderController : BaseController
         var vm = OrderViewModel.FromOrder(order);
         vm.AvailableMenuItems = svc.GetAllMenuItems();
         vm.AvailableTables = svc.GetAllTables();
-        vm.SelectedMenuItemIds = order.MenuItems.Select(mi => mi.Id).ToList();
         return View(vm);
     }
 
@@ -154,9 +182,16 @@ public class OrderController : BaseController
             return RedirectToAction(nameof(Index));
         }
 
-        // Update menu items
-        order.MenuItems = svc.GetAllMenuItems()
-            .Where(mi => vm.SelectedMenuItemIds.Contains(mi.Id))
+        // Update order items from quantities
+        var allMenuItems = svc.GetAllMenuItems().ToDictionary(mi => mi.Id);
+        order.OrderItems = (vm.ItemQuantities ?? new Dictionary<int, int>())
+            .Where(kvp => kvp.Value > 0 && allMenuItems.ContainsKey(kvp.Key))
+            .Select(kvp => new OrderItem
+            {
+                MenuItemId = kvp.Key,
+                Quantity = kvp.Value,
+                UnitPrice = allMenuItems[kvp.Key].Price
+            })
             .ToList();
 
         // Update table — if a new table is selected, free the old one and mark the new one occupied

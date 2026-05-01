@@ -1,0 +1,11 @@
+Feature Raised,Raised By,Outcome
+Real-time table visibility across all staff roles,Management; FOH,Included
+Digital allergen consent record linked to the order,Management; FOH,Included
+Role-based access so staff only see relevant functions,Management,Included
+Ingredient-linked allergen prompts on menu items,Kitchen; FOH,Included
+Menu and menu item management by management role,Management,Included
+Kitchen display screen (KDS) integration,Kitchen,Excluded
+Customer self-ordering via QR code,FOH,Excluded
+Stock management and low-inventory alerts,Kitchen,Excluded
+Staff rota and scheduling,Management,Excluded
+Mobile app for floor staff,FOH,Excluded

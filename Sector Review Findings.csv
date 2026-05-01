@@ -1,0 +1,5 @@
+Finding,Problem Identified,Evaluation Criterion,System Requirement Produced
+Hybrid paper/digital workflow,Duplicate entry; allergy data not digitised at source,Order transmission speed; Allergen communication,All orders created digitally; allergen consent linked to order at creation
+Verbal exception handling,No record of allergy declarations or amendments,Allergen communication; Amendment handling,AllergenConsent entity; VoidOrder and order edit functions
+Unclear real-time state,Staff cannot independently check table or order status,Table/order visibility; Role-based access,Live table index; ByTable order view; role-filtered controller access
+High staff turnover context,Onboarding cost; inconsistent use by untrained staff,Affordability; Training cost,Consistent CRUD interface across all entities; minimal training surface

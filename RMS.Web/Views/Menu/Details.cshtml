@@ -37,7 +37,7 @@
     </dl>
 
     <div class="d-flex gap-2 mt-3">
-        @if (User.IsInRole("admin") || User.IsInRole("owner") || User.IsInRole("manager") || User.IsInRole("staff"))
+        @if (User.IsInRole("admin") || User.IsInRole("owner") || User.IsInRole("manager"))
         {
             <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
             @if (!Model.IsActive)
